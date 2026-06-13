@@ -30,7 +30,7 @@ export function ProblemSolution() {
               Your Salesforce team is expensive, slow, and hard to retain
             </h2>
             <ul className="mt-1.5 space-y-0.5 text-center leading-snug text-muted sm:mt-4 sm:space-y-2 lg:text-base">
-              <li>• 2–8 FTEs costing £400K–£800K+ per year</li>
+              <li>• 1–4 FTEs costing £100K–£200K+ per year</li>
               <li>• Growing backlog and delayed releases</li>
               <li>• Key-person risk when admins or devs leave</li>
               <li>• Can&apos;t hire senior architects fast enough</li>
@@ -48,7 +48,9 @@ export function ProblemSolution() {
               </span>
             </div>
             <h2 className="text-balance font-bold leading-snug lg:text-[1.65rem]">
-              One agentic partner replaces your entire dev function
+              One agentic partner
+              <br />
+              replaces your entire dev function
             </h2>
             <ul className="mt-1.5 space-y-0.5 text-center leading-snug text-muted sm:mt-4 sm:space-y-2 lg:text-base">
               <li>• Fixed capacity from £3,499/mo — not hourly T&M</li>

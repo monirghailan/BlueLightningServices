@@ -7,7 +7,7 @@ export const site = {
 
 export const icp = {
   primary:
-    "Mid-market B2B companies (100–1,000 employees) with an active Salesforce org, a 2–8 person Salesforce team, and a backlog that outpaces capacity.",
+    "Mid-market B2B companies (100–1,000 employees) with an active Salesforce org, a 1–4 person Salesforce team, and a backlog that outpaces capacity.",
   buyer: "VP Engineering, CTO, COO, or Head of Business Systems",
 } as const;
 

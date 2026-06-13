@@ -97,7 +97,7 @@ export function PricingSection({ compact = false }: { compact?: boolean }) {
                 <tbody className="divide-y divide-border">
                   <tr>
                     <td className="px-6 py-4 text-muted">Annual cost</td>
-                    <td className="px-6 py-4">£400K–£800K+</td>
+                    <td className="px-6 py-4">£100K–£200K+</td>
                     <td className="px-6 py-4 text-bolt-glow">
                       £{annual ? pricing.annualUpfront.toLocaleString("en-GB") : (pricing.monthly * 12).toLocaleString("en-GB")}
                     </td>

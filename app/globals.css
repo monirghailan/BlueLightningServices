@@ -318,9 +318,7 @@ body {
 .above-fold .problem-section {
   min-height: 0;
   overflow-x: clip;
-  overflow-y: auto;
-  overscroll-behavior: contain;
-  -webkit-overflow-scrolling: touch;
+  overflow-y: visible;
 }
 
 @media (max-width: 1023px) {
