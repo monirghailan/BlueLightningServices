@@ -36,7 +36,7 @@ export function Header() {
         <div className="mx-auto flex h-full max-w-6xl items-center px-3 sm:px-5">
           <div
             className={cn(
-              "mx-auto flex h-[var(--header-bar-height)] w-full max-w-6xl items-center gap-2 rounded-xl border px-2 transition-all duration-300 sm:gap-3 sm:px-2.5",
+              "mx-auto flex h-[var(--header-bar-height)] w-full max-w-6xl items-center gap-2 overflow-hidden rounded-xl border px-2 transition-all duration-300 sm:gap-3 sm:px-2.5",
               scrolled
                 ? "border-white/10 bg-white/[0.04] shadow-[0_2px_12px_rgba(0,0,0,0.25)]"
                 : "border-white/8 bg-white/[0.03]"
@@ -45,7 +45,7 @@ export function Header() {
           <LogoMark
             showText={false}
             className="shrink-0"
-            logoClassName="h-7 w-auto sm:h-8"
+            logoClassName="h-7 w-6 sm:h-8 sm:w-7"
           />
 
           <nav

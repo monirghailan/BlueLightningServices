@@ -15,7 +15,9 @@ export function LogoImage({ className, priority = false }: LogoImageProps) {
       width={120}
       height={140}
       priority={priority}
-      className={cn("h-auto w-auto object-contain", className)}
+      sizes="(max-width: 640px) 24px, 160px"
+      className={cn("block object-contain", className)}
+      style={{ width: "auto", maxWidth: "100%" }}
       aria-hidden
     />
   );

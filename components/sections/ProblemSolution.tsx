@@ -13,19 +13,19 @@ export function ProblemSolution() {
           whileInView="visible"
           viewport={{ once: true, margin: "-40px" }}
           variants={staggerContainer}
-          className="grid gap-6 md:grid-cols-2 md:gap-8"
+          className="grid grid-cols-2 gap-3 sm:gap-6 md:gap-8"
         >
           <motion.div variants={fadeUp} transition={defaultTransition}>
-            <div className="mb-2 flex items-center gap-2 text-muted sm:mb-3">
-              <Users size={18} />
-              <span className="text-xs font-medium uppercase tracking-wider sm:text-sm">
+            <div className="mb-1.5 flex items-center gap-1.5 text-muted sm:mb-3 sm:gap-2">
+              <Users className="h-3.5 w-3.5 sm:h-[18px] sm:w-[18px]" />
+              <span className="text-[10px] font-medium uppercase tracking-wider sm:text-sm">
                 The problem
               </span>
             </div>
-            <h2 className="text-xl font-bold sm:text-2xl lg:text-[1.65rem] lg:leading-snug">
+            <h2 className="text-sm font-bold leading-snug sm:text-2xl lg:text-[1.65rem]">
               Your Salesforce team is expensive, slow, and hard to retain
             </h2>
-            <ul className="mt-3 space-y-1.5 text-sm text-muted sm:mt-4 sm:space-y-2 sm:text-base">
+            <ul className="mt-2 space-y-1 text-[11px] leading-snug text-muted sm:mt-4 sm:space-y-2 sm:text-base">
               <li>• 2–8 FTEs costing £400K–£800K+ per year</li>
               <li>• Growing backlog and delayed releases</li>
               <li>• Key-person risk when admins or devs leave</li>
@@ -33,16 +33,16 @@ export function ProblemSolution() {
             </ul>
           </motion.div>
           <motion.div variants={fadeUp} transition={defaultTransition}>
-            <div className="mb-2 flex items-center gap-2 text-bolt-glow sm:mb-3">
-              <Zap size={18} />
-              <span className="text-xs font-medium uppercase tracking-wider sm:text-sm">
+            <div className="mb-1.5 flex items-center gap-1.5 text-bolt-glow sm:mb-3 sm:gap-2">
+              <Zap className="h-3.5 w-3.5 sm:h-[18px] sm:w-[18px]" />
+              <span className="text-[10px] font-medium uppercase tracking-wider sm:text-sm">
                 The solution
               </span>
             </div>
-            <h2 className="text-xl font-bold sm:text-2xl lg:text-[1.65rem] lg:leading-snug">
+            <h2 className="text-sm font-bold leading-snug sm:text-2xl lg:text-[1.65rem]">
               One agentic partner replaces your entire dev function
             </h2>
-            <ul className="mt-3 space-y-1.5 text-sm text-muted sm:mt-4 sm:space-y-2 sm:text-base">
+            <ul className="mt-2 space-y-1 text-[11px] leading-snug text-muted sm:mt-4 sm:space-y-2 sm:text-base">
               <li>• Fixed capacity from £3,499/mo — not hourly T&M</li>
               <li>• Decades of Salesforce expertise + agentic AI delivery</li>
               <li>• Weekly releases with architectural guardrails</li>

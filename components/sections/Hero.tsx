@@ -16,7 +16,16 @@ export function Hero() {
           animate={{ opacity: 1, y: 0 }}
           transition={defaultTransition}
         >
-          <p className="mb-2 text-[11px] font-medium uppercase tracking-[0.2em] text-bolt-outline sm:mb-3 sm:text-xs">
+          <motion.div
+            className="hero-logo-inline mb-1 flex justify-center sm:mb-1.5 lg:hidden"
+            initial={{ opacity: 0, scale: 0.92 }}
+            animate={{ opacity: 1, scale: 1 }}
+            transition={{ ...defaultTransition, delay: 0.05 }}
+          >
+            <LogoHero inline />
+          </motion.div>
+
+          <p className="mb-1.5 text-[11px] font-medium uppercase tracking-[0.2em] text-bolt-outline sm:mb-3 sm:text-xs">
             Agentic Salesforce Engineering
           </p>
           <h1 className="text-[1.65rem] font-bold leading-[1.12] tracking-tight sm:text-4xl lg:text-[2.35rem] lg:leading-[1.15] xl:text-5xl xl:leading-tight">
@@ -25,10 +34,10 @@ export function Hero() {
           <p className="mt-2 text-base font-medium text-bolt-glow sm:mt-3 sm:text-lg xl:text-xl">
             {hero.tagline}
           </p>
-          <p className="mx-auto mt-2 max-w-xl text-sm text-muted sm:mt-3 sm:text-base lg:mx-0">
+          <p className="hero-subhead mx-auto mt-2 max-w-xl text-sm text-muted sm:mt-3 sm:text-base lg:mx-0">
             {hero.subhead}
           </p>
-          <div className="mt-5 flex flex-col items-center gap-3 sm:flex-row sm:justify-center lg:justify-start xl:mt-6">
+          <div className="mt-3 flex flex-col items-center gap-2.5 sm:mt-5 sm:gap-3 sm:flex-row sm:justify-center lg:justify-start xl:mt-6">
             <Button href="/contact" size="lg" className="w-full sm:w-auto">
               {hero.ctaPrimary}
             </Button>
@@ -44,7 +53,7 @@ export function Hero() {
         </motion.div>
 
         <motion.div
-          className="hero-logo-wrap flex justify-center lg:justify-end"
+          className="hero-logo-wrap hidden justify-center lg:flex lg:justify-end"
           initial={{ opacity: 0, scale: 0.92 }}
           animate={{ opacity: 1, scale: 1 }}
           transition={{ ...defaultTransition, delay: 0.15 }}
