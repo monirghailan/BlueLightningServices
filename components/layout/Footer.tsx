@@ -2,9 +2,9 @@ import Link from "next/link";
 import { LogoMark } from "@/components/logo/LogoMark";
 import { navLinks, site } from "@/lib/content";
 
-export function Footer() {
+export function Footer({ embedded = false }: { embedded?: boolean }) {
   return (
-    <footer className="mt-auto border-t border-border bg-surface">
+    <footer className={embedded ? "border-t border-border bg-surface" : "mt-auto border-t border-border bg-surface"}>
       <div className="mx-auto max-w-6xl px-6 py-12">
         <div className="grid gap-10 md:grid-cols-3">
           <div>
