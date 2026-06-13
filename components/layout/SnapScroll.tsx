@@ -35,11 +35,27 @@ function findActiveSectionIndex(sections: Element[]) {
   return active;
 }
 
+function shouldShowKeepScrollingHint(
+  sections: Element[],
+  activeIndex: number,
+  sectionCount: number
+) {
+  if (activeIndex >= sectionCount - 1) return false;
+
+  const section = sections[activeIndex];
+  if (!section) return true;
+
+  const rect = section.getBoundingClientRect();
+  const hintClearance = 56;
+
+  return rect.bottom > window.innerHeight - hintClearance;
+}
+
 function KeepScrollingHint({ visible }: { visible: boolean }) {
   return (
     <div
       className={cn(
-        "keep-scrolling-hint pointer-events-none fixed inset-x-0 bottom-0 z-40 flex justify-center pb-6 sm:pb-8",
+        "keep-scrolling-hint pointer-events-none fixed inset-x-0 bottom-0 z-40 flex justify-center sm:pb-8",
         visible && "keep-scrolling-hint--visible"
       )}
       aria-hidden={!visible}
@@ -60,7 +76,7 @@ function getSectionForSnapTarget(target: Element | null) {
 
 export function SnapScrollRoot({ children }: { children: ReactNode }) {
   const sectionCount = Children.count(children);
-  const [activeIndex, setActiveIndex] = useState(0);
+  const [showHint, setShowHint] = useState(false);
   const [settled, setSettled] = useState(true);
   const scrollTimeout = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
 
@@ -70,8 +86,14 @@ export function SnapScrollRoot({ children }: { children: ReactNode }) {
     const getSections = () =>
       Array.from(document.querySelectorAll<HTMLElement>(".snap-section"));
 
+    const syncHint = () => {
+      const sections = getSections();
+      const index = findActiveSectionIndex(sections);
+      setShowHint(shouldShowKeepScrollingHint(sections, index, sectionCount));
+    };
+
     const syncActive = () => {
-      setActiveIndex(findActiveSectionIndex(getSections()));
+      syncHint();
       setSettled(true);
     };
 
@@ -81,9 +103,10 @@ export function SnapScrollRoot({ children }: { children: ReactNode }) {
 
       if (target) {
         const section = getSectionForSnapTarget(target);
-        const index = section ? getSections().indexOf(section as HTMLElement) : -1;
+        const sections = getSections();
+        const index = section ? sections.indexOf(section as HTMLElement) : -1;
         if (index >= 0) {
-          setActiveIndex(index);
+          setShowHint(shouldShowKeepScrollingHint(sections, index, sectionCount));
           setSettled(true);
           return;
         }
@@ -94,28 +117,37 @@ export function SnapScrollRoot({ children }: { children: ReactNode }) {
 
     const onScroll = () => {
       setSettled(false);
+      syncHint();
       clearTimeout(scrollTimeout.current);
       scrollTimeout.current = setTimeout(syncActive, 180);
     };
 
+    const onResize = () => syncHint();
+
+    const resizeObserver = new ResizeObserver(() => syncHint());
+    for (const section of getSections()) {
+      resizeObserver.observe(section);
+    }
+
     document.documentElement.addEventListener("scrollsnapchange", onSnapChange);
     window.addEventListener("scroll", onScroll, { passive: true });
+    window.addEventListener("resize", onResize, { passive: true });
     syncActive();
 
     return () => {
       document.documentElement.classList.remove("snap-scroll");
       document.documentElement.removeEventListener("scrollsnapchange", onSnapChange);
       window.removeEventListener("scroll", onScroll);
+      window.removeEventListener("resize", onResize);
+      resizeObserver.disconnect();
       clearTimeout(scrollTimeout.current);
     };
-  }, []);
-
-  const showHint = settled && activeIndex < sectionCount - 1;
+  }, [sectionCount]);
 
   return (
     <>
       {children}
-      <KeepScrollingHint visible={showHint} />
+      <KeepScrollingHint visible={showHint && settled} />
     </>
   );
 }
@@ -130,6 +162,7 @@ export function SnapSection({
   return (
     <div className={cn("snap-section", isLast && "snap-section--last")}>
       {children}
+      {!isLast && <div className="snap-section__end" aria-hidden />}
     </div>
   );
 }

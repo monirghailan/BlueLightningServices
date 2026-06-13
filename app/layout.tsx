@@ -50,7 +50,7 @@ export default function RootLayout({
       <body className="flex min-h-full flex-col antialiased">
         <ScrollToTop />
         <Header />
-        <main className="flex-1">{children}</main>
+        <main className="min-w-0 flex-1 overflow-x-clip">{children}</main>
         <ConditionalFooter />
         <Analytics />
         <script
