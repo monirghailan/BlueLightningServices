@@ -1,0 +1,72 @@
+import type { Metadata } from "next";
+import { site } from "@/lib/content";
+
+export const metadata: Metadata = {
+  title: "Privacy Policy",
+  description: `Privacy policy for ${site.name}.`,
+};
+
+export default function PrivacyPage() {
+  return (
+    <div className="px-6 py-16">
+      <article className="prose prose-invert mx-auto max-w-3xl">
+        <h1 className="text-4xl font-bold text-foreground">Privacy Policy</h1>
+        <p className="mt-4 text-muted">Last updated: {new Date().toLocaleDateString("en-GB", { month: "long", year: "numeric" })}</p>
+
+        <div className="mt-8 space-y-6 text-muted">
+          <section>
+            <h2 className="text-xl font-semibold text-foreground">Who we are</h2>
+            <p className="mt-2">
+              {site.name} (&quot;we&quot;, &quot;us&quot;, or &quot;our&quot;) operates the website{" "}
+              <a href={site.url} className="text-bolt-outline">{site.url}</a>.
+            </p>
+          </section>
+
+          <section>
+            <h2 className="text-xl font-semibold text-foreground">Information we collect</h2>
+            <p className="mt-2">
+              When you contact us via our website form, we collect the information you provide: your name, email address, company name, optional phone number, and message content.
+            </p>
+          </section>
+
+          <section>
+            <h2 className="text-xl font-semibold text-foreground">How we use your information</h2>
+            <p className="mt-2">
+              We use your information solely to respond to your enquiry and provide our services. We do not sell your personal data to third parties.
+            </p>
+          </section>
+
+          <section>
+            <h2 className="text-xl font-semibold text-foreground">How we store your information</h2>
+            <p className="mt-2">
+              Contact form submissions are stored securely in our email system and in a private Google Workspace spreadsheet used for lead management. Access is restricted to authorised personnel only.
+            </p>
+          </section>
+
+          <section>
+            <h2 className="text-xl font-semibold text-foreground">Cookies and analytics</h2>
+            <p className="mt-2">
+              We may use privacy-focused analytics to understand how visitors use our website. These tools do not collect personally identifiable information unless you submit our contact form.
+            </p>
+          </section>
+
+          <section>
+            <h2 className="text-xl font-semibold text-foreground">Your rights</h2>
+            <p className="mt-2">
+              You may request access to, correction of, or deletion of your personal data at any time by contacting us at{" "}
+              <a href={`mailto:${site.email}`} className="text-bolt-outline">{site.email}</a>.
+            </p>
+          </section>
+
+          <section>
+            <h2 className="text-xl font-semibold text-foreground">Contact</h2>
+            <p className="mt-2">
+              For any questions about this Privacy Policy, please contact us at{" "}
+              <a href={`mailto:${site.email}`} className="text-bolt-outline">{site.email}</a>.
+            </p>
+          </section>
+        </div>
+      </article>
+    </div>
+  );
+}
