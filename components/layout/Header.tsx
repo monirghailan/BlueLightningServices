@@ -21,6 +21,10 @@ export function Header() {
     return () => window.removeEventListener("scroll", onScroll);
   }, []);
 
+  useEffect(() => {
+    setOpen(false);
+  }, [pathname]);
+
   const closeMenu = () => setOpen(false);
 
   return (
@@ -118,9 +122,6 @@ export function Header() {
                 );
               })}
             </nav>
-            <Button href="/contact" size="sm" className="mt-2 w-full sm:hidden">
-              Get started
-            </Button>
           </div>
         </div>
       )}
