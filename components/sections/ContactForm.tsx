@@ -36,8 +36,9 @@ export function ContactForm() {
         throw new Error(body.error || "Something went wrong. Please try again.");
       }
 
-      setStatus("success");
+      (document.activeElement as HTMLElement | null)?.blur();
       reset({ source: "contact", website: "" });
+      setStatus("success");
     } catch (err) {
       setStatus("error");
       setErrorMessage(err instanceof Error ? err.message : "Something went wrong.");
@@ -66,8 +67,7 @@ export function ContactForm() {
         {...register("website")}
         tabIndex={-1}
         autoComplete="off"
-        className="absolute -left-[9999px] opacity-0"
-        aria-hidden="true"
+        className="pointer-events-none absolute -left-[9999px] h-px w-px overflow-hidden opacity-0"
       />
 
       <div>
