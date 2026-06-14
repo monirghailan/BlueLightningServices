@@ -32,6 +32,10 @@ export async function POST(request: NextRequest) {
     );
   }
 
+  if (parsed.data._gotcha) {
+    return NextResponse.json({ success: true });
+  }
+
   const { name, email, company, phone, message, source } = parsed.data;
   const timestamp = new Date().toISOString();
 

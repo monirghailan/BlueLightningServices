@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { contactSchema, type ContactFormData } from "@/lib/validations/contact";
@@ -14,21 +14,39 @@ export function ContactForm() {
     register,
     handleSubmit,
     reset,
+    setValue,
     formState: { errors },
   } = useForm<ContactFormData>({
     resolver: zodResolver(contactSchema),
-    defaultValues: { source: "contact", website: "" },
+    defaultValues: { source: "contact", _gotcha: "" },
   });
 
+  useEffect(() => {
+    setValue("_gotcha", "");
+  }, [setValue]);
+
+  function onInvalid() {
+    setStatus("error");
+    setErrorMessage("Please check the highlighted fields and try again.");
+  }
+
   async function onSubmit(data: ContactFormData) {
+    if (data._gotcha) {
+      setStatus("success");
+      reset({ source: "contact", _gotcha: "" });
+      return;
+    }
+
     setStatus("loading");
     setErrorMessage("");
+
+    const { _gotcha: _ignored, ...payload } = data;
 
     try {
       const res = await fetch("/api/contact", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(data),
+        body: JSON.stringify(payload),
       });
 
       if (!res.ok) {
@@ -37,7 +55,7 @@ export function ContactForm() {
       }
 
       (document.activeElement as HTMLElement | null)?.blur();
-      reset({ source: "contact", website: "" });
+      reset({ source: "contact", _gotcha: "" });
       setStatus("success");
     } catch (err) {
       setStatus("error");
@@ -60,14 +78,16 @@ export function ContactForm() {
   }
 
   return (
-    <form onSubmit={handleSubmit(onSubmit)} className="space-y-5">
+    <form onSubmit={handleSubmit(onSubmit, onInvalid)} className="space-y-5" noValidate>
       <input type="hidden" {...register("source")} />
       <input
         type="text"
-        {...register("website")}
+        {...register("_gotcha")}
         tabIndex={-1}
         autoComplete="off"
-        className="pointer-events-none absolute -left-[9999px] h-px w-px overflow-hidden opacity-0"
+        readOnly
+        onFocus={(event) => event.currentTarget.removeAttribute("readonly")}
+        className="absolute -left-[9999px] h-px w-px overflow-hidden opacity-0"
       />
 
       <div>

@@ -7,7 +7,8 @@ export const contactSchema = z.object({
   phone: z.string().optional(),
   message: z.string().min(10, "Please tell us a bit more about your needs"),
   source: z.string().optional(),
-  website: z.string().max(0, "Invalid submission"),
+  // Honeypot — must stay empty; validated in the form handler, not here.
+  _gotcha: z.string().optional(),
 });
 
 export type ContactFormData = z.infer<typeof contactSchema>;
