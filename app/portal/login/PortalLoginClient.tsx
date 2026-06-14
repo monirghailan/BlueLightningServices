@@ -1,0 +1,96 @@
+"use client";
+
+import { useState } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
+import Link from "next/link";
+import { site } from "@/lib/content";
+
+export default function PortalLoginPage() {
+  const router = useRouter();
+  const searchParams = useSearchParams();
+  const next = searchParams.get("next") ?? "/portal";
+
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [error, setError] = useState<string | null>(
+    searchParams.get("error") ? "Authentication failed. Please try again." : null
+  );
+  const [loading, setLoading] = useState(false);
+
+  async function onSubmit(e: React.FormEvent) {
+    e.preventDefault();
+    setLoading(true);
+    setError(null);
+
+    const res = await fetch("/api/portal/auth", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ email, password }),
+    });
+
+    if (!res.ok) {
+      const data = await res.json();
+      setError(data.error ?? "Login failed.");
+      setLoading(false);
+      return;
+    }
+
+    router.push(next);
+    router.refresh();
+  }
+
+  return (
+    <div className="flex min-h-screen items-center justify-center bg-background px-4">
+      <div className="w-full max-w-md rounded-2xl border border-border bg-surface p-8">
+        <p className="text-xs uppercase tracking-wider text-muted">{site.name}</p>
+        <h1 className="mt-2 text-2xl font-semibold">Client portal</h1>
+        <p className="mt-2 text-sm text-muted">Sign in with your invited account.</p>
+
+        <form onSubmit={onSubmit} className="mt-8 space-y-4">
+          {error && (
+            <p className="rounded-lg border border-red-500/30 bg-red-500/10 px-3 py-2 text-sm text-red-200">
+              {error}
+            </p>
+          )}
+
+          <label className="block space-y-1">
+            <span className="text-sm text-muted">Email</span>
+            <input
+              type="email"
+              required
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              className="w-full rounded-xl border border-border bg-surface-elevated px-3 py-2 text-sm"
+            />
+          </label>
+
+          <label className="block space-y-1">
+            <span className="text-sm text-muted">Password</span>
+            <input
+              type="password"
+              required
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              className="w-full rounded-xl border border-border bg-surface-elevated px-3 py-2 text-sm"
+            />
+          </label>
+
+          <button
+            type="submit"
+            disabled={loading}
+            className="w-full rounded-xl bg-bolt-fill py-2.5 text-sm font-medium text-white disabled:opacity-50"
+          >
+            {loading ? "Signing in…" : "Sign in"}
+          </button>
+        </form>
+
+        <p className="mt-6 text-center text-xs text-muted">
+          Need access?{" "}
+          <Link href="/contact" className="text-bolt-outline hover:underline">
+            Contact {site.name}
+          </Link>
+        </p>
+      </div>
+    </div>
+  );
+}

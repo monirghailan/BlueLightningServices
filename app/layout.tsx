@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import { Analytics } from "@vercel/analytics/next";
 import { Geist, Geist_Mono } from "next/font/google";
 import { ConditionalFooter } from "@/components/layout/ConditionalFooter";
-import { Header } from "@/components/layout/Header";
+import { ConditionalHeader } from "@/components/layout/ConditionalHeader";
 import { ScrollToTop } from "@/components/layout/ScrollToTop";
 import { site } from "@/lib/content";
 import "./globals.css";
@@ -49,7 +49,7 @@ export default function RootLayout({
     <html lang="en" className={`${geistSans.variable} ${geistMono.variable} h-full`}>
       <body className="flex min-h-full flex-col antialiased">
         <ScrollToTop />
-        <Header />
+        <ConditionalHeader />
         <main className="min-w-0 flex-1 overflow-x-clip">{children}</main>
         <ConditionalFooter />
         <Analytics />
