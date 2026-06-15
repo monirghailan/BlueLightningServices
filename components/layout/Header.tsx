@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
-import { Menu, X } from "lucide-react";
+import { CircleDot, Menu, X } from "lucide-react";
 import { LogoMark } from "@/components/logo/LogoMark";
 import { Button } from "@/components/ui/Button";
 import { navLinks } from "@/lib/content";
@@ -84,6 +84,15 @@ export function Header() {
               className="hidden !px-3 !py-1.5 !text-xs sm:inline-flex"
             >
               Get started
+            </Button>
+            <Button
+              href="/portal"
+              variant="portal"
+              size="sm"
+              className="hidden !px-3 !py-1.5 !text-xs sm:inline-flex"
+            >
+              <CircleDot size={13} strokeWidth={2.5} aria-hidden />
+              Portal
             </Button>
             <button
               type="button"

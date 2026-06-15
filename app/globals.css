@@ -146,16 +146,23 @@ html.snap-scroll {
   visibility: hidden;
 }
 
-/* Touch: proximity avoids fighting tall sections and iOS at document bottom */
+/* Touch: free scroll — snap disabled; keep-scrolling hint still guides tall sections */
 @media (hover: none) and (pointer: coarse) {
   html.snap-scroll {
-    scroll-snap-type: y proximity;
+    scroll-snap-type: none;
     scroll-behavior: auto;
     scroll-padding-bottom: max(3.5rem, env(safe-area-inset-bottom, 0px));
   }
 
-  .snap-section:not(.snap-section--last) {
+  .snap-section,
+  .snap-section__end,
+  .snap-section__last-screen,
+  .snap-section__last-end {
+    scroll-snap-align: none;
     scroll-snap-stop: normal;
+  }
+
+  .snap-section:not(.snap-section--last) {
     max-height: none;
     overflow: visible;
   }
@@ -163,12 +170,6 @@ html.snap-scroll {
   .snap-section:not(.snap-section--last) > section {
     flex: none;
     min-height: auto;
-  }
-
-  .snap-section__last-screen,
-  .snap-section__last-end {
-    scroll-snap-align: none;
-    scroll-snap-stop: normal;
   }
 
   .snap-section__last-screen {
@@ -329,12 +330,19 @@ body {
   }
 
   html.snap-scroll {
-    scroll-snap-type: y proximity;
+    scroll-snap-type: none;
     scroll-padding-bottom: max(3.5rem, env(safe-area-inset-bottom, 0px));
   }
 
-  .snap-section:not(.snap-section--last) {
+  .snap-section,
+  .snap-section__end,
+  .snap-section__last-screen,
+  .snap-section__last-end {
+    scroll-snap-align: none;
     scroll-snap-stop: normal;
+  }
+
+  .snap-section:not(.snap-section--last) {
     max-height: none;
     overflow: visible;
     min-height: calc(100svh - var(--header-offset));

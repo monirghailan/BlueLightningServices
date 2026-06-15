@@ -4,7 +4,7 @@ import styles from "./Button.module.css";
 
 interface ButtonProps extends React.ComponentPropsWithoutRef<"button"> {
   href?: string;
-  variant?: "primary" | "secondary" | "ghost";
+  variant?: "primary" | "secondary" | "portal" | "ghost";
   size?: "sm" | "md" | "lg";
 }
 
@@ -31,7 +31,9 @@ export function Button({
   const classes = cn(
     variant === "primary" && styles.primary,
     variant === "secondary" && styles.secondary,
-    (variant === "primary" || variant === "secondary") && styles[size],
+    variant === "portal" && styles.portal,
+    (variant === "primary" || variant === "secondary" || variant === "portal") &&
+      styles[size],
     variant === "ghost" && ghostClasses,
     variant === "ghost" && sizeClasses[size],
     focusClasses,
