@@ -20,8 +20,8 @@ export async function provisionJiraForOrg(
 ): Promise<ProvisionOrgResult> {
   const clientLabel = clientLabelForSlug(slug);
   const jql = `${clientScopeJql(clientLabel)} ORDER BY rank ASC`;
-  const filter = await createFilter(`Portal — ${orgName}`, jql);
-  const board = await createKanbanBoard(`Portal — ${orgName}`, Number(filter.id));
+  const filter = await createFilter(`Portal — ${orgName} (${slug})`, jql);
+  const board = await createKanbanBoard(`Portal — ${orgName} (${slug})`, Number(filter.id));
 
   return {
     clientLabel,
