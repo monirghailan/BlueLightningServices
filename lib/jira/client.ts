@@ -254,19 +254,34 @@ export async function findFilterByName(name: string) {
   return result.values?.find((filter) => filter.name === name) ?? null;
 }
 
-export async function getOrCreateFilter(name: string, jql: string) {
+export async function getOrCreateFilter(
+  name: string,
+  jql: string,
+  options?: { shareWithProjectKey?: string }
+) {
   const existing = await findFilterByName(name);
   if (existing) {
     return { id: existing.id, name: existing.name };
   }
 
-  return createFilter(name, jql);
+  return createFilter(name, jql, options?.shareWithProjectKey);
 }
 
-export async function createFilter(name: string, jql: string) {
+export async function createFilter(
+  name: string,
+  jql: string,
+  shareWithProjectKey?: string
+) {
+  const body: Record<string, unknown> = { name, jql };
+  if (shareWithProjectKey) {
+    body.sharePermissions = [
+      { type: "project", project: { key: shareWithProjectKey } },
+    ];
+  }
+
   return jiraFetch<{ id: string; name: string }>("/rest/api/3/filter", {
     method: "POST",
-    body: JSON.stringify({ name, jql }),
+    body: JSON.stringify(body),
   });
 }
 

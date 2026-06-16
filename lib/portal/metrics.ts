@@ -5,6 +5,7 @@ import {
   serializeIssue,
   type JiraIssue,
 } from "@/lib/jira/client";
+import { resolvePortalBoardId } from "@/lib/jira/board";
 import { clientScopeJql } from "@/lib/jira/client-field";
 import type { Organization } from "@/lib/supabase/database.types";
 
@@ -123,26 +124,34 @@ function emptyMetrics(): PortalMetrics {
 }
 
 export async function getBacklogSections(org: Organization) {
-  if (!org.jira_board_id || !org.jira_component_name) {
+  if (!org.jira_component_name) {
     return { backlog: [], readyForBls: [] };
   }
 
-  const [backlogResult, boardResult] = await Promise.all([
-    getBacklogIssues(org.jira_board_id, 0, 100),
-    getBoardIssues(org.jira_board_id, 0, 100),
+  const boardId = resolvePortalBoardId(org);
+  const clientJql = clientScopeJql(org.jira_component_name);
+  const [backlogResult, boardResult, clientScope] = await Promise.all([
+    getBacklogIssues(boardId, 0, 100),
+    getBoardIssues(boardId, 0, 100),
+    searchIssues(`${clientJql} ORDER BY updated DESC`, 100),
   ]);
 
-  const backlogKeys = new Set((backlogResult.issues ?? []).map((i) => i.key));
+  const clientKeys = new Set((clientScope.issues ?? []).map((i) => i.key));
+  const isClientIssue = (issue: JiraIssue) => clientKeys.has(issue.key);
+
+  const clientBacklog = (backlogResult.issues ?? []).filter(isClientIssue);
+  const backlogKeys = new Set(clientBacklog.map((i) => i.key));
 
   const readyForBls = (boardResult.issues ?? []).filter(
     (i: JiraIssue) =>
+      isClientIssue(i) &&
       !backlogKeys.has(i.key) &&
       (i.fields.status?.name === "To Do" ||
         i.fields.status?.statusCategory?.key === "new")
   );
 
   return {
-    backlog: (backlogResult.issues ?? []).map(serializeIssue),
+    backlog: clientBacklog.map(serializeIssue),
     readyForBls: readyForBls.map(serializeIssue),
   };
 }

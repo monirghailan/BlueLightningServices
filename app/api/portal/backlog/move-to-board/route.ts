@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { moveIssuesToBoard, JiraConfigError } from "@/lib/jira/client";
+import { resolvePortalBoardId } from "@/lib/jira/board";
 import {
   portalErrorResponse,
   requirePortalSession,
@@ -10,14 +11,7 @@ import { moveIssuesSchema } from "@/lib/validations/portal";
 export async function POST(request: NextRequest) {
   try {
     const session = await requirePortalSession();
-    const boardId = session.organization.jira_board_id;
-
-    if (!boardId) {
-      return NextResponse.json(
-        { error: "Organization board is not configured." },
-        { status: 503 }
-      );
-    }
+    const boardId = resolvePortalBoardId(session.organization);
 
     const body = await request.json();
     const parsed = moveIssuesSchema.safeParse(body);

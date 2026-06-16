@@ -1,4 +1,4 @@
-const JIRA_PROJECT_KEY = process.env.JIRA_PROJECT_KEY ?? "KAN";
+export const JIRA_PROJECT_KEY = process.env.JIRA_PROJECT_KEY ?? "KAN";
 
 export const JIRA_CLIENT_FIELD_ID =
   process.env.JIRA_CLIENT_FIELD_ID ?? "customfield_10073";

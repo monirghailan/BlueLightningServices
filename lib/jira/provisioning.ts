@@ -1,11 +1,9 @@
-import {
-  getOrCreateFilter,
-  getOrCreateKanbanBoard,
-  JiraApiError,
-} from "@/lib/jira/client";
+import { getOrCreateFilter, JiraApiError } from "@/lib/jira/client";
+import { sharedJiraBoardId } from "@/lib/jira/board";
 import {
   clientLabelForSlug,
   clientScopeJql,
+  JIRA_PROJECT_KEY,
 } from "@/lib/jira/client-field";
 
 export interface ProvisionOrgResult {
@@ -20,15 +18,13 @@ export async function provisionJiraForOrg(
 ): Promise<ProvisionOrgResult> {
   const clientLabel = clientLabelForSlug(slug);
   const jql = `${clientScopeJql(clientLabel)} ORDER BY rank ASC`;
-  const filter = await getOrCreateFilter(`Portal — ${orgName} (${slug})`, jql);
-  const board = await getOrCreateKanbanBoard(
-    `Portal — ${orgName} (${slug})`,
-    Number(filter.id)
-  );
+  const filter = await getOrCreateFilter(`Portal — ${orgName} (${slug})`, jql, {
+    shareWithProjectKey: JIRA_PROJECT_KEY,
+  });
 
   return {
     clientLabel,
-    boardId: String(board.id),
+    boardId: sharedJiraBoardId(),
     filterId: filter.id,
   };
 }
