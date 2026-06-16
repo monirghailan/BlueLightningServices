@@ -130,27 +130,56 @@ function adfToPlain(body: JiraComment["body"]): string {
 
 export { adfToPlain };
 
+const ISSUE_SEARCH_FIELDS = [
+  "summary",
+  "status",
+  "issuetype",
+  "priority",
+  "components",
+  "created",
+  "updated",
+  "resolutiondate",
+  "comment",
+  "labels",
+] as const;
+
 export async function searchIssues(jql: string, maxResults = 50, startAt = 0) {
-  return jiraFetch<JiraSearchResult>("/rest/api/3/search", {
-    method: "POST",
-    body: JSON.stringify({
-      jql,
-      maxResults,
-      startAt,
-      fields: [
-        "summary",
-        "status",
-        "issuetype",
-        "priority",
-        "components",
-        "created",
-        "updated",
-        "resolutiondate",
-        "comment",
-        "labels",
-      ],
-    }),
-  });
+  const issues: JiraIssue[] = [];
+  let nextPageToken: string | undefined;
+  let skipped = 0;
+
+  while (issues.length < maxResults) {
+    const page = await jiraFetch<{
+      issues?: JiraIssue[];
+      isLast?: boolean;
+      nextPageToken?: string;
+    }>("/rest/api/3/search/jql", {
+      method: "POST",
+      body: JSON.stringify({
+        jql,
+        maxResults: Math.min(maxResults - issues.length, 100),
+        fields: ISSUE_SEARCH_FIELDS,
+        ...(nextPageToken ? { nextPageToken } : {}),
+      }),
+    });
+
+    const batch = page.issues ?? [];
+    if (batch.length === 0) break;
+
+    if (skipped < startAt) {
+      const toSkip = Math.min(batch.length, startAt - skipped);
+      skipped += toSkip;
+      issues.push(...batch.slice(toSkip));
+    } else {
+      issues.push(...batch);
+    }
+
+    if (page.isLast || !page.nextPageToken) break;
+    nextPageToken = page.nextPageToken;
+  }
+
+  const page = issues.slice(0, maxResults);
+  return { issues: page, total: page.length } satisfies JiraSearchResult;
 }
 
 export async function getIssue(key: string) {
