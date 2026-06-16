@@ -1,6 +1,6 @@
 import {
-  createFilter,
-  createKanbanBoard,
+  getOrCreateFilter,
+  getOrCreateKanbanBoard,
   JiraApiError,
 } from "@/lib/jira/client";
 import {
@@ -20,8 +20,11 @@ export async function provisionJiraForOrg(
 ): Promise<ProvisionOrgResult> {
   const clientLabel = clientLabelForSlug(slug);
   const jql = `${clientScopeJql(clientLabel)} ORDER BY rank ASC`;
-  const filter = await createFilter(`Portal — ${orgName} (${slug})`, jql);
-  const board = await createKanbanBoard(`Portal — ${orgName} (${slug})`, Number(filter.id));
+  const filter = await getOrCreateFilter(`Portal — ${orgName} (${slug})`, jql);
+  const board = await getOrCreateKanbanBoard(
+    `Portal — ${orgName} (${slug})`,
+    Number(filter.id)
+  );
 
   return {
     clientLabel,

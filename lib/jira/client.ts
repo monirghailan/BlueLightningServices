@@ -241,11 +241,55 @@ export async function moveIssuesToBacklog(boardId: string, issues: string[]) {
   });
 }
 
+export async function findFilterByName(name: string) {
+  const params = new URLSearchParams({
+    filterName: name,
+    maxResults: "20",
+    startAt: "0",
+  });
+  const result = await jiraFetch<{
+    values: Array<{ id: string; name: string; jql: string }>;
+  }>(`/rest/api/3/filter/search?${params}`);
+
+  return result.values?.find((filter) => filter.name === name) ?? null;
+}
+
+export async function getOrCreateFilter(name: string, jql: string) {
+  const existing = await findFilterByName(name);
+  if (existing) {
+    return { id: existing.id, name: existing.name };
+  }
+
+  return createFilter(name, jql);
+}
+
 export async function createFilter(name: string, jql: string) {
   return jiraFetch<{ id: string; name: string }>("/rest/api/3/filter", {
     method: "POST",
     body: JSON.stringify({ name, jql }),
   });
+}
+
+export async function findBoardByName(name: string) {
+  const params = new URLSearchParams({
+    projectKeyOrId: JIRA_PROJECT_KEY,
+    name,
+    maxResults: "20",
+  });
+  const result = await jiraFetch<{
+    values: Array<{ id: number; name: string }>;
+  }>(`/rest/agile/1.0/board?${params}`);
+
+  return result.values?.find((board) => board.name === name) ?? null;
+}
+
+export async function getOrCreateKanbanBoard(name: string, filterId: number) {
+  const existing = await findBoardByName(name);
+  if (existing) {
+    return { id: existing.id, name: existing.name };
+  }
+
+  return createKanbanBoard(name, filterId);
 }
 
 export async function createKanbanBoard(name: string, filterId: number) {
