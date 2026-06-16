@@ -5,6 +5,7 @@ import {
   hashInviteToken,
   inviteExpiryDate,
 } from "@/lib/portal/invite";
+import { site } from "@/lib/content";
 import { sendInviteEmail } from "@/lib/portal/email";
 import { portalInviteUrl } from "@/lib/portal/url";
 
@@ -66,7 +67,8 @@ export async function provisionClientOrganization(
     to: input.adminEmail,
     orgName: input.name,
     inviteUrl,
-    inviterEmail: "admin@bluelightningservices.com",
+    inviterEmail: site.email,
+    context: "onboarding",
   });
 
   return {

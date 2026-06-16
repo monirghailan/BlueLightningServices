@@ -89,6 +89,7 @@ async function insertLead(data: {
   });
 
   if (error) {
+    console.error("Lead insert failed:", error.code, error.message, error.details);
     throw new Error(error.message);
   }
 }
