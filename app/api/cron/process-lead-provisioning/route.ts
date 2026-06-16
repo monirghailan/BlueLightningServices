@@ -78,6 +78,7 @@ async function processJob(
       name: leadRow.company,
       slug,
       adminEmail: leadRow.email,
+      adminName: leadRow.name,
     });
 
     const now = new Date().toISOString();

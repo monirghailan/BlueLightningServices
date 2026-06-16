@@ -16,7 +16,6 @@ export default function AcceptInvitePage({
     null
   );
   const [password, setPassword] = useState("");
-  const [fullName, setFullName] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
 
@@ -44,7 +43,7 @@ export default function AcceptInvitePage({
     const res = await fetch("/api/portal/invite", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ token, password, fullName }),
+      body: JSON.stringify({ token, password }),
     });
 
     const data = await res.json();
@@ -84,15 +83,6 @@ export default function AcceptInvitePage({
               {error}
             </p>
           )}
-
-          <label className="block space-y-1">
-            <span className="text-sm text-muted">Full name</span>
-            <input
-              value={fullName}
-              onChange={(e) => setFullName(e.target.value)}
-              className="w-full rounded-xl border border-border bg-surface-elevated px-3 py-2 text-sm"
-            />
-          </label>
 
           <label className="block space-y-1">
             <span className="text-sm text-muted">Password</span>

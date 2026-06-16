@@ -34,6 +34,7 @@ export async function POST(request: NextRequest) {
     const { error } = await supabase.from("invitations").insert({
       organization_id: session.organization.id,
       email: parsed.data.email.toLowerCase(),
+      full_name: parsed.data.fullName?.trim() || null,
       role: parsed.data.role,
       token_hash: tokenHash,
       expires_at: expiresAt,

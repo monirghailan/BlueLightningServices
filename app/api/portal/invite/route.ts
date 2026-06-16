@@ -76,12 +76,17 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: "Invitation expired." }, { status: 410 });
   }
 
+  const fullName =
+    invitation.full_name?.trim() ||
+    parsed.data.fullName?.trim() ||
+    invitation.email.split("@")[0];
+
   const { data: created, error: createError } = await supabase.auth.admin.createUser({
     email: invitation.email,
     password: parsed.data.password,
     email_confirm: true,
     user_metadata: {
-      full_name: parsed.data.fullName ?? invitation.email.split("@")[0],
+      full_name: fullName,
     },
   });
 

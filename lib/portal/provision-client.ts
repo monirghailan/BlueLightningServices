@@ -13,6 +13,7 @@ export interface ProvisionClientInput {
   name: string;
   slug: string;
   adminEmail: string;
+  adminName?: string;
   invitedBy?: string | null;
 }
 
@@ -51,6 +52,7 @@ export async function provisionClientOrganization(
   const { error: inviteError } = await supabase.from("invitations").insert({
     organization_id: org.id,
     email: input.adminEmail.toLowerCase(),
+    full_name: input.adminName?.trim() || input.adminEmail.split("@")[0],
     role: "administrator",
     token_hash: tokenHash,
     expires_at: inviteExpiryDate().toISOString(),
