@@ -46,11 +46,5 @@ export async function updateSession(request: NextRequest) {
     return NextResponse.redirect(url);
   }
 
-  if ((isLogin || isInvite) && user && !isAuthCallback) {
-    const url = request.nextUrl.clone();
-    url.pathname = "/portal";
-    return NextResponse.redirect(url);
-  }
-
   return supabaseResponse;
 }

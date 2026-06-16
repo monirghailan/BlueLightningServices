@@ -12,9 +12,16 @@ export default function PortalLoginPage() {
 
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [error, setError] = useState<string | null>(
-    searchParams.get("error") ? "Authentication failed. Please try again." : null
-  );
+  const errorParam = searchParams.get("error");
+  const [error, setError] = useState<string | null>(() => {
+    if (errorParam === "no_access") {
+      return "Your account does not have portal access. Contact support if you believe this is a mistake.";
+    }
+    if (errorParam) {
+      return "Authentication failed. Please try again.";
+    }
+    return null;
+  });
   const [loading, setLoading] = useState(false);
 
   async function onSubmit(e: React.FormEvent) {

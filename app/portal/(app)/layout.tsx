@@ -1,4 +1,5 @@
 import { redirect } from "next/navigation";
+import { createClient } from "@/lib/supabase/server";
 import { getPortalSession } from "@/lib/portal/auth";
 import { PortalShell } from "@/components/portal/PortalShell";
 
@@ -9,7 +10,12 @@ export default async function PortalAppLayout({
 }) {
   const session = await getPortalSession();
   if (!session) {
-    redirect("/portal/login");
+    const supabase = await createClient();
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
+
+    redirect(user ? "/portal/login?error=no_access" : "/portal/login");
   }
 
   return (
