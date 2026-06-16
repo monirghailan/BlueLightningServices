@@ -5,6 +5,7 @@ import {
   serializeIssue,
   type JiraIssue,
 } from "@/lib/jira/client";
+import { clientScopeJql } from "@/lib/jira/client-field";
 import type { Organization } from "@/lib/supabase/database.types";
 
 export interface PortalMetrics {
@@ -27,12 +28,12 @@ function weekLabel(date: Date): string {
 }
 
 export async function computeMetrics(org: Organization): Promise<PortalMetrics> {
-  const component = org.jira_component_name;
-  if (!component) {
+  const clientLabel = org.jira_component_name;
+  if (!clientLabel) {
     return emptyMetrics();
   }
 
-  const jql = `project = ${org.jira_project_key} AND component = "${component}" ORDER BY updated DESC`;
+  const jql = `${clientScopeJql(clientLabel, org.jira_project_key)} ORDER BY updated DESC`;
   const result = await searchIssues(jql, 100);
   const issues = result.issues ?? [];
 
@@ -147,7 +148,7 @@ export async function getBacklogSections(org: Organization) {
 }
 
 export async function validateOrgIssue(org: Organization, issueKey: string) {
-  const { issueBelongsToComponent } = await import("@/lib/jira/client");
+  const { issueBelongsToClient } = await import("@/lib/jira/client");
   if (!org.jira_component_name) return false;
-  return issueBelongsToComponent(issueKey, org.jira_component_name);
+  return issueBelongsToClient(issueKey, org.jira_component_name);
 }

@@ -5,6 +5,7 @@ import {
   serializeIssue,
   JiraConfigError,
 } from "@/lib/jira/client";
+import { clientScopeJql } from "@/lib/jira/client-field";
 import {
   portalErrorResponse,
   requirePortalSession,
@@ -24,7 +25,10 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ issues: [] });
     }
 
-    let jql = `project = ${session.organization.jira_project_key} AND component = "${session.organization.jira_component_name}"`;
+    let jql = clientScopeJql(
+      session.organization.jira_component_name,
+      session.organization.jira_project_key
+    );
     if (status) jql += ` AND status = "${status}"`;
     if (type) jql += ` AND issuetype = "${type}"`;
     if (q) jql += ` AND summary ~ "${q.replace(/"/g, '\\"')}"`;
@@ -64,8 +68,8 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const componentId = session.organization.jira_component_id;
-    if (!componentId) {
+    const clientLabel = session.organization.jira_component_name;
+    if (!clientLabel) {
       return NextResponse.json(
         { error: "Organization is not linked to Jira." },
         { status: 503 }
@@ -76,7 +80,7 @@ export async function POST(request: NextRequest) {
       summary: parsed.data.summary,
       description: parsed.data.description,
       issueTypeName: parsed.data.issueType,
-      componentId,
+      clientLabel,
       priority: parsed.data.priority,
     });
 

@@ -1,13 +1,15 @@
 import {
-  createComponent,
   createFilter,
   createKanbanBoard,
   JiraApiError,
 } from "@/lib/jira/client";
+import {
+  clientLabelForSlug,
+  clientScopeJql,
+} from "@/lib/jira/client-field";
 
 export interface ProvisionOrgResult {
-  componentId: string;
-  componentName: string;
+  clientLabel: string;
   boardId: string;
   filterId: string;
 }
@@ -16,16 +18,13 @@ export async function provisionJiraForOrg(
   orgName: string,
   slug: string
 ): Promise<ProvisionOrgResult> {
-  const componentName = `client-${slug}`;
-  const component = await createComponent(componentName);
-
-  const jql = `project = KAN AND component = "${component.name}" ORDER BY rank ASC`;
+  const clientLabel = clientLabelForSlug(slug);
+  const jql = `${clientScopeJql(clientLabel)} ORDER BY rank ASC`;
   const filter = await createFilter(`Portal — ${orgName}`, jql);
   const board = await createKanbanBoard(`Portal — ${orgName}`, Number(filter.id));
 
   return {
-    componentId: component.id,
-    componentName: component.name,
+    clientLabel,
     boardId: String(board.id),
     filterId: filter.id,
   };

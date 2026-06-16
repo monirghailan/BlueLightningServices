@@ -36,7 +36,7 @@ export default async function SettingsPage() {
             <dd className="font-mono">{org.jira_project_key}</dd>
           </div>
           <div>
-            <dt className="text-muted">Component</dt>
+            <dt className="text-muted">Client label</dt>
             <dd className="font-mono">{org.jira_component_name ?? "—"}</dd>
           </div>
           <div>

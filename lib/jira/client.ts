@@ -1,3 +1,5 @@
+import { JIRA_CLIENT_FIELD_ID } from "@/lib/jira/client-field";
+
 const JIRA_BASE = process.env.JIRA_BASE_URL ?? "https://bluelightning.atlassian.net";
 const JIRA_EMAIL = process.env.JIRA_EMAIL ?? "";
 const JIRA_TOKEN = process.env.JIRA_API_TOKEN ?? "";
@@ -152,7 +154,7 @@ export async function searchIssues(jql: string, maxResults = 50, startAt = 0) {
 
 export async function getIssue(key: string) {
   return jiraFetch<JiraIssue>(
-    `/rest/api/3/issue/${key}?fields=summary,description,status,issuetype,priority,components,created,updated,resolutiondate,comment`
+    `/rest/api/3/issue/${key}?fields=summary,description,status,issuetype,priority,${JIRA_CLIENT_FIELD_ID},created,updated,resolutiondate,comment`
   );
 }
 
@@ -160,14 +162,14 @@ export async function createIssue(input: {
   summary: string;
   description?: string;
   issueTypeName: string;
-  componentId: string;
+  clientLabel: string;
   priority?: string;
 }) {
   const fields: Record<string, unknown> = {
     project: { key: JIRA_PROJECT_KEY },
     issuetype: { name: input.issueTypeName },
     summary: input.summary,
-    components: [{ id: input.componentId }],
+    [JIRA_CLIENT_FIELD_ID]: [input.clientLabel],
     labels: ["portal-submitted"],
   };
 
@@ -239,16 +241,6 @@ export async function moveIssuesToBacklog(boardId: string, issues: string[]) {
   });
 }
 
-export async function createComponent(name: string, projectKey = JIRA_PROJECT_KEY) {
-  return jiraFetch<{ id: string; name: string }>("/rest/api/3/component", {
-    method: "POST",
-    body: JSON.stringify({
-      name,
-      project: projectKey,
-    }),
-  });
-}
-
 export async function createFilter(name: string, jql: string) {
   return jiraFetch<{ id: string; name: string }>("/rest/api/3/filter", {
     method: "POST",
@@ -271,15 +263,20 @@ export async function createKanbanBoard(name: string, filterId: number) {
   });
 }
 
-export async function issueBelongsToComponent(
+export async function issueBelongsToClient(
   issueKey: string,
-  componentName: string
+  clientLabel: string
 ): Promise<boolean> {
   const issue = await getIssue(issueKey);
-  return (
-    issue.fields.components?.some(
-      (c) => c.name.toLowerCase() === componentName.toLowerCase()
-    ) ?? false
+  const fieldValues = (issue.fields as unknown as Record<string, unknown>)[
+    JIRA_CLIENT_FIELD_ID
+  ];
+  if (!Array.isArray(fieldValues)) return false;
+
+  return fieldValues.some(
+    (value) =>
+      typeof value === "string" &&
+      value.toLowerCase() === clientLabel.toLowerCase()
   );
 }
 

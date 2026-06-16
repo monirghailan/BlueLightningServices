@@ -24,8 +24,8 @@ npx tsx scripts/provision-org.ts "Acme Corp" acme-corp admin@acme.com
 
 This creates:
 
-- Jira component `client-acme-corp`
-- Filtered Kanban board scoped to that component
+- Jira component `client-acme-corp` on the **Client** labels field
+- Filtered Kanban board scoped to that client label
 - Supabase `organizations` row
 - Admin invitation URL (also emailed if Resend is configured)
 

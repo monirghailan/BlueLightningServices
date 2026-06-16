@@ -33,8 +33,8 @@ export async function provisionClientOrganization(
       name: input.name,
       slug: input.slug,
       jira_project_key: "KAN",
-      jira_component_id: jira.componentId,
-      jira_component_name: jira.componentName,
+      jira_component_id: null,
+      jira_component_name: jira.clientLabel,
       jira_board_id: jira.boardId,
       status: "active",
     })
