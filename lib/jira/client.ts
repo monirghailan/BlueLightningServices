@@ -1,4 +1,3 @@
-import { JIRA_CLIENT_FIELD_ID } from "@/lib/jira/client-field";
 
 const JIRA_BASE = process.env.JIRA_BASE_URL ?? "https://bluelightning.atlassian.net";
 const JIRA_EMAIL = process.env.JIRA_EMAIL ?? "";
@@ -69,6 +68,7 @@ export interface JiraIssueFields {
   issuetype?: { name: string };
   priority?: { name: string };
   components?: { id: string; name: string }[];
+  labels?: string[];
   created?: string;
   updated?: string;
   resolutiondate?: string | null;
@@ -147,6 +147,7 @@ export async function searchIssues(jql: string, maxResults = 50, startAt = 0) {
         "updated",
         "resolutiondate",
         "comment",
+        "labels",
       ],
     }),
   });
@@ -154,7 +155,7 @@ export async function searchIssues(jql: string, maxResults = 50, startAt = 0) {
 
 export async function getIssue(key: string) {
   return jiraFetch<JiraIssue>(
-    `/rest/api/3/issue/${key}?fields=summary,description,status,issuetype,priority,${JIRA_CLIENT_FIELD_ID},created,updated,resolutiondate,comment`
+    `/rest/api/3/issue/${key}?fields=summary,description,status,issuetype,priority,labels,created,updated,resolutiondate,comment`
   );
 }
 
@@ -169,8 +170,7 @@ export async function createIssue(input: {
     project: { key: JIRA_PROJECT_KEY },
     issuetype: { name: input.issueTypeName },
     summary: input.summary,
-    [JIRA_CLIENT_FIELD_ID]: [input.clientLabel],
-    labels: ["portal-submitted"],
+    labels: [input.clientLabel, "portal-submitted"],
   };
 
   if (input.description) {
@@ -327,15 +327,10 @@ export async function issueBelongsToClient(
   clientLabel: string
 ): Promise<boolean> {
   const issue = await getIssue(issueKey);
-  const fieldValues = (issue.fields as unknown as Record<string, unknown>)[
-    JIRA_CLIENT_FIELD_ID
-  ];
-  if (!Array.isArray(fieldValues)) return false;
+  const labels = issue.fields.labels ?? [];
 
-  return fieldValues.some(
-    (value) =>
-      typeof value === "string" &&
-      value.toLowerCase() === clientLabel.toLowerCase()
+  return labels.some(
+    (value) => value.toLowerCase() === clientLabel.toLowerCase()
   );
 }
 

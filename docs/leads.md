@@ -33,7 +33,7 @@ When you set `status` to **Qualified**:
 1. A row is added to `lead_provisioning_jobs`.
 2. Vercel Cron runs every minute and processes the queue.
 3. Within ~1 minute the system will:
-   - Create Jira filter and Kanban board for the client (scoped by **Client** label)
+   - Create Jira filter scoped by client **label** (e.g. `client-acme-corp`)
    - Create a Supabase `organizations` row (org name = `company`, slug derived from company name)
    - Send a portal admin invite email to the lead's `email`
 4. On success, `leads.organization_id` and `leads.provisioned_at` are populated.
