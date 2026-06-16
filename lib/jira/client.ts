@@ -241,16 +241,10 @@ export async function moveIssuesToBacklog(boardId: string, issues: string[]) {
   });
 }
 
-const JIRA_PROJECT_ID = process.env.JIRA_PROJECT_ID ?? "10000";
-
 export async function createFilter(name: string, jql: string) {
   return jiraFetch<{ id: string; name: string }>("/rest/api/3/filter", {
     method: "POST",
-    body: JSON.stringify({
-      name,
-      jql,
-      sharePermissions: [{ type: "project", project: { id: JIRA_PROJECT_ID } }],
-    }),
+    body: JSON.stringify({ name, jql }),
   });
 }
 
@@ -261,6 +255,10 @@ export async function createKanbanBoard(name: string, filterId: number) {
       name,
       type: "kanban",
       filterId,
+      location: {
+        type: "project",
+        projectKeyOrId: JIRA_PROJECT_KEY,
+      },
     }),
   });
 }
