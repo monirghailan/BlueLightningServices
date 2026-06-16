@@ -1,5 +1,12 @@
 export type OrgStatus = "active" | "suspended";
 export type MemberRole = "administrator" | "standard";
+export type LeadStatus =
+  | "New"
+  | "Contacted"
+  | "In Progress"
+  | "Not Qualified"
+  | "Qualified"
+  | "Parked";
 
 export interface Organization {
   id: string;
@@ -41,6 +48,30 @@ export interface Invitation {
   created_at: string;
 }
 
+export interface Lead {
+  id: string;
+  name: string;
+  email: string;
+  company: string;
+  phone: string | null;
+  message: string;
+  source: string | null;
+  status: LeadStatus;
+  organization_id: string | null;
+  provisioned_at: string | null;
+  provisioning_error: string | null;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface LeadProvisioningJob {
+  lead_id: string;
+  created_at: string;
+  processed_at: string | null;
+  error: string | null;
+  attempt_count: number;
+}
+
 export interface Database {
   public: {
     Tables: {
@@ -51,11 +82,13 @@ export interface Database {
           created_at?: string;
         };
         Update: Partial<Organization>;
+        Relationships: [];
       };
       profiles: {
         Row: Profile;
         Insert: Omit<Profile, "created_at"> & { created_at?: string };
         Update: Partial<Profile>;
+        Relationships: [];
       };
       organization_members: {
         Row: OrganizationMember;
@@ -64,6 +97,7 @@ export interface Database {
           joined_at?: string;
         };
         Update: Partial<OrganizationMember>;
+        Relationships: [];
       };
       invitations: {
         Row: Invitation;
@@ -73,6 +107,39 @@ export interface Database {
           accepted_at?: string | null;
         };
         Update: Partial<Invitation>;
+        Relationships: [];
+      };
+      leads: {
+        Row: Lead;
+        Insert: {
+          id?: string;
+          name: string;
+          email: string;
+          company: string;
+          phone?: string | null;
+          message: string;
+          source?: string | null;
+          status?: LeadStatus;
+          organization_id?: string | null;
+          provisioned_at?: string | null;
+          provisioning_error?: string | null;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Update: Partial<Lead>;
+        Relationships: [];
+      };
+      lead_provisioning_jobs: {
+        Row: LeadProvisioningJob;
+        Insert: {
+          lead_id: string;
+          created_at?: string;
+          processed_at?: string | null;
+          error?: string | null;
+          attempt_count?: number;
+        };
+        Update: Partial<LeadProvisioningJob>;
+        Relationships: [];
       };
     };
     Views: Record<string, never>;

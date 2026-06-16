@@ -5,7 +5,9 @@ The portal is served at **`https://bluelightningservices.com/portal`** on the ma
 ## 1. Supabase
 
 1. Create a Supabase project.
-2. Run the migration in [`supabase/migrations/20250614000000_portal_schema.sql`](../supabase/migrations/20250614000000_portal_schema.sql) via the SQL editor or Supabase CLI.
+2. Run migrations via the SQL editor or Supabase CLI:
+   - [`supabase/migrations/20250614000000_portal_schema.sql`](../supabase/migrations/20250614000000_portal_schema.sql)
+   - [`supabase/migrations/20250616000000_leads.sql`](../supabase/migrations/20250616000000_leads.sql)
 3. Copy URL, anon key, and service role key into `.env.local`.
 
 ## 2. Jira service account
@@ -53,8 +55,13 @@ See [`.env.example`](../.env.example) for the full list. Required for production
 - `PORTAL_BASE_URL` — set to `https://bluelightningservices.com` (site origin only, no `/portal` suffix)
 - `PORTAL_INVITE_SECRET`
 - `RESEND_API_KEY` (for invite emails)
+- `CRON_SECRET` (for qualified-lead auto-provisioning — see [leads.md](./leads.md))
 
 If `PORTAL_BASE_URL` is unset, invite links fall back to `site.url` from [`lib/content.ts`](../lib/content.ts) (`https://bluelightningservices.com`).
+
+## Website leads
+
+See [leads.md](./leads.md) for contact form → Supabase workflow and qualifying leads for portal onboarding.
 
 ## Routes
 

@@ -3,6 +3,7 @@ import { Resend } from "resend";
 import { contactSchema } from "@/lib/validations/contact";
 import { isRateLimited } from "@/lib/rate-limit";
 import { site } from "@/lib/content";
+import { createServiceClient } from "@/lib/supabase/server";
 
 export async function POST(request: NextRequest) {
   const ip =
@@ -39,10 +40,23 @@ export async function POST(request: NextRequest) {
   const { name, email, company, phone, message, source } = parsed.data;
   const timestamp = new Date().toISOString();
 
+  const leadPromise = insertLead({ name, email, company, phone, message, source });
   const emailPromise = sendEmail({ name, email, company, phone, message, source, timestamp });
   const sheetPromise = appendToSheet({ name, email, company, phone, message, source, timestamp });
 
-  const [emailResult, sheetResult] = await Promise.allSettled([emailPromise, sheetPromise]);
+  const [leadResult, emailResult, sheetResult] = await Promise.allSettled([
+    leadPromise,
+    emailPromise,
+    sheetPromise,
+  ]);
+
+  if (leadResult.status === "rejected") {
+    console.error("Lead insert failed:", leadResult.reason);
+    return NextResponse.json(
+      { error: "Unable to submit your message. Please email us directly." },
+      { status: 500 }
+    );
+  }
 
   if (emailResult.status === "rejected") {
     console.error("Email send failed:", emailResult.reason);
@@ -51,14 +65,32 @@ export async function POST(request: NextRequest) {
     console.error("Sheet append failed:", sheetResult.reason);
   }
 
-  if (emailResult.status === "rejected" && sheetResult.status === "rejected") {
-    return NextResponse.json(
-      { error: "Unable to submit your message. Please email us directly." },
-      { status: 500 }
-    );
-  }
-
   return NextResponse.json({ success: true });
+}
+
+async function insertLead(data: {
+  name: string;
+  email: string;
+  company: string;
+  phone?: string;
+  message: string;
+  source?: string;
+}) {
+  const supabase = createServiceClient();
+
+  const { error } = await supabase.from("leads").insert({
+    name: data.name,
+    email: data.email.toLowerCase(),
+    company: data.company,
+    phone: data.phone ?? null,
+    message: data.message,
+    source: data.source ?? "contact",
+    status: "New",
+  });
+
+  if (error) {
+    throw new Error(error.message);
+  }
 }
 
 async function sendEmail(data: {
