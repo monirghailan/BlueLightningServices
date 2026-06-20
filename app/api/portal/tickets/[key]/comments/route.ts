@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { addComment, JiraConfigError } from "@/lib/jira/client";
 import {
   portalErrorResponse,
-  requirePortalSession,
+  requirePortalAdmin,
 } from "@/lib/portal/auth";
 import { validateOrgIssue } from "@/lib/portal/metrics";
 import { commentSchema } from "@/lib/validations/portal";
@@ -12,7 +12,7 @@ export async function POST(
   { params }: { params: Promise<{ key: string }> }
 ) {
   try {
-    const session = await requirePortalSession();
+    const session = await requirePortalAdmin();
     const { key } = await params;
 
     const allowed = await validateOrgIssue(session.organization, key);

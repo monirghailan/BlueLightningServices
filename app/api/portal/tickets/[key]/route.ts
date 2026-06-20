@@ -6,7 +6,7 @@ import {
 } from "@/lib/jira/client";
 import {
   portalErrorResponse,
-  requirePortalSession,
+  requirePortalAdmin,
 } from "@/lib/portal/auth";
 import { validateOrgIssue } from "@/lib/portal/metrics";
 
@@ -15,7 +15,7 @@ export async function GET(
   { params }: { params: Promise<{ key: string }> }
 ) {
   try {
-    const session = await requirePortalSession();
+    const session = await requirePortalAdmin();
     const { key } = await params;
 
     const allowed = await validateOrgIssue(session.organization, key);

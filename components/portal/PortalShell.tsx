@@ -21,6 +21,10 @@ export function PortalShell({ children, orgName, role }: PortalShellProps) {
   const pathname = usePathname();
   const router = useRouter();
 
+  const visibleNav = nav.filter(
+    (item) => item.href !== "/portal" || role === "administrator"
+  );
+
   async function signOut() {
     await fetch("/api/portal/auth", { method: "DELETE" });
     router.push("/portal/login");
@@ -36,7 +40,7 @@ export function PortalShell({ children, orgName, role }: PortalShellProps) {
             <h1 className="text-lg font-semibold">{orgName}</h1>
           </div>
           <div className="hidden items-center gap-1 sm:flex">
-            {nav.map((item) => {
+            {visibleNav.map((item) => {
               const active = item.exact
                 ? pathname === item.href
                 : pathname.startsWith(item.href);
@@ -81,7 +85,7 @@ export function PortalShell({ children, orgName, role }: PortalShellProps) {
           </div>
         </div>
         <nav className="flex gap-1 overflow-x-auto border-t border-border px-4 py-2 sm:hidden">
-          {nav.map((item) => (
+          {visibleNav.map((item) => (
             <Link
               key={item.href}
               href={item.href}

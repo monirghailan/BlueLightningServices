@@ -1,9 +1,16 @@
+import { redirect } from "next/navigation";
 import { computeMetrics } from "@/lib/portal/metrics";
-import { getPortalSession } from "@/lib/portal/auth";
+import { getPortalSession, requirePortalAdmin } from "@/lib/portal/auth";
 import { StatCard, PortalCard } from "@/components/portal/PortalCard";
 import { DashboardQueue } from "@/components/portal/DashboardQueue";
 
 export default async function PortalDashboardPage() {
+  try {
+    await requirePortalAdmin();
+  } catch {
+    redirect("/portal/assistant");
+  }
+
   const session = await getPortalSession();
   if (!session) return null;
 

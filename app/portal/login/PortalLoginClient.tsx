@@ -8,7 +8,7 @@ import { site } from "@/lib/content";
 export default function PortalLoginPage() {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const next = searchParams.get("next") ?? "/portal";
+  const nextParam = searchParams.get("next");
 
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -35,14 +35,16 @@ export default function PortalLoginPage() {
       body: JSON.stringify({ email, password }),
     });
 
+    const data = await res.json();
     if (!res.ok) {
-      const data = await res.json();
       setError(data.error ?? "Login failed.");
       setLoading(false);
       return;
     }
 
-    router.push(next);
+    const destination =
+      nextParam && nextParam !== "/portal" ? nextParam : (data.home ?? "/portal/assistant");
+    router.push(destination);
     router.refresh();
   }
 

@@ -9,7 +9,7 @@ import {
 import { clientScopeJql } from "@/lib/jira/client-field";
 import {
   portalErrorResponse,
-  requirePortalSession,
+  requirePortalAdmin,
 } from "@/lib/portal/auth";
 import { getClientBacklogKeys } from "@/lib/portal/metrics";
 import { ticketCreateSchema } from "@/lib/validations/portal";
@@ -24,7 +24,7 @@ function parsePageSize(value: string | null): number {
 
 export async function GET(request: NextRequest) {
   try {
-    const session = await requirePortalSession();
+    const session = await requirePortalAdmin();
     const { searchParams } = request.nextUrl;
     const status = searchParams.get("status");
     const type = searchParams.get("type");
@@ -79,7 +79,7 @@ export async function GET(request: NextRequest) {
 
 export async function POST(request: NextRequest) {
   try {
-    const session = await requirePortalSession();
+    const session = await requirePortalAdmin();
     const ip =
       request.headers.get("x-forwarded-for")?.split(",")[0]?.trim() ?? session.userId;
 

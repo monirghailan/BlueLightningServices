@@ -2,13 +2,13 @@ import { NextResponse } from "next/server";
 import { JiraConfigError } from "@/lib/jira/client";
 import {
   portalErrorResponse,
-  requirePortalSession,
+  requirePortalAdmin,
 } from "@/lib/portal/auth";
 import { computeMetrics } from "@/lib/portal/metrics";
 
 export async function GET() {
   try {
-    const session = await requirePortalSession();
+    const session = await requirePortalAdmin();
     const metrics = await computeMetrics(session.organization);
     return NextResponse.json(metrics);
   } catch (error) {

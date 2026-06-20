@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
+import { getPortalSession, getPortalHomePath } from "@/lib/portal/auth";
 import { loginSchema } from "@/lib/validations/portal";
 
 export async function POST(request: NextRequest) {
@@ -23,7 +24,10 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: "Invalid email or password." }, { status: 401 });
   }
 
-  return NextResponse.json({ ok: true });
+  const session = await getPortalSession();
+  const home = session ? getPortalHomePath(session.role) : "/portal/assistant";
+
+  return NextResponse.json({ ok: true, home });
 }
 
 export async function DELETE() {

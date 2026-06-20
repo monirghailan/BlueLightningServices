@@ -57,10 +57,15 @@ export default function AcceptInvitePage({
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ email: data.email, password }),
-    });
-
-    router.push("/portal");
-    router.refresh();
+    })
+      .then((r) => r.json())
+      .then((authData) => {
+        const home =
+          authData.home ??
+          (invite?.role === "administrator" ? "/portal" : "/portal/assistant");
+        router.push(home);
+        router.refresh();
+      });
   }
 
   return (

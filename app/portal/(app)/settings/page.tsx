@@ -8,7 +8,7 @@ export default async function SettingsPage() {
   try {
     await requirePortalAdmin();
   } catch {
-    redirect("/portal");
+    redirect("/portal/assistant");
   }
 
   const session = await getPortalSession();
