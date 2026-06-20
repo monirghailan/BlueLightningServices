@@ -5,9 +5,16 @@ interface PortalCardProps {
   className?: string;
   title?: string;
   description?: string;
+  action?: React.ReactNode;
 }
 
-export function PortalCard({ children, className, title, description }: PortalCardProps) {
+export function PortalCard({
+  children,
+  className,
+  title,
+  description,
+  action,
+}: PortalCardProps) {
   return (
     <section
       className={cn(
@@ -15,10 +22,13 @@ export function PortalCard({ children, className, title, description }: PortalCa
         className
       )}
     >
-      {(title || description) && (
-        <div className="mb-4">
-          {title && <h2 className="text-base font-semibold">{title}</h2>}
-          {description && <p className="mt-1 text-sm text-muted">{description}</p>}
+      {(title || description || action) && (
+        <div className="mb-4 flex items-start justify-between gap-4">
+          <div className="min-w-0">
+            {title && <h2 className="text-base font-semibold">{title}</h2>}
+            {description && <p className="mt-1 text-sm text-muted">{description}</p>}
+          </div>
+          {action && <div className="shrink-0">{action}</div>}
         </div>
       )}
       {children}

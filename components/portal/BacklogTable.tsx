@@ -14,11 +14,12 @@ interface BacklogItem {
 
 interface BacklogTableProps {
   onTicketReady?: () => void;
+  reloadToken?: number;
 }
 
 const PAGE_SIZES = [5, 10, 25, 50] as const;
 
-export function BacklogTable({ onTicketReady }: BacklogTableProps) {
+export function BacklogTable({ onTicketReady, reloadToken = 0 }: BacklogTableProps) {
   const [items, setItems] = useState<BacklogItem[]>([]);
   const [page, setPage] = useState(1);
   const [pageSize, setPageSize] = useState<number>(5);
@@ -55,6 +56,11 @@ export function BacklogTable({ onTicketReady }: BacklogTableProps) {
   useEffect(() => {
     void load();
   }, [load]);
+
+  useEffect(() => {
+    if (reloadToken === 0) return;
+    void load();
+  }, [reloadToken, load]);
 
   async function markReady(key: string) {
     setBusyKey(key);
