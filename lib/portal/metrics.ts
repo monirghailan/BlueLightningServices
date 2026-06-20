@@ -15,7 +15,7 @@ import type { Organization } from "@/lib/supabase/database.types";
 export interface PortalMetrics {
   openTickets: number;
   closedThisMonth: number;
-  avgAgeDays: number;
+  avgTimeToCloseDays: number;
   oldestOpen: { key: string; summary: string; ageDays: number } | null;
   byType: Record<string, number>;
   byStatus: Record<string, number>;
@@ -25,6 +25,12 @@ export interface PortalMetrics {
 
 function daysSince(iso: string): number {
   return Math.floor((Date.now() - new Date(iso).getTime()) / (1000 * 60 * 60 * 24));
+}
+
+function daysBetween(startIso: string, endIso: string): number {
+  return Math.floor(
+    (new Date(endIso).getTime() - new Date(startIso).getTime()) / (1000 * 60 * 60 * 24)
+  );
 }
 
 function weekLabel(date: Date): string {
@@ -50,11 +56,14 @@ export async function computeMetrics(org: Organization): Promise<PortalMetrics> 
     return resolved && new Date(resolved) >= monthStart;
   });
 
-  const ages = open
-    .map((i) => (i.fields.created ? daysSince(i.fields.created) : 0))
+  const closeTimes = closedThisMonth
+    .filter((i) => i.fields.created && i.fields.resolutiondate)
+    .map((i) => daysBetween(i.fields.created!, i.fields.resolutiondate!))
     .filter((d) => d >= 0);
-  const avgAgeDays =
-    ages.length > 0 ? Math.round(ages.reduce((a, b) => a + b, 0) / ages.length) : 0;
+  const avgTimeToCloseDays =
+    closeTimes.length > 0
+      ? Math.round((closeTimes.reduce((a, b) => a + b, 0) / closeTimes.length) * 10) / 10
+      : 0;
 
   let oldestOpen: PortalMetrics["oldestOpen"] = null;
   for (const issue of open) {
@@ -104,7 +113,7 @@ export async function computeMetrics(org: Organization): Promise<PortalMetrics> 
   return {
     openTickets: open.length,
     closedThisMonth: closedThisMonth.length,
-    avgAgeDays,
+    avgTimeToCloseDays,
     oldestOpen,
     byType,
     byStatus,
@@ -117,7 +126,7 @@ function emptyMetrics(): PortalMetrics {
   return {
     openTickets: 0,
     closedThisMonth: 0,
-    avgAgeDays: 0,
+    avgTimeToCloseDays: 0,
     oldestOpen: null,
     byType: {},
     byStatus: {},
