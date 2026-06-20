@@ -13,5 +13,5 @@ export function clientScopeJql(
   projectKey = JIRA_PROJECT_KEY
 ): string {
   const label = escapeJqlString(clientLabel);
-  return `project = ${projectKey} AND labels = "${label}"`;
+  return `project = ${projectKey} AND labels = "${label}" AND parent IS EMPTY`;
 }

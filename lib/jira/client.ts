@@ -70,7 +70,8 @@ export interface JiraIssueFields {
   summary: string;
   description?: string | { type: string; version: number; content: unknown[] };
   status?: { name: string; statusCategory?: { key: string; name: string } };
-  issuetype?: { name: string };
+  issuetype?: { name: string; subtask?: boolean };
+  parent?: { key: string } | null;
   priority?: { name: string };
   components?: { id: string; name: string }[];
   labels?: string[];
@@ -139,6 +140,7 @@ const ISSUE_SEARCH_FIELDS = [
   "summary",
   "status",
   "issuetype",
+  "parent",
   "priority",
   "components",
   "created",
@@ -147,6 +149,17 @@ const ISSUE_SEARCH_FIELDS = [
   "comment",
   "labels",
 ] as const;
+
+const BOARD_ISSUE_FIELDS = "summary,status,issuetype,parent,priority,created,updated";
+
+export function isSubtaskIssue(issue: JiraIssue): boolean {
+  if (issue.fields.issuetype?.subtask) return true;
+  return issue.fields.parent != null;
+}
+
+export function parentIssuesOnly(issues: JiraIssue[]): JiraIssue[] {
+  return issues.filter((issue) => !isSubtaskIssue(issue));
+}
 
 export async function searchIssues(jql: string, maxResults = 50, startAt = 0) {
   const issues: JiraIssue[] = [];
@@ -189,7 +202,7 @@ export async function searchIssues(jql: string, maxResults = 50, startAt = 0) {
 
 export async function getIssue(key: string) {
   return jiraFetch<JiraIssue>(
-    `/rest/api/3/issue/${key}?fields=summary,description,status,issuetype,priority,labels,created,updated,resolutiondate,comment`
+    `/rest/api/3/issue/${key}?fields=summary,description,status,issuetype,parent,priority,labels,created,updated,resolutiondate,comment`
   );
 }
 
@@ -232,7 +245,7 @@ export async function getBacklogIssues(boardId: string, startAt = 0, maxResults 
   const params = new URLSearchParams({
     startAt: String(startAt),
     maxResults: String(maxResults),
-    fields: "summary,status,issuetype,priority,created,updated",
+    fields: BOARD_ISSUE_FIELDS,
   });
   return jiraFetch<{ issues: JiraIssue[]; total: number }>(
     `/rest/agile/1.0/board/${boardId}/backlog?${params}`
@@ -243,7 +256,7 @@ export async function getBoardIssues(boardId: string, startAt = 0, maxResults = 
   const params = new URLSearchParams({
     startAt: String(startAt),
     maxResults: String(maxResults),
-    fields: "summary,status,issuetype,priority,created,updated",
+    fields: BOARD_ISSUE_FIELDS,
   });
   return jiraFetch<{ issues: JiraIssue[]; total: number }>(
     `/rest/agile/1.0/board/${boardId}/issue?${params}`

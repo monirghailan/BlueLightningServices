@@ -1,6 +1,9 @@
 import {
   getBacklogIssues,
   getBoardIssues,
+  getIssue,
+  isSubtaskIssue,
+  parentIssuesOnly,
   searchIssues,
   serializeIssue,
   type JiraIssue,
@@ -36,7 +39,7 @@ export async function computeMetrics(org: Organization): Promise<PortalMetrics> 
 
   const jql = `${clientScopeJql(clientLabel, org.jira_project_key)} ORDER BY updated DESC`;
   const result = await searchIssues(jql, 100);
-  const issues = result.issues ?? [];
+  const issues = parentIssuesOnly(result.issues ?? []);
 
   const now = new Date();
   const monthStart = new Date(now.getFullYear(), now.getMonth(), 1);
@@ -136,13 +139,16 @@ export async function getBacklogSections(org: Organization) {
     searchIssues(`${clientJql} ORDER BY updated DESC`, 100),
   ]);
 
-  const clientKeys = new Set((clientScope.issues ?? []).map((i) => i.key));
-  const isClientIssue = (issue: JiraIssue) => clientKeys.has(issue.key);
+  const clientKeys = new Set(
+    parentIssuesOnly(clientScope.issues ?? []).map((i) => i.key)
+  );
+  const isClientIssue = (issue: JiraIssue) =>
+    clientKeys.has(issue.key) && !isSubtaskIssue(issue);
 
-  const clientBacklog = (backlogResult.issues ?? []).filter(isClientIssue);
+  const clientBacklog = parentIssuesOnly(backlogResult.issues ?? []).filter(isClientIssue);
   const backlogKeys = new Set(clientBacklog.map((i) => i.key));
 
-  const readyForBls = (boardResult.issues ?? []).filter(
+  const readyForBls = parentIssuesOnly(boardResult.issues ?? []).filter(
     (i: JiraIssue) =>
       isClientIssue(i) &&
       !backlogKeys.has(i.key) &&
@@ -157,7 +163,13 @@ export async function getBacklogSections(org: Organization) {
 }
 
 export async function validateOrgIssue(org: Organization, issueKey: string) {
-  const { issueBelongsToClient } = await import("@/lib/jira/client");
   if (!org.jira_component_name) return false;
-  return issueBelongsToClient(issueKey, org.jira_component_name);
+
+  const issue = await getIssue(issueKey);
+  if (isSubtaskIssue(issue)) return false;
+
+  const labels = issue.fields.labels ?? [];
+  return labels.some(
+    (value) => value.toLowerCase() === org.jira_component_name!.toLowerCase()
+  );
 }
