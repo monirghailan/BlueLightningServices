@@ -2,6 +2,7 @@ import { redirect } from "next/navigation";
 import { getPortalSession, requirePortalAdmin } from "@/lib/portal/auth";
 import { PortalCard } from "@/components/portal/PortalCard";
 import { ReindexAssistantButton } from "@/components/portal/ReindexAssistantButton";
+import { TeamManagement } from "@/components/portal/TeamManagement";
 
 export default async function SettingsPage() {
   try {
@@ -19,7 +20,9 @@ export default async function SettingsPage() {
     <div className="space-y-6">
       <div>
         <h1 className="text-2xl font-semibold tracking-tight">Settings</h1>
-        <p className="mt-1 text-sm text-muted">Organization profile and Jira linkage.</p>
+        <p className="mt-1 text-sm text-muted">
+          Organization profile, team access, and integrations.
+        </p>
       </div>
 
       <PortalCard title="Organization">
@@ -75,6 +78,8 @@ export default async function SettingsPage() {
           <ReindexAssistantButton />
         </PortalCard>
       )}
+
+      <TeamManagement />
     </div>
   );
 }

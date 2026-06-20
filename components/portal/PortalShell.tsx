@@ -17,10 +17,9 @@ interface PortalShellProps {
   children: React.ReactNode;
   orgName: string;
   role: MemberRole;
-  email: string;
 }
 
-export function PortalShell({ children, orgName, role, email }: PortalShellProps) {
+export function PortalShell({ children, orgName, role }: PortalShellProps) {
   const pathname = usePathname();
   const router = useRouter();
 
@@ -59,34 +58,20 @@ export function PortalShell({ children, orgName, role, email }: PortalShellProps
               );
             })}
             {role === "administrator" && (
-              <>
-                <Link
-                  href="/portal/team"
-                  className={cn(
-                    "rounded-lg px-3 py-2 text-sm transition-colors",
-                    pathname.startsWith("/portal/team")
-                      ? "bg-surface-elevated text-foreground"
-                      : "text-muted hover:text-foreground"
-                  )}
-                >
-                  Team
-                </Link>
-                <Link
-                  href="/portal/settings"
-                  className={cn(
-                    "rounded-lg px-3 py-2 text-sm transition-colors",
-                    pathname.startsWith("/portal/settings")
-                      ? "bg-surface-elevated text-foreground"
-                      : "text-muted hover:text-foreground"
-                  )}
-                >
-                  Settings
-                </Link>
-              </>
+              <Link
+                href="/portal/settings"
+                className={cn(
+                  "rounded-lg px-3 py-2 text-sm transition-colors",
+                  pathname.startsWith("/portal/settings")
+                    ? "bg-surface-elevated text-foreground"
+                    : "text-muted hover:text-foreground"
+                )}
+              >
+                Settings
+              </Link>
             )}
           </div>
           <div className="flex items-center gap-3">
-            <span className="hidden text-sm text-muted sm:inline">{email}</span>
             <button
               type="button"
               onClick={signOut}
@@ -98,10 +83,7 @@ export function PortalShell({ children, orgName, role, email }: PortalShellProps
         </div>
         <nav className="flex gap-1 overflow-x-auto border-t border-border px-4 py-2 sm:hidden">
           {[...nav, ...(role === "administrator"
-            ? [
-                { href: "/portal/team", label: "Team", exact: false },
-                { href: "/portal/settings", label: "Settings", exact: false },
-              ]
+            ? [{ href: "/portal/settings", label: "Settings", exact: false }]
             : [])].map((item) => (
             <Link
               key={item.href}

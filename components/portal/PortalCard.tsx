@@ -29,16 +29,26 @@ export function PortalCard({ children, className, title, description }: PortalCa
 export function StatCard({
   label,
   value,
+  unit,
   hint,
 }: {
   label: string;
   value: string | number;
+  unit?: string;
   hint?: string;
 }) {
   return (
     <PortalCard>
       <p className="text-sm text-muted">{label}</p>
-      <p className="mt-2 text-3xl font-semibold tracking-tight">{value}</p>
+      <p className="mt-2 text-3xl font-semibold tracking-tight">
+        {value}
+        {unit ? (
+          <>
+            {" "}
+            <span className="text-sm font-normal text-muted">{unit}</span>
+          </>
+        ) : null}
+      </p>
       {hint && <p className="mt-2 text-xs text-muted">{hint}</p>}
     </PortalCard>
   );

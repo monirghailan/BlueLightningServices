@@ -6,6 +6,7 @@ import {
   ASSISTANT_PERSONA_LABELS,
   ASSISTANT_PERSONAS,
 } from "@/lib/assistant/personas";
+import { PortalCard } from "@/components/portal/PortalCard";
 
 interface MemberRow {
   id: string;
@@ -21,7 +22,7 @@ interface InviteRow {
   expires_at: string;
 }
 
-export default function TeamPage() {
+export function TeamManagement() {
   const [members, setMembers] = useState<MemberRow[]>([]);
   const [invitations, setInvitations] = useState<InviteRow[]>([]);
   const [email, setEmail] = useState("");
@@ -92,57 +93,61 @@ export default function TeamPage() {
   }
 
   return (
-    <div className="space-y-8">
-      <div>
-        <h1 className="text-2xl font-semibold tracking-tight">Team</h1>
-        <p className="mt-1 text-sm text-muted">Invite users and manage roles.</p>
-      </div>
+    <div className="space-y-6">
+      <PortalCard title="Team" description="Invite users and manage roles.">
+        <form
+          onSubmit={invite}
+          className="grid gap-3 sm:grid-cols-[1fr_auto_auto_auto]"
+        >
+          {message && <p className="sm:col-span-4 text-sm text-emerald-300">{message}</p>}
+          {error && <p className="sm:col-span-4 text-sm text-red-200">{error}</p>}
+          <input
+            type="email"
+            required
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            placeholder="colleague@company.com"
+            className="rounded-xl border border-border bg-surface-elevated px-3 py-2 text-sm"
+          />
+          <select
+            value={role}
+            onChange={(e) => setRole(e.target.value as "standard" | "administrator")}
+            className="rounded-xl border border-border bg-surface-elevated px-3 py-2 text-sm"
+          >
+            <option value="standard">Standard</option>
+            <option value="administrator">Administrator</option>
+          </select>
+          <select
+            value={assistantPersona}
+            onChange={(e) => setAssistantPersona(e.target.value as AssistantPersona)}
+            className="rounded-xl border border-border bg-surface-elevated px-3 py-2 text-sm"
+          >
+            {ASSISTANT_PERSONAS.map((persona) => (
+              <option key={persona} value={persona}>
+                {ASSISTANT_PERSONA_LABELS[persona]}
+              </option>
+            ))}
+          </select>
+          <button
+            type="submit"
+            className="rounded-xl bg-bolt-fill px-4 py-2 text-sm font-medium text-white"
+          >
+            Send invite
+          </button>
+        </form>
+      </PortalCard>
 
-      <form onSubmit={invite} className="grid gap-3 rounded-2xl border border-border bg-surface p-5 sm:grid-cols-[1fr_auto_auto_auto]">
-        {message && <p className="sm:col-span-4 text-sm text-emerald-300">{message}</p>}
-        {error && <p className="sm:col-span-4 text-sm text-red-200">{error}</p>}
-        <input
-          type="email"
-          required
-          value={email}
-          onChange={(e) => setEmail(e.target.value)}
-          placeholder="colleague@company.com"
-          className="rounded-xl border border-border bg-surface-elevated px-3 py-2 text-sm"
-        />
-        <select
-          value={role}
-          onChange={(e) => setRole(e.target.value as "standard" | "administrator")}
-          className="rounded-xl border border-border bg-surface-elevated px-3 py-2 text-sm"
-        >
-          <option value="standard">Standard</option>
-          <option value="administrator">Administrator</option>
-        </select>
-        <select
-          value={assistantPersona}
-          onChange={(e) => setAssistantPersona(e.target.value as AssistantPersona)}
-          className="rounded-xl border border-border bg-surface-elevated px-3 py-2 text-sm"
-        >
-          {ASSISTANT_PERSONAS.map((persona) => (
-            <option key={persona} value={persona}>
-              {ASSISTANT_PERSONA_LABELS[persona]}
-            </option>
-          ))}
-        </select>
-        <button
-          type="submit"
-          className="rounded-xl bg-bolt-fill px-4 py-2 text-sm font-medium text-white"
-        >
-          Send invite
-        </button>
-      </form>
-
-      <section className="rounded-2xl border border-border bg-surface p-5">
-        <h2 className="font-semibold">Members</h2>
-        <ul className="mt-4 divide-y divide-border">
+      <PortalCard title="Members">
+        <ul className="divide-y divide-border">
           {members.map((m) => (
-            <li key={m.id} className="flex flex-col gap-3 py-3 sm:flex-row sm:items-center sm:justify-between">
+            <li
+              key={m.id}
+              className="flex flex-col gap-3 py-3 sm:flex-row sm:items-center sm:justify-between"
+            >
               <div>
-                <p className="text-sm font-medium">{m.profiles?.full_name ?? m.profiles?.email}</p>
+                <p className="text-sm font-medium">
+                  {m.profiles?.full_name ?? m.profiles?.email}
+                </p>
                 <p className="text-xs text-muted">{m.profiles?.email}</p>
               </div>
               <div className="flex items-center gap-2">
@@ -167,12 +172,11 @@ export default function TeamPage() {
             </li>
           ))}
         </ul>
-      </section>
+      </PortalCard>
 
       {invitations.length > 0 && (
-        <section className="rounded-2xl border border-border bg-surface p-5">
-          <h2 className="font-semibold">Pending invitations</h2>
-          <ul className="mt-4 space-y-2 text-sm">
+        <PortalCard title="Pending invitations">
+          <ul className="space-y-2 text-sm">
             {invitations.map((inv) => (
               <li key={inv.id} className="flex justify-between text-muted">
                 <span>{inv.email}</span>
@@ -182,7 +186,7 @@ export default function TeamPage() {
               </li>
             ))}
           </ul>
-        </section>
+        </PortalCard>
       )}
     </div>
   );

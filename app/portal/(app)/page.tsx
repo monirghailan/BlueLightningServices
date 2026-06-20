@@ -50,22 +50,22 @@ export default async function PortalDashboardPage() {
         <StatCard label="Open tickets" value={metrics.openTickets} />
         <StatCard
           label="Oldest open ticket"
-          value={metrics.oldestOpen ? `${metrics.oldestOpen.ageDays} days` : "—"}
+          value={metrics.oldestOpen ? metrics.oldestOpen.ageDays : "—"}
+          unit={metrics.oldestOpen ? "days" : undefined}
           hint={metrics.oldestOpen ? `${metrics.oldestOpen.key}: ${metrics.oldestOpen.summary}` : undefined}
         />
         <StatCard label="Closed this month" value={metrics.closedThisMonth} />
         <StatCard
           label="Avg time to close"
           value={
-            metrics.closedThisMonth > 0
-              ? `${metrics.avgTimeToCloseDays.toFixed(1)} days`
-              : "—"
+            metrics.closedThisMonth > 0 ? metrics.avgTimeToCloseDays.toFixed(1) : "—"
           }
+          unit={metrics.closedThisMonth > 0 ? "days" : undefined}
         />
       </div>
 
       <div className="grid gap-4 lg:grid-cols-2">
-        <PortalCard title="Status pipeline" description="Read-only breakdown by status">
+        <PortalCard title="By status" description="Where your tickets sit in the workflow">
           {statusEntries.length === 0 ? (
             <p className="text-sm text-muted">No ticket data yet.</p>
           ) : (

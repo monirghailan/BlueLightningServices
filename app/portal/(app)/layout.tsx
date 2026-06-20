@@ -19,11 +19,7 @@ export default async function PortalAppLayout({
   }
 
   return (
-    <PortalShell
-      orgName={session.organization.name}
-      role={session.role}
-      email={session.email}
-    >
+    <PortalShell orgName={session.organization.name} role={session.role}>
       {children}
     </PortalShell>
   );
