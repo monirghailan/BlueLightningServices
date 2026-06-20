@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
+import { Cog } from "lucide-react";
 import { cn } from "@/lib/utils";
 import type { MemberRole } from "@/lib/supabase/database.types";
 
@@ -54,21 +55,22 @@ export function PortalShell({ children, orgName, role }: PortalShellProps) {
                 </Link>
               );
             })}
+          </div>
+          <div className="flex items-center gap-2 sm:gap-3">
             {role === "administrator" && (
               <Link
                 href="/portal/settings"
+                aria-label="Settings"
                 className={cn(
-                  "rounded-lg px-3 py-2 text-sm transition-colors",
+                  "rounded-lg border border-border p-1.5 transition-colors",
                   pathname.startsWith("/portal/settings")
                     ? "bg-surface-elevated text-foreground"
                     : "text-muted hover:text-foreground"
                 )}
               >
-                Settings
+                <Cog className="size-4" aria-hidden />
               </Link>
             )}
-          </div>
-          <div className="flex items-center gap-2 sm:gap-3">
             <button
               type="button"
               onClick={signOut}
@@ -79,9 +81,7 @@ export function PortalShell({ children, orgName, role }: PortalShellProps) {
           </div>
         </div>
         <nav className="flex gap-1 overflow-x-auto border-t border-border px-4 py-2 sm:hidden">
-          {[...nav, ...(role === "administrator"
-            ? [{ href: "/portal/settings", label: "Settings", exact: false }]
-            : [])].map((item) => (
+          {nav.map((item) => (
             <Link
               key={item.href}
               href={item.href}
