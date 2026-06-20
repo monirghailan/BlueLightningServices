@@ -105,6 +105,7 @@ export async function POST(request: NextRequest) {
     organization_id: invitation.organization_id,
     user_id: created.user.id,
     role: invitation.role,
+    assistant_persona: invitation.assistant_persona ?? "general",
   });
 
   if (memberError) {

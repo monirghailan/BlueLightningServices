@@ -36,6 +36,7 @@ export async function POST(request: NextRequest) {
       email: parsed.data.email.toLowerCase(),
       full_name: parsed.data.fullName?.trim() || null,
       role: parsed.data.role,
+      assistant_persona: parsed.data.assistantPersona,
       token_hash: tokenHash,
       expires_at: expiresAt,
       invited_by: session.userId,

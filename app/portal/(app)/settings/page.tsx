@@ -1,6 +1,7 @@
 import { redirect } from "next/navigation";
 import { getPortalSession, requirePortalAdmin } from "@/lib/portal/auth";
 import { PortalCard } from "@/components/portal/PortalCard";
+import { ReindexAssistantButton } from "@/components/portal/ReindexAssistantButton";
 
 export default async function SettingsPage() {
   try {
@@ -47,8 +48,33 @@ export default async function SettingsPage() {
             <dt className="text-muted">Status</dt>
             <dd className="capitalize">{org.status}</dd>
           </div>
+          <div>
+            <dt className="text-muted">Assistant</dt>
+            <dd>{org.assistant_enabled ? "Enabled" : "Not configured"}</dd>
+          </div>
+          <div>
+            <dt className="text-muted">Guide repo</dt>
+            <dd className="font-mono text-xs break-all">{org.github_repo_url ?? "—"}</dd>
+          </div>
+          <div>
+            <dt className="text-muted">Last indexed</dt>
+            <dd>
+              {org.assistant_last_indexed_at
+                ? new Date(org.assistant_last_indexed_at).toLocaleString()
+                : "—"}
+            </dd>
+          </div>
         </dl>
       </PortalCard>
+
+      {org.github_repo_url && (
+        <PortalCard title="Org guide index">
+          <p className="mb-4 text-sm text-muted">
+            Re-index after updating the organization guide repository.
+          </p>
+          <ReindexAssistantButton />
+        </PortalCard>
+      )}
     </div>
   );
 }

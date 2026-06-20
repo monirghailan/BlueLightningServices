@@ -24,6 +24,9 @@
 .cursor/
 .DS_Store
 *.pem
+org-guides/
+org-sf/
+.index-batches/
 
 # debug
 npm-debug.log*

@@ -1,5 +1,11 @@
 export type OrgStatus = "active" | "suspended";
 export type MemberRole = "administrator" | "standard";
+export type AssistantPersona =
+  | "sales_rep"
+  | "sales_manager"
+  | "service_agent"
+  | "service_manager"
+  | "general";
 export type LeadStatus =
   | "New"
   | "Contacted"
@@ -17,6 +23,13 @@ export interface Organization {
   jira_component_name: string | null;
   jira_board_id: string | null;
   status: OrgStatus;
+  github_repo_url: string | null;
+  github_default_branch: string;
+  assistant_enabled: boolean;
+  assistant_last_indexed_at: string | null;
+  assistant_system_prompt_override: string | null;
+  metadata_repo_url: string | null;
+  metadata_last_synced_at: string | null;
   created_at: string;
 }
 
@@ -33,6 +46,7 @@ export interface OrganizationMember {
   organization_id: string;
   user_id: string;
   role: MemberRole;
+  assistant_persona: AssistantPersona | null;
   joined_at: string;
 }
 
@@ -42,6 +56,7 @@ export interface Invitation {
   email: string;
   full_name: string | null;
   role: MemberRole;
+  assistant_persona: AssistantPersona | null;
   token_hash: string;
   expires_at: string;
   invited_by: string | null;
@@ -73,6 +88,46 @@ export interface LeadProvisioningJob {
   attempt_count: number;
 }
 
+export interface AssistantDocument {
+  id: string;
+  organization_id: string;
+  path: string;
+  content_hash: string;
+  title: string;
+  chunk_index: number;
+  content: string;
+  personas: string[];
+  embedding: number[] | null;
+  created_at: string;
+}
+
+export interface AssistantConversation {
+  id: string;
+  organization_id: string;
+  user_id: string;
+  title: string | null;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface AssistantMessage {
+  id: string;
+  conversation_id: string;
+  role: "user" | "assistant" | "system";
+  content: string;
+  sources: Record<string, unknown>[] | null;
+  created_at: string;
+}
+
+export interface GuideSearchResult {
+  id: string;
+  path: string;
+  title: string;
+  content: string;
+  personas: string[];
+  similarity: number;
+}
+
 export interface Database {
   public: {
     Tables: {
@@ -81,6 +136,13 @@ export interface Database {
         Insert: Omit<Organization, "id" | "created_at"> & {
           id?: string;
           created_at?: string;
+          github_repo_url?: string | null;
+          github_default_branch?: string;
+          assistant_enabled?: boolean;
+          assistant_last_indexed_at?: string | null;
+          assistant_system_prompt_override?: string | null;
+          metadata_repo_url?: string | null;
+          metadata_last_synced_at?: string | null;
         };
         Update: Partial<Organization>;
         Relationships: [];
@@ -96,6 +158,7 @@ export interface Database {
         Insert: Omit<OrganizationMember, "id" | "joined_at"> & {
           id?: string;
           joined_at?: string;
+          assistant_persona?: AssistantPersona | null;
         };
         Update: Partial<OrganizationMember>;
         Relationships: [];
@@ -106,6 +169,7 @@ export interface Database {
           id?: string;
           created_at?: string;
           accepted_at?: string | null;
+          assistant_persona?: AssistantPersona | null;
         };
         Update: Partial<Invitation>;
         Relationships: [];
@@ -142,9 +206,52 @@ export interface Database {
         Update: Partial<LeadProvisioningJob>;
         Relationships: [];
       };
+      assistant_documents: {
+        Row: AssistantDocument;
+        Insert: Omit<AssistantDocument, "id" | "created_at"> & {
+          id?: string;
+          created_at?: string;
+          embedding?: number[] | null;
+        };
+        Update: Partial<AssistantDocument>;
+        Relationships: [];
+      };
+      assistant_conversations: {
+        Row: AssistantConversation;
+        Insert: Omit<AssistantConversation, "id" | "created_at" | "updated_at"> & {
+          id?: string;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Update: Partial<AssistantConversation>;
+        Relationships: [];
+      };
+      assistant_messages: {
+        Row: AssistantMessage;
+        Insert: Omit<AssistantMessage, "id" | "created_at"> & {
+          id?: string;
+          created_at?: string;
+          sources?: Record<string, unknown>[] | null;
+        };
+        Update: Partial<AssistantMessage>;
+        Relationships: [];
+      };
     };
     Views: Record<string, never>;
-    Functions: Record<string, never>;
-    Enums: Record<string, never>;
+    Functions: {
+      match_assistant_documents: {
+        Args: {
+          p_org_id: string;
+          p_query_embedding: number[];
+          p_personas: string[];
+          p_match_count?: number;
+          p_match_threshold?: number;
+        };
+        Returns: GuideSearchResult[];
+      };
+    };
+    Enums: {
+      assistant_persona: AssistantPersona;
+    };
   };
 }

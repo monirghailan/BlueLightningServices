@@ -1,12 +1,17 @@
 import { NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
-import type { MemberRole, Organization } from "@/lib/supabase/database.types";
+import type {
+  AssistantPersona,
+  MemberRole,
+  Organization,
+} from "@/lib/supabase/database.types";
 
 export interface PortalSession {
   userId: string;
   email: string;
   organization: Organization;
   role: MemberRole;
+  assistantPersona: AssistantPersona;
 }
 
 export async function getPortalSession(): Promise<PortalSession | null> {
@@ -19,14 +24,18 @@ export async function getPortalSession(): Promise<PortalSession | null> {
 
   const { data: membership, error } = await supabase
     .from("organization_members")
-    .select("role, organization_id")
+    .select("role, organization_id, assistant_persona")
     .eq("user_id", user.id)
     .limit(1)
     .maybeSingle();
 
   if (error || !membership) return null;
 
-  const member = membership as { role: MemberRole; organization_id: string };
+  const member = membership as {
+    role: MemberRole;
+    organization_id: string;
+    assistant_persona: AssistantPersona | null;
+  };
 
   const { data: org, error: orgError } = await supabase
     .from("organizations")
@@ -44,6 +53,7 @@ export async function getPortalSession(): Promise<PortalSession | null> {
     email: user.email ?? "",
     organization,
     role: member.role,
+    assistantPersona: member.assistant_persona ?? "general",
   };
 }
 

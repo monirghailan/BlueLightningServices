@@ -1,6 +1,11 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import type { AssistantPersona } from "@/lib/supabase/database.types";
+import {
+  ASSISTANT_PERSONA_LABELS,
+  ASSISTANT_PERSONAS,
+} from "@/lib/assistant/personas";
 
 interface MemberRow {
   id: string;
@@ -21,6 +26,7 @@ export default function TeamPage() {
   const [invitations, setInvitations] = useState<InviteRow[]>([]);
   const [email, setEmail] = useState("");
   const [role, setRole] = useState<"standard" | "administrator">("standard");
+  const [assistantPersona, setAssistantPersona] = useState<AssistantPersona>("general");
   const [message, setMessage] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
 
@@ -56,7 +62,7 @@ export default function TeamPage() {
     const res = await fetch("/api/portal/team", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ email, role }),
+      body: JSON.stringify({ email, role, assistantPersona }),
     });
 
     const data = await res.json();
@@ -92,9 +98,9 @@ export default function TeamPage() {
         <p className="mt-1 text-sm text-muted">Invite users and manage roles.</p>
       </div>
 
-      <form onSubmit={invite} className="grid gap-3 rounded-2xl border border-border bg-surface p-5 sm:grid-cols-[1fr_auto_auto]">
-        {message && <p className="sm:col-span-3 text-sm text-emerald-300">{message}</p>}
-        {error && <p className="sm:col-span-3 text-sm text-red-200">{error}</p>}
+      <form onSubmit={invite} className="grid gap-3 rounded-2xl border border-border bg-surface p-5 sm:grid-cols-[1fr_auto_auto_auto]">
+        {message && <p className="sm:col-span-4 text-sm text-emerald-300">{message}</p>}
+        {error && <p className="sm:col-span-4 text-sm text-red-200">{error}</p>}
         <input
           type="email"
           required
@@ -110,6 +116,17 @@ export default function TeamPage() {
         >
           <option value="standard">Standard</option>
           <option value="administrator">Administrator</option>
+        </select>
+        <select
+          value={assistantPersona}
+          onChange={(e) => setAssistantPersona(e.target.value as AssistantPersona)}
+          className="rounded-xl border border-border bg-surface-elevated px-3 py-2 text-sm"
+        >
+          {ASSISTANT_PERSONAS.map((persona) => (
+            <option key={persona} value={persona}>
+              {ASSISTANT_PERSONA_LABELS[persona]}
+            </option>
+          ))}
         </select>
         <button
           type="submit"

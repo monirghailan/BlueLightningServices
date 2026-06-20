@@ -10,6 +10,7 @@ const nav = [
   { href: "/portal/backlog", label: "Backlog" },
   { href: "/portal/tickets", label: "Tickets" },
   { href: "/portal/tickets/new", label: "New ticket" },
+  { href: "/portal/assistant", label: "Assistant" },
 ];
 
 interface PortalShellProps {
@@ -96,7 +97,12 @@ export function PortalShell({ children, orgName, role, email }: PortalShellProps
           </div>
         </div>
         <nav className="flex gap-1 overflow-x-auto border-t border-border px-4 py-2 sm:hidden">
-          {nav.map((item) => (
+          {[...nav, ...(role === "administrator"
+            ? [
+                { href: "/portal/team", label: "Team", exact: false },
+                { href: "/portal/settings", label: "Settings", exact: false },
+              ]
+            : [])].map((item) => (
             <Link
               key={item.href}
               href={item.href}

@@ -21,10 +21,43 @@ export const moveIssuesSchema = z.object({
   issueKeys: z.array(z.string().regex(/^KAN-\d+$/)).min(1).max(50),
 });
 
+export type AssistantPersona =
+  | "sales_rep"
+  | "sales_manager"
+  | "service_agent"
+  | "service_manager"
+  | "general";
+
 export const inviteSchema = z.object({
   email: z.string().email(),
   role: z.enum(["administrator", "standard"]).default("standard"),
   fullName: z.string().min(1).max(120).optional(),
+  assistantPersona: z
+    .enum(["sales_rep", "sales_manager", "service_agent", "service_manager", "general"])
+    .default("general"),
+});
+
+export const updatePersonaSchema = z.object({
+  assistantPersona: z.enum([
+    "sales_rep",
+    "sales_manager",
+    "service_agent",
+    "service_manager",
+    "general",
+  ]),
+});
+
+export const chatSchema = z.object({
+  messages: z
+    .array(
+      z.object({
+        role: z.enum(["user", "assistant"]),
+        content: z.string().min(1).max(8000),
+      })
+    )
+    .min(1)
+    .max(40),
+  conversationId: z.string().uuid().optional(),
 });
 
 export const acceptInviteSchema = z.object({
