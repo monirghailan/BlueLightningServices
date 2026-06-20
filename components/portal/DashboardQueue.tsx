@@ -23,7 +23,6 @@ export function DashboardQueue() {
 
   function handleTicketCreated(_key: string) {
     setBacklogReloadToken((token) => token + 1);
-    setTicketsRefreshKey((key) => key + 1);
   }
 
   return (
