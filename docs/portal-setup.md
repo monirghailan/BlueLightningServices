@@ -67,9 +67,8 @@ See [leads.md](./leads.md) for contact form → Supabase workflow and qualifying
 
 | Route | Purpose |
 |-------|---------|
-| `/portal` | Dashboard |
-| `/portal/backlog` | Prioritize backlog + move to/from board |
-| `/portal/tickets` | All tickets |
+| `/portal` | Dashboard (backlog + tickets table) |
 | `/portal/tickets/new` | Create ticket |
+| `/portal/tickets/[key]` | Ticket detail |
 | `/portal/team` | Admin: invite & manage users |
 | `/portal/settings` | Admin: org info |

@@ -13,6 +13,11 @@ const nextConfig: NextConfig = {
         destination: "/contact",
         permanent: true,
       },
+      {
+        source: "/portal/tickets",
+        destination: "/portal",
+        permanent: true,
+      },
     ];
   },
 };

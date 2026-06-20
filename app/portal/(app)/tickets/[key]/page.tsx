@@ -69,8 +69,8 @@ export default function TicketDetailPage({
     return (
       <div className="space-y-4">
         <p className="text-red-200">{error}</p>
-        <Link href="/portal/tickets" className="text-sm text-bolt-outline hover:underline">
-          Back to tickets
+        <Link href="/portal" className="text-sm text-bolt-outline hover:underline">
+          ← Back to dashboard
         </Link>
       </div>
     );
@@ -81,8 +81,8 @@ export default function TicketDetailPage({
   return (
     <div className="space-y-6">
       <div>
-        <Link href="/portal/tickets" className="text-sm text-muted hover:text-foreground">
-          ← All tickets
+        <Link href="/portal" className="text-sm text-muted hover:text-foreground">
+          ← Back to dashboard
         </Link>
         <div className="mt-3 flex flex-wrap items-center gap-3">
           <h1 className="font-mono text-lg text-bolt-outline">{ticket.key}</h1>
