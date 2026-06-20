@@ -11,6 +11,7 @@ import {
   portalErrorResponse,
   requirePortalSession,
 } from "@/lib/portal/auth";
+import { getClientBacklogKeys } from "@/lib/portal/metrics";
 import { ticketCreateSchema } from "@/lib/validations/portal";
 import { isRateLimited } from "@/lib/rate-limit";
 
@@ -39,9 +40,19 @@ export async function GET(request: NextRequest) {
       session.organization.jira_component_name,
       session.organization.jira_project_key
     );
-    if (status) jql += ` AND status = "${status}"`;
+    if (status === "open") {
+      jql += ` AND statusCategory != Done`;
+    } else if (status) {
+      jql += ` AND status = "${status}"`;
+    }
     if (type) jql += ` AND issuetype = "${type}"`;
     if (q) jql += ` AND summary ~ "${q.replace(/"/g, '\\"')}"`;
+
+    const backlogKeys = await getClientBacklogKeys(session.organization);
+    if (backlogKeys.length > 0) {
+      jql += ` AND key not in (${backlogKeys.join(", ")})`;
+    }
+
     jql += " ORDER BY updated DESC";
 
     const startAt = (page - 1) * pageSize;

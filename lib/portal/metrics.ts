@@ -141,6 +141,53 @@ function emptyMetrics(): PortalMetrics {
   };
 }
 
+async function getClientBacklogItems(org: Organization) {
+  if (!org.jira_component_name) return [];
+
+  const boardId = resolvePortalBoardId(org);
+  const clientJql = clientScopeJql(org.jira_component_name, org.jira_project_key);
+  const [backlogResult, clientScope] = await Promise.all([
+    getBacklogIssues(boardId, 0, 100),
+    searchIssues(`${clientJql} ORDER BY updated DESC`, 100),
+  ]);
+
+  const clientKeys = new Set(
+    parentIssuesOnly(clientScope.issues ?? []).map((i) => i.key)
+  );
+
+  return parentIssuesOnly(backlogResult.issues ?? [])
+    .filter((i) => clientKeys.has(i.key) && !isSubtaskIssue(i))
+    .map(serializeIssue);
+}
+
+export async function getClientBacklogKeys(org: Organization): Promise<string[]> {
+  const items = await getClientBacklogItems(org);
+  return items.map((item) => item.key);
+}
+
+export async function getPaginatedBacklog(
+  org: Organization,
+  page: number,
+  pageSize: number
+) {
+  const allBacklog = await getClientBacklogItems(org);
+  const total = allBacklog.length;
+  const start = (page - 1) * pageSize;
+  const backlog = allBacklog.slice(start, start + pageSize);
+  const totalPages = total > 0 ? Math.ceil(total / pageSize) : 0;
+
+  return {
+    backlog,
+    total,
+    page,
+    pageSize,
+    totalPages,
+    leadingKey: start > 0 ? allBacklog[start - 1].key : null,
+    trailingKey:
+      start + backlog.length < total ? allBacklog[start + backlog.length].key : null,
+  };
+}
+
 export async function getBacklogSections(org: Organization) {
   if (!org.jira_component_name) {
     return { backlog: [], readyForBls: [] };
@@ -148,8 +195,8 @@ export async function getBacklogSections(org: Organization) {
 
   const boardId = resolvePortalBoardId(org);
   const clientJql = clientScopeJql(org.jira_component_name);
-  const [backlogResult, boardResult, clientScope] = await Promise.all([
-    getBacklogIssues(boardId, 0, 100),
+  const [backlog, boardResult, clientScope] = await Promise.all([
+    getClientBacklogItems(org),
     getBoardIssues(boardId, 0, 100),
     searchIssues(`${clientJql} ORDER BY updated DESC`, 100),
   ]);
@@ -160,8 +207,7 @@ export async function getBacklogSections(org: Organization) {
   const isClientIssue = (issue: JiraIssue) =>
     clientKeys.has(issue.key) && !isSubtaskIssue(issue);
 
-  const clientBacklog = parentIssuesOnly(backlogResult.issues ?? []).filter(isClientIssue);
-  const backlogKeys = new Set(clientBacklog.map((i) => i.key));
+  const backlogKeys = new Set(backlog.map((i) => i.key));
 
   const readyForBls = parentIssuesOnly(boardResult.issues ?? []).filter(
     (i: JiraIssue) =>
@@ -172,7 +218,7 @@ export async function getBacklogSections(org: Organization) {
   );
 
   return {
-    backlog: clientBacklog.map(serializeIssue),
+    backlog,
     readyForBls: readyForBls.map(serializeIssue),
   };
 }

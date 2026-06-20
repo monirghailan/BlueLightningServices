@@ -3,7 +3,6 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { StatusBadge } from "@/components/portal/PortalCard";
-import { Button } from "@/components/ui/Button";
 
 interface TicketRow {
   key: string;
@@ -15,9 +14,13 @@ interface TicketRow {
 
 const PAGE_SIZES = [5, 10, 25, 50] as const;
 
-export function TicketsTable() {
+interface TicketsTableProps {
+  refreshKey?: number;
+}
+
+export function TicketsTable({ refreshKey = 0 }: TicketsTableProps) {
   const [issues, setIssues] = useState<TicketRow[]>([]);
-  const [status, setStatus] = useState("In Progress");
+  const [status, setStatus] = useState("open");
   const [type, setType] = useState("");
   const [q, setQ] = useState("");
   const [page, setPage] = useState(1);
@@ -43,15 +46,14 @@ export function TicketsTable() {
         setTotalPages(data.totalPages ?? 0);
       })
       .finally(() => setLoading(false));
-  }, [status, type, q, page, pageSize]);
+  }, [status, type, q, page, pageSize, refreshKey]);
 
   const rangeStart = total === 0 ? 0 : (page - 1) * pageSize + 1;
   const rangeEnd = total === 0 ? 0 : Math.min(page * pageSize, total);
 
   return (
     <div className="space-y-4">
-      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-        <div className="grid flex-1 gap-3 sm:grid-cols-3">
+      <div className="grid gap-3 sm:grid-cols-3">
         <input
           value={q}
           onChange={(e) => {
@@ -69,6 +71,7 @@ export function TicketsTable() {
           }}
           className="rounded-xl border border-border bg-surface px-3 py-2 text-sm"
         >
+          <option value="open">All open statuses</option>
           <option value="">All statuses</option>
           <option>To Do</option>
           <option>In Progress</option>
@@ -89,10 +92,6 @@ export function TicketsTable() {
           <option>Request</option>
           <option>Task</option>
         </select>
-        </div>
-        <Button href="/portal/backlog" variant="secondary" size="sm" className="shrink-0">
-          Manage backlog
-        </Button>
       </div>
 
       <div className="overflow-hidden rounded-xl border border-border">

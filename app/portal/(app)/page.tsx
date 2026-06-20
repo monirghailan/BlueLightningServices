@@ -1,7 +1,7 @@
 import { computeMetrics } from "@/lib/portal/metrics";
 import { getPortalSession } from "@/lib/portal/auth";
 import { StatCard, PortalCard } from "@/components/portal/PortalCard";
-import { TicketsTable } from "@/components/portal/TicketsTable";
+import { DashboardQueue } from "@/components/portal/DashboardQueue";
 
 export default async function PortalDashboardPage() {
   const session = await getPortalSession();
@@ -95,9 +95,7 @@ export default async function PortalDashboardPage() {
         </PortalCard>
       </div>
 
-      <PortalCard title="Tickets" description="Browse and filter your organization's tickets">
-        <TicketsTable />
-      </PortalCard>
+      <DashboardQueue />
     </div>
   );
 }
