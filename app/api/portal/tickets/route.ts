@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import {
+  countIssues,
   createIssue,
   searchIssues,
   serializeIssue,
@@ -13,6 +14,13 @@ import {
 import { ticketCreateSchema } from "@/lib/validations/portal";
 import { isRateLimited } from "@/lib/rate-limit";
 
+const PAGE_SIZES = [5, 10, 25, 50] as const;
+
+function parsePageSize(value: string | null): number {
+  const parsed = parseInt(value ?? "5", 10);
+  return (PAGE_SIZES as readonly number[]).includes(parsed) ? parsed : 5;
+}
+
 export async function GET(request: NextRequest) {
   try {
     const session = await requirePortalSession();
@@ -20,9 +28,11 @@ export async function GET(request: NextRequest) {
     const status = searchParams.get("status");
     const type = searchParams.get("type");
     const q = searchParams.get("q");
+    const page = Math.max(1, parseInt(searchParams.get("page") ?? "1", 10) || 1);
+    const pageSize = parsePageSize(searchParams.get("pageSize"));
 
     if (!session.organization.jira_component_name) {
-      return NextResponse.json({ issues: [] });
+      return NextResponse.json({ issues: [], total: 0, page: 1, pageSize, totalPages: 0 });
     }
 
     let jql = clientScopeJql(
@@ -34,9 +44,19 @@ export async function GET(request: NextRequest) {
     if (q) jql += ` AND summary ~ "${q.replace(/"/g, '\\"')}"`;
     jql += " ORDER BY updated DESC";
 
-    const result = await searchIssues(jql, 100);
+    const startAt = (page - 1) * pageSize;
+    const [result, total] = await Promise.all([
+      searchIssues(jql, pageSize, startAt),
+      countIssues(jql),
+    ]);
+    const totalPages = total > 0 ? Math.ceil(total / pageSize) : 0;
+
     return NextResponse.json({
       issues: (result.issues ?? []).map(serializeIssue),
+      total,
+      page,
+      pageSize,
+      totalPages,
     });
   } catch (error) {
     if (error instanceof JiraConfigError) {

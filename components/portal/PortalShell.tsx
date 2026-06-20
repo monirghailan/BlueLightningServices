@@ -2,14 +2,13 @@
 
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
+import { Plus } from "lucide-react";
+import { Button } from "@/components/ui/Button";
 import { cn } from "@/lib/utils";
 import type { MemberRole } from "@/lib/supabase/database.types";
 
 const nav = [
   { href: "/portal", label: "Dashboard", exact: true },
-  { href: "/portal/backlog", label: "Backlog" },
-  { href: "/portal/tickets", label: "Tickets" },
-  { href: "/portal/tickets/new", label: "New ticket" },
   { href: "/portal/assistant", label: "Assistant" },
 ];
 
@@ -71,7 +70,16 @@ export function PortalShell({ children, orgName, role }: PortalShellProps) {
               </Link>
             )}
           </div>
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-2 sm:gap-3">
+            <Button
+              href="/portal/tickets/new"
+              variant="portal"
+              size="sm"
+              className="!px-3 !py-1.5 !text-xs"
+            >
+              <Plus size={13} strokeWidth={2.5} aria-hidden />
+              New ticket
+            </Button>
             <button
               type="button"
               onClick={signOut}

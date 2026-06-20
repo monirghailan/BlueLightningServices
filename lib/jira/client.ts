@@ -161,6 +161,14 @@ export function parentIssuesOnly(issues: JiraIssue[]): JiraIssue[] {
   return issues.filter((issue) => !isSubtaskIssue(issue));
 }
 
+export async function countIssues(jql: string): Promise<number> {
+  const result = await jiraFetch<{ count: number }>("/rest/api/3/search/approximate-count", {
+    method: "POST",
+    body: JSON.stringify({ jql }),
+  });
+  return result.count ?? 0;
+}
+
 export async function searchIssues(jql: string, maxResults = 50, startAt = 0) {
   const issues: JiraIssue[] = [];
   let nextPageToken: string | undefined;
@@ -175,7 +183,7 @@ export async function searchIssues(jql: string, maxResults = 50, startAt = 0) {
       method: "POST",
       body: JSON.stringify({
         jql,
-        maxResults: Math.min(maxResults - issues.length, 100),
+        maxResults: skipped < startAt ? 100 : Math.min(maxResults - issues.length, 100),
         fields: ISSUE_SEARCH_FIELDS,
         ...(nextPageToken ? { nextPageToken } : {}),
       }),
@@ -184,20 +192,20 @@ export async function searchIssues(jql: string, maxResults = 50, startAt = 0) {
     const batch = page.issues ?? [];
     if (batch.length === 0) break;
 
-    if (skipped < startAt) {
-      const toSkip = Math.min(batch.length, startAt - skipped);
-      skipped += toSkip;
-      issues.push(...batch.slice(toSkip));
-    } else {
-      issues.push(...batch);
+    for (const issue of batch) {
+      if (skipped < startAt) {
+        skipped++;
+        continue;
+      }
+      issues.push(issue);
+      if (issues.length >= maxResults) break;
     }
 
-    if (page.isLast || !page.nextPageToken) break;
+    if (issues.length >= maxResults || page.isLast || !page.nextPageToken) break;
     nextPageToken = page.nextPageToken;
   }
 
-  const page = issues.slice(0, maxResults);
-  return { issues: page, total: page.length } satisfies JiraSearchResult;
+  return { issues, total: issues.length } satisfies JiraSearchResult;
 }
 
 export async function getIssue(key: string) {

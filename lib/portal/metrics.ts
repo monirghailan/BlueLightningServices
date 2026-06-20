@@ -20,17 +20,27 @@ export interface PortalMetrics {
   byType: Record<string, number>;
   byStatus: Record<string, number>;
   throughput: { week: string; created: number; resolved: number }[];
-  recentActivity: ReturnType<typeof serializeIssue>[];
 }
 
 function daysSince(iso: string): number {
   return Math.floor((Date.now() - new Date(iso).getTime()) / (1000 * 60 * 60 * 24));
 }
 
-function daysBetween(startIso: string, endIso: string): number {
-  return Math.floor(
-    (new Date(endIso).getTime() - new Date(startIso).getTime()) / (1000 * 60 * 60 * 24)
-  );
+function businessDaysBetween(startIso: string, endIso: string): number {
+  const end = new Date(endIso);
+  if (end.getTime() <= new Date(startIso).getTime()) return 0;
+
+  let count = 0;
+  const cursor = new Date(startIso);
+  cursor.setUTCHours(0, 0, 0, 0);
+
+  while (cursor.getTime() < end.getTime()) {
+    cursor.setUTCDate(cursor.getUTCDate() + 1);
+    const day = cursor.getUTCDay();
+    if (day !== 0 && day !== 6) count++;
+  }
+
+  return count;
 }
 
 function weekLabel(date: Date): string {
@@ -58,7 +68,7 @@ export async function computeMetrics(org: Organization): Promise<PortalMetrics> 
 
   const closeTimes = closedThisMonth
     .filter((i) => i.fields.created && i.fields.resolutiondate)
-    .map((i) => daysBetween(i.fields.created!, i.fields.resolutiondate!))
+    .map((i) => businessDaysBetween(i.fields.created!, i.fields.resolutiondate!))
     .filter((d) => d >= 0);
   const avgTimeToCloseDays =
     closeTimes.length > 0
@@ -108,8 +118,6 @@ export async function computeMetrics(org: Organization): Promise<PortalMetrics> 
     throughput.push({ week: label, created, resolved });
   }
 
-  const recentActivity = issues.slice(0, 10).map(serializeIssue);
-
   return {
     openTickets: open.length,
     closedThisMonth: closedThisMonth.length,
@@ -118,7 +126,6 @@ export async function computeMetrics(org: Organization): Promise<PortalMetrics> 
     byType,
     byStatus,
     throughput,
-    recentActivity,
   };
 }
 
@@ -131,7 +138,6 @@ function emptyMetrics(): PortalMetrics {
     byType: {},
     byStatus: {},
     throughput: [],
-    recentActivity: [],
   };
 }
 
