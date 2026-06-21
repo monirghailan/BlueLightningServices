@@ -39,7 +39,7 @@ export default async function SettingsPage() {
         userRole={session.role}
       />
 
-      <TeamManagement />
+      <TeamManagement currentUserId={session.userId} />
     </div>
   );
 }

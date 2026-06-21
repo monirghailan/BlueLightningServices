@@ -22,7 +22,11 @@ interface InviteRow {
   expires_at: string;
 }
 
-export function TeamManagement() {
+interface TeamManagementProps {
+  currentUserId: string;
+}
+
+export function TeamManagement({ currentUserId }: TeamManagementProps) {
   const [members, setMembers] = useState<MemberRow[]>([]);
   const [invitations, setInvitations] = useState<InviteRow[]>([]);
   const [loadError, setLoadError] = useState<string | null>(null);
@@ -154,7 +158,9 @@ export function TeamManagement() {
           <p className="text-sm text-muted">No team members yet.</p>
         ) : (
         <ul className="divide-y divide-border">
-          {members.map((m) => (
+          {members.map((m) => {
+            const isCurrentUser = m.profiles?.id === currentUserId;
+            return (
             <li
               key={m.id}
               className="flex flex-col gap-3 py-3 sm:flex-row sm:items-center sm:justify-between"
@@ -162,6 +168,9 @@ export function TeamManagement() {
               <div>
                 <p className="text-sm font-medium">
                   {m.profiles?.full_name ?? m.profiles?.email ?? "Unknown member"}
+                  {isCurrentUser && (
+                    <span className="ml-2 text-xs font-normal text-muted">(you)</span>
+                  )}
                 </p>
                 {m.profiles?.email && (
                   <p className="text-xs text-muted">{m.profiles.email}</p>
@@ -180,17 +189,20 @@ export function TeamManagement() {
                   <option value="standard">Standard</option>
                   <option value="administrator">Administrator</option>
                 </select>
-                <button
-                  type="button"
-                  disabled={!m.profiles}
-                  onClick={() => m.profiles && removeMember(m.profiles.id)}
-                  className="rounded-lg border border-border px-2 py-1 text-sm text-muted hover:text-red-200 disabled:opacity-50"
-                >
-                  Remove
-                </button>
+                {!isCurrentUser && (
+                  <button
+                    type="button"
+                    disabled={!m.profiles}
+                    onClick={() => m.profiles && removeMember(m.profiles.id)}
+                    className="rounded-lg border border-border px-2 py-1 text-sm text-muted hover:text-red-200 disabled:opacity-50"
+                  >
+                    Remove
+                  </button>
+                )}
               </div>
             </li>
-          ))}
+            );
+          })}
         </ul>
         )}
       </PortalCard>
