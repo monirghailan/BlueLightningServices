@@ -110,12 +110,16 @@ export interface AssistantConversation {
   updated_at: string;
 }
 
+export type AssistantMessageFeedback = "up" | "down";
+
 export interface AssistantMessage {
   id: string;
   conversation_id: string;
   role: "user" | "assistant" | "system";
   content: string;
   sources: Record<string, unknown>[] | null;
+  feedback: AssistantMessageFeedback | null;
+  feedback_at: string | null;
   created_at: string;
 }
 

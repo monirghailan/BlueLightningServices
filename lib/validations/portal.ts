@@ -60,6 +60,10 @@ export const chatSchema = z.object({
   conversationId: z.string().uuid().optional(),
 });
 
+export const assistantMessageFeedbackSchema = z.object({
+  feedback: z.enum(["up", "down"]).nullable(),
+});
+
 export const acceptInviteSchema = z.object({
   token: z.string().min(16),
   password: z.string().min(8).max(128),

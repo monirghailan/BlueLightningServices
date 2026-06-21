@@ -9,6 +9,9 @@ import {
   suggestedPromptsForPersona,
 } from "@/lib/assistant/personas";
 import type { AssistantPersona } from "@/lib/supabase/database.types";
+import type { AssistantChatMessage } from "@/lib/assistant/chat-types";
+import { AssistantMessageFeedbackBar } from "@/components/portal/AssistantMessageFeedback";
+import { MarkdownContent } from "@/components/portal/MarkdownContent";
 import { PortalCard } from "@/components/portal/PortalCard";
 
 interface AssistantMeta {
@@ -47,7 +50,7 @@ export function AssistantChat() {
     [conversationId]
   );
 
-  const { messages, sendMessage, status, error } = useChat({
+  const { messages, sendMessage, status, error } = useChat<AssistantChatMessage>({
     transport,
   });
 
@@ -205,7 +208,18 @@ export function AssistantChat() {
               log a case, or follow a business process.
             </p>
           )}
-          {messages.map((message) => (
+          {messages.map((message) => {
+            const isAssistant = message.role === "assistant";
+            const isStreamingThisMessage =
+              isAssistant &&
+              (status === "streaming" || status === "submitted") &&
+              message.id === messages.at(-1)?.id;
+            const dbMessageId = message.metadata?.dbMessageId;
+            const hasText = message.parts.some(
+              (part) => part.type === "text" && part.text.trim().length > 0
+            );
+
+            return (
             <div
               key={message.id}
               className={
@@ -218,10 +232,25 @@ export function AssistantChat() {
                 {message.role === "user" ? "You" : "Assistant"}
               </p>
               {message.parts.map((part, index) =>
-                part.type === "text" ? <p key={index}>{part.text}</p> : null
+                part.type === "text" ? (
+                  message.role === "assistant" ? (
+                    <MarkdownContent key={index} content={part.text} />
+                  ) : (
+                    <p key={index} className="whitespace-pre-wrap leading-relaxed">
+                      {part.text}
+                    </p>
+                  )
+                ) : null
+              )}
+              {isAssistant && dbMessageId && hasText && !isStreamingThisMessage && (
+                <AssistantMessageFeedbackBar
+                  messageId={dbMessageId}
+                  feedback={message.metadata?.feedback}
+                />
               )}
             </div>
-          ))}
+            );
+          })}
         </div>
 
         <form onSubmit={handleSubmit} className="border-t border-border p-4">

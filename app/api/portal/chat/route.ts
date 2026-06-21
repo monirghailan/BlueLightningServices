@@ -1,5 +1,7 @@
 import {
   convertToModelMessages,
+  createUIMessageStream,
+  createUIMessageStreamResponse,
   stepCountIs,
   streamText,
   tool,
@@ -21,6 +23,7 @@ import {
   parseGitHubRepoUrl,
 } from "@/lib/assistant/github";
 import { chatSchema } from "@/lib/validations/portal";
+import type { AssistantChatMessage } from "@/lib/assistant/chat-types";
 
 export const maxDuration = 60;
 
@@ -123,7 +126,7 @@ export async function POST(request: Request) {
       conversationId = created.id;
     }
 
-    const uiMessages = body.messages as UIMessage[];
+    const uiMessages = body.messages as AssistantChatMessage[];
     const lastUser = uiMessages.filter((m) => m.role === "user").at(-1);
     const lastUserText = lastUser ? getMessageText(lastUser) : "";
 
@@ -137,88 +140,116 @@ export async function POST(request: Request) {
 
     const repoRef = parseGitHubRepoUrl(org.github_repo_url, org.github_default_branch ?? "main");
     const collectedSources: Array<{ path: string; title: string }> = [];
+    const modelMessages = await convertToModelMessages(uiMessages);
 
-    const result = streamText({
-      model: openai("gpt-4o-mini"),
-      system: buildAssistantSystemPrompt({
-        org,
-        persona: session.assistantPersona,
-      }),
-      messages: await convertToModelMessages(uiMessages),
-      stopWhen: stepCountIs(5),
-      tools: {
-        searchOrgGuide: tool({
-          description:
-            "Search this organization's curated Salesforce guide for relevant information.",
-          inputSchema: z.object({
-            question: z.string().describe("The user's question or search query"),
+    const stream = createUIMessageStream<AssistantChatMessage>({
+      execute: ({ writer }) => {
+        const result = streamText({
+          model: openai("gpt-4o-mini"),
+          system: buildAssistantSystemPrompt({
+            org,
+            persona: session.assistantPersona,
           }),
-          execute: async ({ question }) => {
-            const results = await searchOrgGuide(supabase, {
-              organizationId: org.id,
-              question,
-              persona: session.assistantPersona,
-            });
+          messages: modelMessages,
+          stopWhen: stepCountIs(5),
+          tools: {
+            searchOrgGuide: tool({
+              description:
+                "Search this organization's curated Salesforce guide for relevant information.",
+              inputSchema: z.object({
+                question: z.string().describe("The user's question or search query"),
+              }),
+              execute: async ({ question }) => {
+                const results = await searchOrgGuide(supabase, {
+                  organizationId: org.id,
+                  question,
+                  persona: session.assistantPersona,
+                });
 
-            for (const item of results) {
-              if (!collectedSources.some((s) => s.path === item.path)) {
-                collectedSources.push({ path: item.path, title: item.title });
-              }
+                for (const item of results) {
+                  if (!collectedSources.some((s) => s.path === item.path)) {
+                    collectedSources.push({ path: item.path, title: item.title });
+                  }
+                }
+
+                if (results.length === 0) {
+                  return { found: false, results: [] };
+                }
+
+                return {
+                  found: true,
+                  results: results.map((item) => ({
+                    path: item.path,
+                    title: item.title,
+                    content: item.content,
+                    similarity: item.similarity,
+                  })),
+                };
+              },
+            }),
+            fetchGuideFile: tool({
+              description:
+                "Fetch a specific markdown file from the org guide repository by path.",
+              inputSchema: z.object({
+                path: z.string().describe("Relative repo path, e.g. how-to/create-a-lead.md"),
+              }),
+              execute: async ({ path }) => {
+                const content = await fetchRepoFile(getGitHubClient(), repoRef, path);
+                collectedSources.push({
+                  path,
+                  title: path.split("/").pop() ?? path,
+                });
+                return { path, content: content.slice(0, 12000) };
+              },
+            }),
+          },
+          onFinish: async ({ text }) => {
+            const { data: savedMessage, error: saveError } = await supabase
+              .from("assistant_messages")
+              .insert({
+                conversation_id: conversationId!,
+                role: "assistant",
+                content: text,
+                sources: collectedSources,
+              })
+              .select("id")
+              .single();
+
+            if (saveError) {
+              console.error(saveError);
             }
 
-            if (results.length === 0) {
-              return { found: false, results: [] };
-            }
+            await supabase
+              .from("assistant_conversations")
+              .update({ updated_at: new Date().toISOString() })
+              .eq("id", conversationId!);
 
-            return {
-              found: true,
-              results: results.map((item) => ({
-                path: item.path,
-                title: item.title,
-                content: item.content,
-                similarity: item.similarity,
-              })),
-            };
+            if (savedMessage) {
+              writer.write({
+                type: "message-metadata",
+                messageMetadata: {
+                  dbMessageId: savedMessage.id,
+                  feedback: null,
+                },
+              });
+            }
           },
-        }),
-        fetchGuideFile: tool({
-          description:
-            "Fetch a specific markdown file from the org guide repository by path.",
-          inputSchema: z.object({
-            path: z.string().describe("Relative repo path, e.g. how-to/create-a-lead.md"),
-          }),
-          execute: async ({ path }) => {
-            const content = await fetchRepoFile(getGitHubClient(), repoRef, path);
-            collectedSources.push({
-              path,
-              title: path.split("/").pop() ?? path,
-            });
-            return { path, content: content.slice(0, 12000) };
-          },
-        }),
-      },
-      onFinish: async ({ text }) => {
-        await supabase.from("assistant_messages").insert({
-          conversation_id: conversationId!,
-          role: "assistant",
-          content: text,
-          sources: collectedSources,
         });
 
-        await supabase
-          .from("assistant_conversations")
-          .update({ updated_at: new Date().toISOString() })
-          .eq("id", conversationId!);
+        writer.merge(
+          result.toUIMessageStream({
+            originalMessages: uiMessages,
+          })
+        );
       },
     });
 
-    const response = result.toUIMessageStreamResponse({
+    return createUIMessageStreamResponse({
+      stream,
       headers: {
         "X-Conversation-Id": conversationId!,
       },
     });
-
-    return response;
   } catch (error) {
     return portalErrorResponse(error);
   }
