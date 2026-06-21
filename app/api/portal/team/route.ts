@@ -74,13 +74,48 @@ export async function GET() {
       .is("accepted_at", null)
       .order("created_at", { ascending: false });
 
-    const { data: members } = await supabase
+    const { data: memberRows, error: membersError } = await supabase
       .from("organization_members")
-      .select("id, role, joined_at, profiles (id, email, full_name)")
-      .eq("organization_id", session.organization.id);
+      .select("id, role, joined_at, user_id")
+      .eq("organization_id", session.organization.id)
+      .order("joined_at", { ascending: true });
+
+    if (membersError) {
+      console.error(membersError);
+      return NextResponse.json({ error: "Failed to load members." }, { status: 500 });
+    }
+
+    const userIds = (memberRows ?? []).map((member) => member.user_id);
+    const profilesByUserId = new Map<
+      string,
+      { id: string; email: string; full_name: string | null }
+    >();
+
+    if (userIds.length > 0) {
+      const { data: profiles, error: profilesError } = await supabase
+        .from("profiles")
+        .select("id, email, full_name")
+        .in("id", userIds);
+
+      if (profilesError) {
+        console.error(profilesError);
+        return NextResponse.json({ error: "Failed to load members." }, { status: 500 });
+      }
+
+      for (const profile of profiles ?? []) {
+        profilesByUserId.set(profile.id, profile);
+      }
+    }
+
+    const members = (memberRows ?? []).map((member) => ({
+      id: member.id,
+      role: member.role,
+      joined_at: member.joined_at,
+      profiles: profilesByUserId.get(member.user_id) ?? null,
+    }));
 
     return NextResponse.json({
-      members: members ?? [],
+      members,
       invitations: invitations ?? [],
     });
   } catch (error) {

@@ -25,6 +25,7 @@ interface InviteRow {
 export function TeamManagement() {
   const [members, setMembers] = useState<MemberRow[]>([]);
   const [invitations, setInvitations] = useState<InviteRow[]>([]);
+  const [loadError, setLoadError] = useState<string | null>(null);
   const [email, setEmail] = useState("");
   const [role, setRole] = useState<"standard" | "administrator">("standard");
   const [assistantPersona, setAssistantPersona] = useState<AssistantPersona>("general");
@@ -33,18 +34,28 @@ export function TeamManagement() {
 
   async function load() {
     const res = await fetch("/api/portal/team");
-    if (res.ok) {
-      const data = await res.json();
-      setMembers(data.members ?? []);
-      setInvitations(data.invitations ?? []);
+    if (!res.ok) {
+      const data = await res.json().catch(() => ({}));
+      setLoadError(data.error ?? "Failed to load team.");
+      return;
     }
+    setLoadError(null);
+    const data = await res.json();
+    setMembers(data.members ?? []);
+    setInvitations(data.invitations ?? []);
   }
 
   useEffect(() => {
     let active = true;
     async function fetchTeam() {
       const res = await fetch("/api/portal/team");
-      if (!active || !res.ok) return;
+      if (!active) return;
+      if (!res.ok) {
+        const data = await res.json().catch(() => ({}));
+        setLoadError(data.error ?? "Failed to load team.");
+        return;
+      }
+      setLoadError(null);
       const data = await res.json();
       setMembers(data.members ?? []);
       setInvitations(data.invitations ?? []);
@@ -138,6 +149,10 @@ export function TeamManagement() {
       </PortalCard>
 
       <PortalCard title="Members">
+        {loadError && <p className="mb-3 text-sm text-red-200">{loadError}</p>}
+        {members.length === 0 && !loadError ? (
+          <p className="text-sm text-muted">No team members yet.</p>
+        ) : (
         <ul className="divide-y divide-border">
           {members.map((m) => (
             <li
@@ -146,15 +161,19 @@ export function TeamManagement() {
             >
               <div>
                 <p className="text-sm font-medium">
-                  {m.profiles?.full_name ?? m.profiles?.email}
+                  {m.profiles?.full_name ?? m.profiles?.email ?? "Unknown member"}
                 </p>
-                <p className="text-xs text-muted">{m.profiles?.email}</p>
+                {m.profiles?.email && (
+                  <p className="text-xs text-muted">{m.profiles.email}</p>
+                )}
               </div>
               <div className="flex items-center gap-2">
                 <select
                   value={m.role}
+                  disabled={!m.profiles}
                   onChange={(e) =>
-                    updateRole(m.profiles!.id, e.target.value as "standard" | "administrator")
+                    m.profiles &&
+                    updateRole(m.profiles.id, e.target.value as "standard" | "administrator")
                   }
                   className="rounded-lg border border-border bg-surface-elevated px-2 py-1 text-sm"
                 >
@@ -163,8 +182,9 @@ export function TeamManagement() {
                 </select>
                 <button
                   type="button"
-                  onClick={() => removeMember(m.profiles!.id)}
-                  className="rounded-lg border border-border px-2 py-1 text-sm text-muted hover:text-red-200"
+                  disabled={!m.profiles}
+                  onClick={() => m.profiles && removeMember(m.profiles.id)}
+                  className="rounded-lg border border-border px-2 py-1 text-sm text-muted hover:text-red-200 disabled:opacity-50"
                 >
                   Remove
                 </button>
@@ -172,6 +192,7 @@ export function TeamManagement() {
             </li>
           ))}
         </ul>
+        )}
       </PortalCard>
 
       {invitations.length > 0 && (
