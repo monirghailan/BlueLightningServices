@@ -27,9 +27,35 @@ interface TeamManagementProps {
   currentUserId: string;
 }
 
+interface TeamData {
+  members: MemberRow[];
+  invitations: InviteRow[];
+}
+
+function MembersSkeleton() {
+  return (
+    <ul className="divide-y divide-border">
+      {Array.from({ length: 3 }).map((_, i) => (
+        <li
+          key={i}
+          className="flex flex-col gap-3 py-3 sm:flex-row sm:items-center sm:justify-between"
+        >
+          <div className="space-y-2">
+            <div className="h-4 w-32 animate-pulse rounded bg-surface-elevated" />
+            <div className="h-3 w-48 animate-pulse rounded bg-surface-elevated" />
+          </div>
+          <div className="flex gap-2">
+            <div className="h-8 w-24 animate-pulse rounded-lg bg-surface-elevated" />
+            <div className="h-8 w-24 animate-pulse rounded-lg bg-surface-elevated" />
+          </div>
+        </li>
+      ))}
+    </ul>
+  );
+}
+
 export function TeamManagement({ currentUserId }: TeamManagementProps) {
-  const [members, setMembers] = useState<MemberRow[]>([]);
-  const [invitations, setInvitations] = useState<InviteRow[]>([]);
+  const [team, setTeam] = useState<TeamData | null>(null);
   const [loadError, setLoadError] = useState<string | null>(null);
   const [email, setEmail] = useState("");
   const [role, setRole] = useState<"standard" | "administrator">("standard");
@@ -42,33 +68,19 @@ export function TeamManagement({ currentUserId }: TeamManagementProps) {
     if (!res.ok) {
       const data = await res.json().catch(() => ({}));
       setLoadError(data.error ?? "Failed to load team.");
+      setTeam((prev) => prev ?? { members: [], invitations: [] });
       return;
     }
     setLoadError(null);
     const data = await res.json();
-    setMembers(data.members ?? []);
-    setInvitations(data.invitations ?? []);
+    setTeam({
+      members: data.members ?? [],
+      invitations: data.invitations ?? [],
+    });
   }
 
   useEffect(() => {
-    let active = true;
-    async function fetchTeam() {
-      const res = await fetch("/api/portal/team");
-      if (!active) return;
-      if (!res.ok) {
-        const data = await res.json().catch(() => ({}));
-        setLoadError(data.error ?? "Failed to load team.");
-        return;
-      }
-      setLoadError(null);
-      const data = await res.json();
-      setMembers(data.members ?? []);
-      setInvitations(data.invitations ?? []);
-    }
-    void fetchTeam();
-    return () => {
-      active = false;
-    };
+    void load();
   }, []);
 
   async function invite(e: React.FormEvent) {
@@ -117,6 +129,9 @@ export function TeamManagement({ currentUserId }: TeamManagementProps) {
     await load();
   }
 
+  const members = team?.members ?? [];
+  const invitations = team?.invitations ?? [];
+
   return (
     <div className="space-y-6">
       <PortalCard title="Team" description="Invite users and manage roles.">
@@ -164,7 +179,9 @@ export function TeamManagement({ currentUserId }: TeamManagementProps) {
 
       <PortalCard title="Members">
         {loadError && <p className="mb-3 text-sm text-red-200">{loadError}</p>}
-        {members.length === 0 && !loadError ? (
+        {!team ? (
+          <MembersSkeleton />
+        ) : members.length === 0 ? (
           <p className="text-sm text-muted">No team members yet.</p>
         ) : (
         <ul className="divide-y divide-border">
