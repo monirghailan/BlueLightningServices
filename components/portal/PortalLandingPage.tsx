@@ -12,10 +12,10 @@ import { defaultTransition, fadeUp, staggerContainer } from "@/lib/animations";
 
 export function PortalLandingPage() {
   return (
-    <SnapScrollRoot>
+    <SnapScrollRoot portal>
       <SnapSection>
         <section className="portal-snap-hero gradient-mesh relative overflow-x-clip px-4 sm:px-6">
-          <div className="mx-auto grid w-full max-w-6xl items-start gap-10 lg:grid-cols-[minmax(0,1.05fr)_minmax(0,0.95fr)] lg:gap-12">
+          <div className="mx-auto grid w-full max-w-6xl items-center gap-10 lg:grid-cols-[minmax(0,1.05fr)_minmax(0,0.95fr)] lg:gap-12">
             <motion.div
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
@@ -60,7 +60,7 @@ export function PortalLandingPage() {
       </SnapSection>
 
       <SnapSection>
-        <section className="gradient-mesh px-4 sm:px-6">
+        <section className="portal-snap-panel-top gradient-mesh px-4 sm:px-6">
           <motion.div
             initial={{ opacity: 0, y: 24 }}
             whileInView={{ opacity: 1, y: 0 }}
@@ -74,7 +74,7 @@ export function PortalLandingPage() {
       </SnapSection>
 
       <SnapSection>
-        <section className="border-y border-border bg-surface px-4 sm:px-6">
+        <section className="portal-snap-panel-center border-y border-border bg-surface px-4 sm:px-6">
           <div className="mx-auto max-w-6xl">
             <motion.div
               initial="hidden"
@@ -115,7 +115,7 @@ export function PortalLandingPage() {
       </SnapSection>
 
       <SnapSection>
-        <section className="px-4 sm:px-6">
+        <section className="portal-snap-panel-center px-4 sm:px-6">
           <div className="mx-auto max-w-6xl">
             <motion.div
               initial={{ opacity: 0, y: 20 }}
@@ -153,7 +153,7 @@ export function PortalLandingPage() {
       </SnapSection>
 
       <SnapSection>
-        <section className="border-y border-border bg-surface px-4 sm:px-6">
+        <section className="portal-snap-panel-center border-y border-border bg-surface px-4 sm:px-6">
           <div className="mx-auto max-w-3xl space-y-10">
             <motion.div
               initial={{ opacity: 0, y: 20 }}

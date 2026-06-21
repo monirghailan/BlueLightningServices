@@ -74,7 +74,13 @@ function getSectionForSnapTarget(target: Element | null) {
   return target.closest(".snap-section");
 }
 
-export function SnapScrollRoot({ children }: { children: ReactNode }) {
+export function SnapScrollRoot({
+  children,
+  portal = false,
+}: {
+  children: ReactNode;
+  portal?: boolean;
+}) {
   const sectionCount = Children.count(children);
   const [showHint, setShowHint] = useState(false);
   const [settled, setSettled] = useState(true);
@@ -82,6 +88,9 @@ export function SnapScrollRoot({ children }: { children: ReactNode }) {
 
   useEffect(() => {
     document.documentElement.classList.add("snap-scroll");
+    if (portal) {
+      document.documentElement.classList.add("snap-scroll--portal");
+    }
 
     const getSections = () =>
       Array.from(document.querySelectorAll<HTMLElement>(".snap-section"));
@@ -136,13 +145,14 @@ export function SnapScrollRoot({ children }: { children: ReactNode }) {
 
     return () => {
       document.documentElement.classList.remove("snap-scroll");
+      document.documentElement.classList.remove("snap-scroll--portal");
       document.documentElement.removeEventListener("scrollsnapchange", onSnapChange);
       window.removeEventListener("scroll", onScroll);
       window.removeEventListener("resize", onResize);
       resizeObserver.disconnect();
       clearTimeout(scrollTimeout.current);
     };
-  }, [sectionCount]);
+  }, [sectionCount, portal]);
 
   return (
     <>

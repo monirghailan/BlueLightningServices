@@ -96,11 +96,45 @@ html.snap-scroll {
   min-height: calc(100svh - var(--header-offset));
 }
 
-.snap-section:not(.snap-section--last) > .portal-snap-hero {
+/* Portal landing: allow tall panels (dashboard demo) without clipping */
+html.snap-scroll.snap-scroll--portal .snap-section:not(.snap-section--last) {
+  max-height: none;
+  overflow: visible;
+}
+
+html.snap-scroll.snap-scroll--portal .snap-section:not(.snap-section--last) > section {
   flex: none;
   min-height: calc(100dvh - var(--header-offset));
   min-height: calc(100svh - var(--header-offset));
+}
+
+html.snap-scroll.snap-scroll--portal .snap-section:not(.snap-section--last) > .portal-snap-hero {
+  height: calc(100dvh - var(--header-offset));
+  height: calc(100svh - var(--header-offset));
+  max-height: calc(100dvh - var(--header-offset));
+  max-height: calc(100svh - var(--header-offset));
+  flex: none;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
   justify-content: center;
+  align-items: stretch;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+html.snap-scroll.snap-scroll--portal .snap-section:not(.snap-section--last) > .portal-snap-panel-top {
+  justify-content: flex-start;
+  max-height: none;
+  padding-top: clamp(0.75rem, 2.5vh, 1.75rem);
+  padding-bottom: clamp(0.75rem, 2.5vh, 1.75rem);
+}
+
+html.snap-scroll.snap-scroll--portal .snap-section:not(.snap-section--last) > .portal-snap-panel-center {
+  justify-content: center;
+  max-height: none;
+  padding-top: clamp(0.75rem, 2.5vh, 1.75rem);
+  padding-bottom: clamp(0.75rem, 2.5vh, 1.75rem);
 }
 
 .snap-section__last-main > section {
