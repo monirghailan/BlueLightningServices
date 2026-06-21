@@ -5,9 +5,10 @@ import { cn } from "@/lib/utils";
 interface PricingToggleProps {
   annual: boolean;
   onChange: (annual: boolean) => void;
+  savingsLabel?: string;
 }
 
-export function PricingToggle({ annual, onChange }: PricingToggleProps) {
+export function PricingToggle({ annual, onChange, savingsLabel }: PricingToggleProps) {
   return (
     <div className="inline-flex items-center gap-3 rounded-full border border-border bg-surface p-1">
       <button
@@ -33,9 +34,11 @@ export function PricingToggle({ annual, onChange }: PricingToggleProps) {
         )}
       >
         Annual
-        <span className="rounded-full bg-bolt-glow/20 px-2 py-0.5 text-xs text-bolt-outline">
-          Save £6,000
-        </span>
+        {savingsLabel && (
+          <span className="rounded-full bg-bolt-glow/20 px-2 py-0.5 text-xs text-bolt-outline">
+            {savingsLabel}
+          </span>
+        )}
       </button>
     </div>
   );

@@ -6,6 +6,7 @@ import { useEffect, useState } from "react";
 import { CircleDot, Menu, X } from "lucide-react";
 import { LogoMark } from "@/components/logo/LogoMark";
 import { Button } from "@/components/ui/Button";
+import { CurrencySwitcher } from "@/components/ui/CurrencySwitcher";
 import { navLinks } from "@/lib/content";
 import { cn } from "@/lib/utils";
 
@@ -78,6 +79,7 @@ export function Header() {
           </nav>
 
           <div className="ml-auto flex items-center gap-1.5">
+            <CurrencySwitcher className="hidden sm:inline-flex" />
             <Button
               href="/contact"
               size="sm"
@@ -142,6 +144,9 @@ export function Header() {
               >
                 Portal
               </Link>
+              <div className="px-3 py-2">
+                <CurrencySwitcher />
+              </div>
               <Link
                 href="/contact"
                 onClick={closeMenu}

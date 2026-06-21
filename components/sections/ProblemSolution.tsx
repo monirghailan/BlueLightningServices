@@ -2,9 +2,19 @@
 
 import { motion } from "framer-motion";
 import { Users, Zap } from "lucide-react";
+import { useCurrency } from "@/components/providers/CurrencyProvider";
 import { fadeUp, staggerContainer, defaultTransition } from "@/lib/animations";
 
 export function ProblemSolution() {
+  const { prices, format, isReady } = useCurrency();
+
+  const inHouseCost = isReady
+    ? format.formatCompactRange(prices.inHouseMin, prices.inHouseMax)
+    : null;
+  const monthlyPrice = isReady
+    ? format.formatMoneyPerMonth(prices.annualEquivalent)
+    : null;
+
   return (
     <section className="problem-section border-t border-white/[0.06] px-4 pt-5 sm:px-6 sm:pt-6 lg:pt-8">
       <div className="mx-auto w-full min-w-0 max-w-6xl">
@@ -30,7 +40,9 @@ export function ProblemSolution() {
               Your Salesforce team is expensive, slow, and hard to retain
             </h2>
             <ul className="mt-1.5 space-y-0.5 text-center leading-snug text-muted sm:mt-4 sm:space-y-2 lg:text-base">
-              <li>• 1–4 FTEs costing £100K–£200K+ per year</li>
+              <li>
+                • 1–4 FTEs costing {inHouseCost ?? "—"} per year
+              </li>
               <li>• Growing backlog and delayed releases</li>
               <li>• Key-person risk when admins or devs leave</li>
               <li>• Can&apos;t hire senior architects fast enough</li>
@@ -53,7 +65,7 @@ export function ProblemSolution() {
               replaces your entire dev function
             </h2>
             <ul className="mt-1.5 space-y-0.5 text-center leading-snug text-muted sm:mt-4 sm:space-y-2 lg:text-base">
-              <li>• Fixed capacity from £3,499/mo — not hourly T&M</li>
+              <li>• Fixed capacity from {monthlyPrice ?? "—"} — not hourly T&M</li>
               <li>• Decades of Salesforce expertise + agentic AI delivery</li>
               <li>• Weekly releases with architectural guardrails</li>
               <li>• Full lifecycle: build, ship, maintain, optimize</li>

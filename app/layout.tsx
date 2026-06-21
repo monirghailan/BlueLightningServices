@@ -3,6 +3,7 @@ import { Analytics } from "@vercel/analytics/next";
 import { Geist, Geist_Mono } from "next/font/google";
 import { ConditionalFooter } from "@/components/layout/ConditionalFooter";
 import { ConditionalHeader } from "@/components/layout/ConditionalHeader";
+import { ClientProviders } from "@/components/providers/ClientProviders";
 import { ScrollToTop } from "@/components/layout/ScrollToTop";
 import { site } from "@/lib/content";
 import "./globals.css";
@@ -48,10 +49,12 @@ export default function RootLayout({
   return (
     <html lang="en" className={`${geistSans.variable} ${geistMono.variable} h-full`}>
       <body className="flex min-h-full flex-col antialiased">
-        <ScrollToTop />
-        <ConditionalHeader />
-        <main className="min-w-0 flex-1 overflow-x-clip">{children}</main>
-        <ConditionalFooter />
+        <ClientProviders>
+          <ScrollToTop />
+          <ConditionalHeader />
+          <main className="min-w-0 flex-1 overflow-x-clip">{children}</main>
+          <ConditionalFooter />
+        </ClientProviders>
         <Analytics />
         <script
           type="application/ld+json"

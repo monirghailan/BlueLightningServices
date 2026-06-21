@@ -3,10 +3,16 @@
 import { motion } from "framer-motion";
 import { LogoHero } from "@/components/logo/LogoHero";
 import { Button } from "@/components/ui/Button";
+import { useCurrency } from "@/components/providers/CurrencyProvider";
 import { hero } from "@/lib/content";
 import { defaultTransition } from "@/lib/animations";
 
 export function Hero() {
+  const { prices, format, isReady } = useCurrency();
+  const ctaPrimary = isReady
+    ? `Get started — from ${format.formatMoneyPerMonth(prices.annualEquivalent)}`
+    : hero.ctaPrimary;
+
   return (
     <section className="hero-section gradient-mesh relative min-h-0 min-w-0 overflow-x-clip px-4 sm:px-6">
       <div className="mx-auto grid w-full min-w-0 max-w-6xl flex-1 items-center gap-4 sm:gap-6 lg:grid-cols-[minmax(0,1.15fr)_minmax(0,0.85fr)] lg:gap-8">
@@ -39,7 +45,7 @@ export function Hero() {
           </p>
           <div className="mt-2 flex flex-col items-center gap-2 sm:mt-5 sm:gap-3 sm:flex-row sm:justify-center lg:justify-start xl:mt-6">
             <Button href="/contact" size="lg" className="w-full max-w-sm sm:w-auto">
-              {hero.ctaPrimary}
+              {ctaPrimary}
             </Button>
             <Button
               href="/pricing"

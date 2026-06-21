@@ -51,6 +51,13 @@ export default function PrivacyPage() {
           </section>
 
           <section>
+            <h2 className="text-xl font-semibold text-foreground">Pricing currency preference</h2>
+            <p className="mt-2">
+              If you choose a pricing region (UK, EU, or US) using the currency selector on our website, we store that choice in your browser&apos;s local storage so prices stay in your selected currency on future visits. We only save this preference when you select a region yourself — we do not store an auto-detected default. This data stays on your device and is not sent to our servers.
+            </p>
+          </section>
+
+          <section>
             <h2 className="text-xl font-semibold text-foreground">Your rights</h2>
             <p className="mt-2">
               You may request access to, correction of, or deletion of your personal data at any time by contacting us at{" "}

@@ -6,12 +6,14 @@ import Link from "next/link";
 import { Check } from "lucide-react";
 import { Button } from "@/components/ui/Button";
 import { PricingToggle } from "@/components/ui/PricingToggle";
-import { planIncludes, pricing } from "@/lib/content";
+import { useCurrency } from "@/components/providers/CurrencyProvider";
+import { planIncludes } from "@/lib/content";
 import { fadeUp, staggerContainer, defaultTransition } from "@/lib/animations";
 
 export function PricingSection({ compact = false }: { compact?: boolean }) {
   const [annual, setAnnual] = useState(true);
-  const price = annual ? pricing.annualEquivalent : pricing.monthly;
+  const { prices, format, isReady } = useCurrency();
+  const price = annual ? prices.annualEquivalent : prices.monthly;
 
   return (
     <section className="px-6 py-20" id="pricing">
@@ -32,7 +34,13 @@ export function PricingSection({ compact = false }: { compact?: boolean }) {
               </p>
             )}
             <div className="mt-8 flex justify-center">
-              <PricingToggle annual={annual} onChange={setAnnual} />
+              <PricingToggle
+                annual={annual}
+                onChange={setAnnual}
+                savingsLabel={
+                  isReady ? format.formatAnnualSavings(prices.annualSavings) : undefined
+                }
+              />
             </div>
           </motion.div>
 
@@ -46,20 +54,29 @@ export function PricingSection({ compact = false }: { compact?: boolean }) {
                 Salesforce Engineering Partner
               </p>
               <div className="mt-4 flex items-baseline justify-center gap-1">
-                <span className="text-5xl font-bold">
-                  {pricing.currency}
-                  {price.toLocaleString("en-GB")}
-                </span>
-                <span className="text-muted">/mo</span>
+                {isReady ? (
+                  <>
+                    <span className="text-5xl font-bold">
+                      {format.formatMoney(price)}
+                    </span>
+                    <span className="text-muted">/mo</span>
+                  </>
+                ) : (
+                  <span className="inline-block h-12 w-40 animate-pulse rounded bg-white/10" />
+                )}
               </div>
               <p className="mt-2 text-sm text-muted">
-                {annual
-                  ? `£${pricing.annualUpfront.toLocaleString("en-GB")} billed once per year · 12-month commitment`
-                  : "12-month contract · billed monthly"}
+                {isReady ? (
+                  annual
+                    ? format.formatAnnualBilling(prices.annualUpfront)
+                    : "12-month contract · billed monthly"
+                ) : (
+                  <span className="inline-block h-4 w-56 animate-pulse rounded bg-white/10" />
+                )}
               </p>
-              {annual && (
+              {annual && isReady && (
                 <span className="mt-3 inline-block rounded-full bg-bolt-glow/15 px-3 py-1 text-xs font-medium text-bolt-outline">
-                  Save £{pricing.annualSavings.toLocaleString("en-GB")}/year
+                  {format.formatAnnualSavings(prices.annualSavings)}
                 </span>
               )}
               <ul className="mt-8 space-y-3 text-left text-sm text-muted">
@@ -97,9 +114,17 @@ export function PricingSection({ compact = false }: { compact?: boolean }) {
                 <tbody className="divide-y divide-border">
                   <tr>
                     <td className="px-6 py-4 text-muted">Annual cost</td>
-                    <td className="px-6 py-4">£100K–£200K+</td>
+                    <td className="px-6 py-4">
+                      {isReady
+                        ? format.formatCompactRange(prices.inHouseMin, prices.inHouseMax)
+                        : "—"}
+                    </td>
                     <td className="px-6 py-4 text-bolt-glow">
-                      £{annual ? pricing.annualUpfront.toLocaleString("en-GB") : (pricing.monthly * 12).toLocaleString("en-GB")}
+                      {isReady
+                        ? format.formatMoney(
+                            annual ? prices.annualUpfront : prices.monthly * 12,
+                          )
+                        : "—"}
                     </td>
                   </tr>
                   <tr>

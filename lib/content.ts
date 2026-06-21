@@ -11,21 +11,12 @@ export const icp = {
   buyer: "VP Engineering, CTO, COO, or Head of Business Systems",
 } as const;
 
-export const pricing = {
-  monthly: 3999,
-  annualEquivalent: 3499,
-  annualUpfront: 41988,
-  annualSavings: 6000,
-  currency: "£",
-  contractMonths: 12,
-} as const;
-
 export const hero = {
   headline: "Your entire Salesforce development team — without the headcount.",
   tagline: site.tagline,
   subhead:
     "Decades of Salesforce mastery. One partner that builds, ships, and maintains your org.",
-  ctaPrimary: `Get started — from ${pricing.currency}${pricing.annualEquivalent.toLocaleString("en-GB")}/mo`,
+  ctaPrimary: "Get started",
   ctaSecondary: "See pricing",
 } as const;
 
@@ -126,16 +117,6 @@ export const planIncludes = [
 ] as const;
 
 export const faqs = [
-  {
-    question: "What's included in £3,999/month?",
-    answer:
-      "Full Salesforce engineering capacity: development, admin ops, releases, and ongoing maintenance. See our Services page for capability detail.",
-  },
-  {
-    question: "Is there a minimum contract?",
-    answer:
-      "Yes — a 12-month annual contract. Pay monthly at £3,999/mo, or £41,988 upfront for the year (£3,499/mo equivalent — save £6,000).",
-  },
   {
     question: "Are you replacing our admin too?",
     answer:

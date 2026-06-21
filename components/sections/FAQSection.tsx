@@ -1,10 +1,21 @@
 "use client";
 
+import { useMemo } from "react";
 import { motion } from "framer-motion";
-import { faqs } from "@/lib/content";
+import { useCurrency } from "@/components/providers/CurrencyProvider";
+import { faqs as staticFaqs } from "@/lib/content";
+import { getPricingFaqs } from "@/lib/pricing/faqs";
 import { fadeUp, staggerContainer, defaultTransition } from "@/lib/animations";
 
 export function FAQSection() {
+  const { prices, format, isReady } = useCurrency();
+
+  const faqs = useMemo(() => {
+    if (!isReady) return staticFaqs;
+    const pricingFaqs = getPricingFaqs(prices, format);
+    return [...pricingFaqs, ...staticFaqs];
+  }, [format, isReady, prices]);
+
   return (
     <section className="px-6 py-20">
       <div className="mx-auto max-w-3xl">
