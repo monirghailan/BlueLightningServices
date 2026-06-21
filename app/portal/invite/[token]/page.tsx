@@ -3,6 +3,10 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
+import {
+  PortalAuthShell,
+  PortalBackToWebsiteLink,
+} from "@/components/portal/PortalAuthShell";
 import { site } from "@/lib/content";
 
 export default function AcceptInvitePage({
@@ -69,8 +73,7 @@ export default function AcceptInvitePage({
   }
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-background px-4">
-      <div className="w-full max-w-md rounded-2xl border border-border bg-surface p-8">
+    <PortalAuthShell>
         <p className="text-xs uppercase tracking-wider text-muted">{site.name}</p>
         <h1 className="mt-2 text-2xl font-semibold">Accept invitation</h1>
 
@@ -110,13 +113,14 @@ export default function AcceptInvitePage({
           </button>
         </form>
 
-        <p className="mt-6 text-center text-sm text-muted">
+        <PortalBackToWebsiteLink />
+
+        <p className="mt-2 text-center text-sm text-muted">
           Already have an account?{" "}
           <Link href="/portal/login" className="text-bolt-outline hover:underline">
             Sign in
           </Link>
         </p>
-      </div>
-    </div>
+    </PortalAuthShell>
   );
 }

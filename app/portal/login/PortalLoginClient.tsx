@@ -3,6 +3,10 @@
 import { useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
+import {
+  PortalAuthShell,
+  PortalBackToWebsiteLink,
+} from "@/components/portal/PortalAuthShell";
 import { site } from "@/lib/content";
 
 export default function PortalLoginPage() {
@@ -49,8 +53,7 @@ export default function PortalLoginPage() {
   }
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-background px-4">
-      <div className="w-full max-w-md rounded-2xl border border-border bg-surface p-8">
+    <PortalAuthShell>
         <p className="text-xs uppercase tracking-wider text-muted">{site.name}</p>
         <h1 className="mt-2 text-2xl font-semibold">Client portal</h1>
         <p className="mt-2 text-sm text-muted">Sign in with your invited account.</p>
@@ -93,13 +96,14 @@ export default function PortalLoginPage() {
           </button>
         </form>
 
-        <p className="mt-6 text-center text-xs text-muted">
+        <PortalBackToWebsiteLink />
+
+        <p className="mt-2 text-center text-xs text-muted">
           Need access?{" "}
           <Link href="/contact" className="text-bolt-outline hover:underline">
             Contact {site.name}
           </Link>
         </p>
-      </div>
-    </div>
+    </PortalAuthShell>
   );
 }
