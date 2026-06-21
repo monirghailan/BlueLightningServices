@@ -109,12 +109,11 @@ html.snap-scroll.snap-scroll--portal .snap-section:not(.snap-section--last) > se
 }
 
 html.snap-scroll.snap-scroll--portal .snap-section:not(.snap-section--last) > .portal-snap-hero {
-  height: calc(100dvh - var(--header-offset));
-  height: calc(100svh - var(--header-offset));
-  max-height: calc(100dvh - var(--header-offset));
-  max-height: calc(100svh - var(--header-offset));
+  min-height: calc(100dvh - var(--header-offset));
+  min-height: calc(100svh - var(--header-offset));
+  height: auto;
+  max-height: none;
   flex: none;
-  min-height: 0;
   display: flex;
   flex-direction: column;
   justify-content: center;
@@ -486,6 +485,25 @@ body {
     padding-top: clamp(0.75rem, 2.5dvh, 1.25rem);
     padding-bottom: 3rem;
   }
+
+  /* Portal landing: stacked layout — let hero + demo grow instead of clipping */
+  html.snap-scroll.snap-scroll--portal .snap-section:not(.snap-section--last) {
+    min-height: auto;
+  }
+
+  html.snap-scroll.snap-scroll--portal .snap-section:not(.snap-section--last) > section {
+    min-height: auto;
+    height: auto;
+    max-height: none;
+    justify-content: flex-start;
+  }
+
+  html.snap-scroll.snap-scroll--portal .snap-section:not(.snap-section--last) > .portal-snap-hero {
+    min-height: auto;
+    justify-content: flex-start;
+    padding-top: clamp(0.75rem, 2.5dvh, 1.25rem);
+    padding-bottom: clamp(2rem, 4dvh, 3.5rem);
+  }
 }
 
 .problem-section {
@@ -495,14 +513,78 @@ body {
   justify-content: center;
 }
 
-/* Scale first-screen content on short desktop viewports only — not phones */
-@media (min-width: 1024px) and (max-height: 860px) {
+/* Short desktop viewports: disable snap + viewport locks so content can grow naturally */
+@media (min-width: 1024px) and (max-height: 960px) {
   :root {
     --fold-gap: clamp(0.75rem, 2dvh, 1.25rem);
   }
 
+  html.snap-scroll {
+    scroll-snap-type: none;
+    scroll-padding-bottom: max(3.5rem, env(safe-area-inset-bottom, 0px));
+  }
+
+  .snap-section,
+  .snap-section__end,
+  .snap-section__last-screen,
+  .snap-section__last-end {
+    scroll-snap-align: none;
+    scroll-snap-stop: normal;
+  }
+
+  .snap-section:not(.snap-section--last) {
+    max-height: none;
+    overflow: visible;
+    min-height: auto;
+  }
+
+  .snap-section:not(.snap-section--last) > section {
+    flex: none;
+    min-height: auto;
+    justify-content: flex-start;
+    padding-top: clamp(0.75rem, 2.5dvh, 1.25rem);
+    padding-bottom: clamp(2rem, 4dvh, 3rem);
+  }
+
+  .snap-section:not(.snap-section--last) > .above-fold {
+    flex: none;
+    min-height: auto;
+    max-height: none;
+    overflow: visible;
+    grid-template-rows: auto auto;
+  }
+
+  .snap-section__last-screen {
+    min-height: auto;
+  }
+
+  .snap-section__last-main {
+    flex: none;
+    justify-content: flex-start;
+  }
+
+  .snap-section__last-main > section {
+    flex: none;
+    justify-content: flex-start;
+    padding-top: clamp(0.75rem, 2.5dvh, 1.25rem);
+    padding-bottom: clamp(0.75rem, 2.5dvh, 1.25rem);
+  }
+
   .above-fold {
-    grid-template-rows: minmax(0, 1.08fr) minmax(0, 0.92fr);
+    grid-template-rows: auto auto;
+    min-height: auto;
+    max-height: none;
+    overflow: visible;
+    padding-bottom: clamp(1.5rem, 4dvh, 2.5rem);
+  }
+
+  .above-fold .hero-section {
+    justify-content: flex-start;
+  }
+
+  .above-fold .problem-section {
+    overflow-y: visible;
+    flex-shrink: 0;
   }
 
   .hero-section h1 {
@@ -525,6 +607,24 @@ body {
   .problem-section li {
     font-size: 0.8125rem;
   }
+
+  html.snap-scroll.snap-scroll--portal .snap-section:not(.snap-section--last) {
+    min-height: auto;
+  }
+
+  html.snap-scroll.snap-scroll--portal .snap-section:not(.snap-section--last) > section {
+    min-height: auto;
+    height: auto;
+    max-height: none;
+    justify-content: flex-start;
+  }
+
+  html.snap-scroll.snap-scroll--portal .snap-section:not(.snap-section--last) > .portal-snap-hero {
+    min-height: auto;
+    justify-content: flex-start;
+    padding-top: clamp(0.75rem, 2.5dvh, 1.25rem);
+    padding-bottom: clamp(2rem, 4dvh, 3.5rem);
+  }
 }
 
 @media (min-width: 1024px) and (max-height: 700px) {
@@ -539,7 +639,7 @@ body {
 }
 
 /* Compact snap panels on shorter desktop viewports */
-@media (min-width: 1024px) and (max-height: 860px) {
+@media (min-width: 1024px) and (max-height: 960px) {
   .snap-section:not(.snap-section--last) > section h2 {
     font-size: 1.75rem;
   }

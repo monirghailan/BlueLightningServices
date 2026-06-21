@@ -79,19 +79,21 @@ export function Header() {
           </nav>
 
           <div className="ml-auto flex items-center gap-1.5">
-            <CurrencySwitcher className="hidden sm:inline-flex" />
-            <Button
-              href="/contact"
-              size="sm"
-              className="hidden !px-3 !py-1.5 !text-xs sm:inline-flex"
-            >
-              Get started
-            </Button>
+            <div className="hidden items-center gap-1.5 sm:flex">
+              <CurrencySwitcher />
+              <Button
+                href="/contact"
+                size="sm"
+                className="!px-3 !py-1.5 !text-xs whitespace-nowrap"
+              >
+                Get started
+              </Button>
+            </div>
             <Button
               href="/portal"
               variant="portal"
               size="sm"
-              className="hidden !px-3 !py-1.5 !text-xs sm:inline-flex"
+              className="!px-2.5 !py-1.5 !text-xs whitespace-nowrap sm:!px-3"
             >
               <CircleDot size={13} strokeWidth={2.5} aria-hidden />
               Portal

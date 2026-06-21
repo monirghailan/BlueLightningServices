@@ -131,7 +131,24 @@ export function SnapScrollRoot({
       scrollTimeout.current = setTimeout(syncActive, 180);
     };
 
-    const onResize = () => syncHint();
+    const onResize = () => {
+      syncHint();
+      // After viewport shrink, snap can leave scroll between sections — re-align once settled
+      clearTimeout(scrollTimeout.current);
+      scrollTimeout.current = setTimeout(() => {
+        if (window.matchMedia("(max-width: 1023px), (max-height: 960px)").matches) {
+          syncActive();
+          return;
+        }
+        const sections = getSections();
+        const index = findActiveSectionIndex(sections);
+        const section = sections[index] as HTMLElement | undefined;
+        if (section) {
+          section.scrollIntoView({ block: "start", behavior: "instant" });
+        }
+        syncActive();
+      }, 100);
+    };
 
     const resizeObserver = new ResizeObserver(() => syncHint());
     for (const section of getSections()) {
