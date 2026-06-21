@@ -7,7 +7,7 @@ import { cn } from "@/lib/utils";
 import type { MemberRole } from "@/lib/supabase/database.types";
 
 const nav = [
-  { href: "/portal", label: "Dashboard", exact: true },
+  { href: "/portal/dashboard", label: "Dashboard", exact: true },
   { href: "/portal/assistant", label: "Assistant" },
 ];
 
@@ -22,7 +22,7 @@ export function PortalShell({ children, orgName, role }: PortalShellProps) {
   const router = useRouter();
 
   const visibleNav = nav.filter(
-    (item) => item.href !== "/portal" || role === "administrator"
+    (item) => item.href !== "/portal/dashboard" || role === "administrator"
   );
 
   async function signOut() {

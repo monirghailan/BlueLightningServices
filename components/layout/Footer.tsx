@@ -23,6 +23,9 @@ export function Footer({ embedded = false }: { embedded?: boolean }) {
                   {link.label}
                 </Link>
               ))}
+              <Link href="/portal" className="text-sm text-muted hover:text-foreground">
+                Client portal
+              </Link>
             </nav>
           </div>
           <div>

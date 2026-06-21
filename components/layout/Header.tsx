@@ -130,6 +130,25 @@ export function Header() {
                   </Link>
                 );
               })}
+              <Link
+                href="/portal"
+                onClick={closeMenu}
+                className={cn(
+                  "rounded-lg px-3 py-2 text-sm transition-colors",
+                  pathname === "/portal"
+                    ? "bg-white/10 text-foreground"
+                    : "text-muted hover:bg-white/[0.05] hover:text-foreground"
+                )}
+              >
+                Portal
+              </Link>
+              <Link
+                href="/contact"
+                onClick={closeMenu}
+                className="mt-1 rounded-lg bg-bolt-fill px-3 py-2 text-center text-sm font-medium text-white"
+              >
+                Get started
+              </Link>
             </nav>
           </div>
         </div>

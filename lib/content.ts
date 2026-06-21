@@ -165,3 +165,136 @@ export const navLinks = [
   { href: "/pricing", label: "Pricing" },
   { href: "/contact", label: "Contact" },
 ] as const;
+
+export const portalLanding = {
+  badge: "Included free with your Blue Lightning partnership",
+  headline: "Ask your org anything. Get an answer in seconds.",
+  subhead:
+    "The client portal puts an AI assistant, living documentation, and delivery visibility in one place — free for every Blue Lightning client.",
+  ctaPrimary: "Sign in to your portal",
+  ctaSecondary: "Not a client yet?",
+  demoDisclaimer:
+    "Example conversation. Your portal is grounded in your organization's own guide.",
+  stopDoing: [
+    {
+      title: "Answer the same Salesforce questions",
+      description:
+        "The Assistant gives plain-English answers grounded in your org guide, 24/7 — so reps and managers stop pinging admins and team leads.",
+      savings: "Saves hours per week of interrupt-driven support.",
+    },
+    {
+      title: "Maintain documentation",
+      description:
+        "Blue Lightning writes, updates, and indexes your org guide. Users get answers without hunting a wiki or outdated deck.",
+      savings: "Saves BA or enablement headcount — or expensive doc projects.",
+    },
+    {
+      title: "Chase delivery status",
+      description:
+        "Submit tickets, prioritize your backlog, and see live metrics. We manage execution — you stay in control of priorities.",
+      savings: "Saves PM overhead and weekly status-meeting time.",
+    },
+  ] as const,
+  features: [
+    {
+      title: "Portal Assistant",
+      audience: "All users",
+      description: "Instant answers in plain English, tailored to each user's role.",
+    },
+    {
+      title: "Living org guide",
+      audience: "All users",
+      description: "Always-current documentation — maintained by Blue Lightning, not your team.",
+    },
+    {
+      title: "Ticket submission",
+      audience: "Administrators",
+      description: "One place to request work. New items land in your prioritized backlog.",
+    },
+    {
+      title: "Backlog prioritization",
+      audience: "Administrators",
+      description: "You decide what ships first. We deliver on a fixed weekly cadence.",
+    },
+    {
+      title: "Delivery dashboard",
+      audience: "Administrators",
+      description: "Open and closed metrics, status mix, and average time to close.",
+    },
+    {
+      title: "Team & personas",
+      audience: "Administrators",
+      description: "Invite colleagues and set roles so the Assistant shows the right guidance.",
+    },
+  ] as const,
+  roi: {
+    headline: "Time your team gets back",
+    example:
+      "50 Salesforce users × 2 \"how do I\" questions per week × 15 minutes each ≈ 25 hours per week of interrupt-driven support. The Assistant handles the repeatable majority instantly.",
+    footnote:
+      "Actual savings depend on org size and how much tier-1 support you currently absorb in-house.",
+  },
+  included: {
+    headline: "No per-seat fee. No setup fee.",
+    description:
+      "Every Blue Lightning client gets the portal at no extra cost — Assistant, documentation, tickets, and delivery visibility included in your partnership.",
+  },
+  finalCta: {
+    headline: "Ready to sign in?",
+    subhead: "Use the email and password from your invitation. Need access? Contact us.",
+    ctaPrimary: "Sign in to your portal",
+    ctaSecondary: "Contact us",
+  },
+  demo: {
+    persona: "Sales rep",
+    defaultScenarioIndex: 2,
+    scenarios: [
+      {
+        question: "How do I create a lead?",
+        answer:
+          "From the **Leads** tab, click **New**. Enter the person's name, company, and email — at minimum. Set **Lead Source** so reporting stays accurate, then click **Save**.\n\nIf the company already exists as an account, search first to avoid duplicates. The org guide lists required fields for your team.",
+        source: "how-to/create-a-lead.md",
+      },
+      {
+        question: "How do I log a case?",
+        answer:
+          "Open the **Cases** tab and click **New**. Select the account or contact the case is for, enter a subject and description, and set **Status** to New.\n\nChoose the **Type** and **Reason** that best match the issue — your service team uses these for routing. Click **Save** and the case owner is assigned automatically.",
+        source: "how-to/log-a-case.md",
+      },
+      {
+        question: "How do I convert a lead?",
+        answer:
+          "Open the lead record and confirm the details are complete. Before you can convert, **Country**, **Website**, and **Number of Employees** must be filled in — conversion is blocked until all three are present.\n\nOnce those fields are set, click **Convert**. Choose an existing account or create a new one, add contact details if prompted, and optionally create an opportunity. Click **Convert** to finish.",
+        source: "processes/lead-to-opportunity.md",
+      },
+    ],
+  },
+  dashboardDemo: {
+    orgName: "Acme Corp",
+    disclaimer: "Example dashboard. Your portal shows live metrics from your organization's tickets.",
+    stats: [
+      { label: "Open tickets", value: 7, unit: "tickets" },
+      { label: "Oldest open ticket", value: 3, unit: "days", hint: "KAN-142: Quote approval flow error" },
+      { label: "Closed this month", value: 14, unit: "tickets" },
+      { label: "Avg time to close this month", value: "1.8", unit: "business days" },
+    ],
+    byStatus: [
+      { status: "To Do", count: 4 },
+      { status: "In Progress", count: 3 },
+      { status: "In Review", count: 2 },
+      { status: "Done", count: 14 },
+    ],
+    byType: {
+      Feature: 8,
+      Bug: 5,
+      Request: 6,
+    },
+    backlog: [
+      { key: "KAN-201", summary: "Add discount field to quote screen", type: "Feature", priority: "High" },
+      { key: "KAN-198", summary: "Fix duplicate contact trigger", type: "Bug", priority: "Medium" },
+      { key: "KAN-195", summary: "Integrate billing API webhook", type: "Feature", priority: "Medium" },
+    ],
+  },
+  loginReminder:
+    "Your portal includes the Assistant, ticket management, and live delivery metrics — included with your partnership.",
+} as const;

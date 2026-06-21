@@ -68,7 +68,7 @@ export async function requirePortalAdmin(): Promise<PortalSession> {
 }
 
 export function getPortalHomePath(role: MemberRole): string {
-  return role === "administrator" ? "/portal" : "/portal/assistant";
+  return role === "administrator" ? "/portal/dashboard" : "/portal/assistant";
 }
 
 export class PortalAuthError extends Error {

@@ -70,7 +70,7 @@ export default function TicketDetailPage({
     return (
       <div className="space-y-4">
         <p className="text-red-200">{error}</p>
-        <Link href="/portal" className="text-sm text-bolt-outline hover:underline">
+        <Link href="/portal/dashboard" className="text-sm text-bolt-outline hover:underline">
           ← Back to dashboard
         </Link>
       </div>
@@ -82,7 +82,7 @@ export default function TicketDetailPage({
   return (
     <div className="space-y-6">
       <div>
-        <Link href="/portal" className="text-sm text-muted hover:text-foreground">
+        <Link href="/portal/dashboard" className="text-sm text-muted hover:text-foreground">
           ← Back to dashboard
         </Link>
         <div className="mt-3 flex flex-wrap items-center gap-3">

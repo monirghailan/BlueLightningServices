@@ -15,7 +15,7 @@ const nextConfig: NextConfig = {
       },
       {
         source: "/portal/tickets",
-        destination: "/portal",
+        destination: "/portal/dashboard",
         permanent: true,
       },
     ];

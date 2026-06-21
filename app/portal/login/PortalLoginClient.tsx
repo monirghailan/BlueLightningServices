@@ -7,7 +7,7 @@ import {
   PortalAuthShell,
   PortalBackToWebsiteLink,
 } from "@/components/portal/PortalAuthShell";
-import { site } from "@/lib/content";
+import { site, portalLanding } from "@/lib/content";
 
 export default function PortalLoginPage() {
   const router = useRouter();
@@ -56,7 +56,14 @@ export default function PortalLoginPage() {
     <PortalAuthShell>
         <p className="text-xs uppercase tracking-wider text-muted">{site.name}</p>
         <h1 className="mt-2 text-2xl font-semibold">Client portal</h1>
-        <p className="mt-2 text-sm text-muted">Sign in with your invited account.</p>
+        <p className="mt-2 text-sm text-muted">{portalLanding.loginReminder}</p>
+        <p className="mt-1 text-sm text-muted">
+          <Link href="/portal" className="text-bolt-outline hover:underline">
+            Learn what&apos;s included
+          </Link>
+          {" · "}
+          Sign in with your invited account.
+        </p>
 
         <form onSubmit={onSubmit} className="mt-8 space-y-4">
           {error && (

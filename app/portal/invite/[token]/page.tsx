@@ -66,7 +66,7 @@ export default function AcceptInvitePage({
       .then((authData) => {
         const home =
           authData.home ??
-          (invite?.role === "administrator" ? "/portal" : "/portal/assistant");
+          (invite?.role === "administrator" ? "/portal/dashboard" : "/portal/assistant");
         router.push(home);
         router.refresh();
       });

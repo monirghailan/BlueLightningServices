@@ -33,11 +33,13 @@ export async function updateSession(request: NextRequest) {
   const isLogin = pathname === "/portal/login";
   const isInvite = pathname.startsWith("/portal/invite");
   const isAuthCallback = pathname.startsWith("/portal/auth/callback");
+  const isPublicLanding = pathname === "/portal";
   const isProtected =
     pathname.startsWith("/portal") &&
     !isLogin &&
     !isInvite &&
-    !isAuthCallback;
+    !isAuthCallback &&
+    !isPublicLanding;
 
   if (isProtected && !user) {
     const url = request.nextUrl.clone();
