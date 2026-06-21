@@ -1,8 +1,16 @@
-import { getPortalSession } from "@/lib/portal/auth";
 import { AssistantChat } from "@/components/portal/AssistantChat";
+import { getCachedOrgFaqQuestions } from "@/lib/assistant/faq";
+import { getAuthenticatedSupabase, getPortalSession } from "@/lib/portal/auth";
 
 export default async function AssistantPage() {
   const session = await getPortalSession();
+  const suggestedQuestions =
+    session?.organization.assistant_enabled && session.organization.github_repo_url
+      ? await getCachedOrgFaqQuestions(
+          session.organization,
+          await getAuthenticatedSupabase()
+        )
+      : [];
 
   return (
     <div className="space-y-6">
@@ -19,6 +27,7 @@ export default async function AssistantPage() {
             assistantEnabled: session.organization.assistant_enabled,
             assistantLastIndexedAt: session.organization.assistant_last_indexed_at,
           }}
+          suggestedQuestions={suggestedQuestions}
         />
       )}
     </div>

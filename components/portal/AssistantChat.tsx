@@ -3,11 +3,7 @@
 import { useChat } from "@ai-sdk/react";
 import { DefaultChatTransport } from "ai";
 import { useEffect, useMemo, useState } from "react";
-import {
-  ASSISTANT_PERSONA_LABELS,
-  ASSISTANT_PERSONAS,
-  suggestedPromptsForPersona,
-} from "@/lib/assistant/personas";
+import { ASSISTANT_PERSONA_LABELS, ASSISTANT_PERSONAS } from "@/lib/assistant/personas";
 import type { AssistantPersona } from "@/lib/supabase/database.types";
 import type { AssistantChatMessage } from "@/lib/assistant/chat-types";
 import { AssistantMessageFeedbackBar } from "@/components/portal/AssistantMessageFeedback";
@@ -22,9 +18,10 @@ interface AssistantMeta {
 
 interface AssistantChatProps {
   initialMeta: AssistantMeta;
+  suggestedQuestions?: string[];
 }
 
-export function AssistantChat({ initialMeta }: AssistantChatProps) {
+export function AssistantChat({ initialMeta, suggestedQuestions = [] }: AssistantChatProps) {
   const [meta, setMeta] = useState<AssistantMeta>(initialMeta);
   const [personaSaving, setPersonaSaving] = useState(false);
   const [showPersonaPicker, setShowPersonaPicker] = useState(false);
@@ -113,8 +110,6 @@ export function AssistantChat({ initialMeta }: AssistantChatProps) {
     );
   }
 
-  const prompts = suggestedPromptsForPersona(meta.assistantPersona);
-
   return (
     <div className="space-y-6">
       {showPersonaPicker && (
@@ -165,19 +160,21 @@ export function AssistantChat({ initialMeta }: AssistantChatProps) {
         </button>
       </div>
 
-      <div className="flex flex-wrap gap-2">
-        {prompts.map((prompt) => (
-          <button
-            key={prompt}
-            type="button"
-            onClick={() => handleSuggestedPrompt(prompt)}
-            disabled={status !== "ready"}
-            className="rounded-full border border-border bg-surface px-3 py-1.5 text-xs text-muted hover:text-foreground"
-          >
-            {prompt}
-          </button>
-        ))}
-      </div>
+      {suggestedQuestions.length > 0 && (
+        <div className="flex flex-wrap gap-2">
+          {suggestedQuestions.map((question) => (
+            <button
+              key={question}
+              type="button"
+              onClick={() => handleSuggestedPrompt(question)}
+              disabled={status !== "ready"}
+              className="rounded-full border border-border bg-surface px-3 py-1.5 text-xs text-muted hover:text-foreground"
+            >
+              {question}
+            </button>
+          ))}
+        </div>
+      )}
 
       <div className="rounded-2xl border border-border bg-surface">
         <div className="max-h-[32rem] space-y-4 overflow-y-auto p-4">

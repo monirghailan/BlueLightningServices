@@ -40,43 +40,6 @@ export function expandPersonasForSearch(persona: AssistantPersona): string[] {
   }
 }
 
-export function suggestedPromptsForPersona(persona: AssistantPersona): string[] {
-  switch (persona) {
-    case "sales_rep":
-      return [
-        "How do I create a lead?",
-        "How do I convert a lead?",
-        "Where do I find my pipeline?",
-      ];
-    case "sales_manager":
-      return [
-        "How do I review my team's pipeline?",
-        "How do approvals work for deals?",
-        "What reports should I check weekly?",
-      ];
-    case "service_agent":
-      return [
-        "How do I log a case?",
-        "How do I escalate a case?",
-        "Where do I find our SLA guidelines?",
-      ];
-    case "service_manager":
-      return [
-        "How do I monitor team SLA performance?",
-        "How do case escalations work?",
-        "Which queues should my team work?",
-      ];
-    case "general":
-      return [
-        "How does our lead-to-close process work?",
-        "What do the main record types mean here?",
-        "Where should I go to get started in Salesforce?",
-      ];
-    default:
-      return ["How do I get started in our Salesforce org?"];
-  }
-}
-
 export function personaSystemContext(persona: AssistantPersona): string {
   switch (persona) {
     case "sales_rep":
