@@ -2,8 +2,6 @@ import { redirect } from "next/navigation";
 import { getPortalSession, requirePortalAdmin } from "@/lib/portal/auth";
 import { createClient } from "@/lib/supabase/server";
 import { Profile } from "@/components/portal/Profile";
-import { PortalCard } from "@/components/portal/PortalCard";
-import { ReindexAssistantButton } from "@/components/portal/ReindexAssistantButton";
 import { TeamManagement } from "@/components/portal/TeamManagement";
 
 export default async function SettingsPage() {
@@ -40,15 +38,6 @@ export default async function SettingsPage() {
         userEmail={session.email}
         userRole={session.role}
       />
-
-      {org.github_repo_url && (
-        <PortalCard title="Org guide index">
-          <p className="mb-4 text-sm text-muted">
-            Re-index after updating the organization guide repository.
-          </p>
-          <ReindexAssistantButton />
-        </PortalCard>
-      )}
 
       <TeamManagement />
     </div>

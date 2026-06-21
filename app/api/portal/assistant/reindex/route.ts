@@ -1,10 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { indexOrgGuide } from "@/lib/assistant/index-repo";
-import {
-  getServiceSupabase,
-  portalErrorResponse,
-  requirePortalAdmin,
-} from "@/lib/portal/auth";
+import { getServiceSupabase, portalErrorResponse } from "@/lib/portal/auth";
 
 function isAuthorizedReindex(request: NextRequest): boolean {
   const secret = process.env.ASSISTANT_REINDEX_SECRET;
@@ -15,32 +11,29 @@ function isAuthorizedReindex(request: NextRequest): boolean {
 
 export async function POST(request: NextRequest) {
   try {
+    if (!isAuthorizedReindex(request)) {
+      return NextResponse.json({ error: "Unauthorized." }, { status: 401 });
+    }
+
     const serviceSupabase = await getServiceSupabase();
-    let organizationId: string | undefined;
+    const body = await request.json().catch(() => ({}));
+    let organizationId =
+      typeof body.organizationId === "string" ? body.organizationId : undefined;
 
-    if (isAuthorizedReindex(request)) {
-      const body = await request.json().catch(() => ({}));
-      organizationId =
-        typeof body.organizationId === "string" ? body.organizationId : undefined;
-
-      if (!organizationId) {
-        const slug = typeof body.slug === "string" ? body.slug : undefined;
-        if (slug) {
-          const { data: org } = await serviceSupabase
-            .from("organizations")
-            .select("id")
-            .eq("slug", slug)
-            .maybeSingle();
-          organizationId = org?.id;
-        }
+    if (!organizationId) {
+      const slug = typeof body.slug === "string" ? body.slug : undefined;
+      if (slug) {
+        const { data: org } = await serviceSupabase
+          .from("organizations")
+          .select("id")
+          .eq("slug", slug)
+          .maybeSingle();
+        organizationId = org?.id;
       }
+    }
 
-      if (!organizationId) {
-        return NextResponse.json({ error: "organizationId or slug required." }, { status: 400 });
-      }
-    } else {
-      const session = await requirePortalAdmin();
-      organizationId = session.organization.id;
+    if (!organizationId) {
+      return NextResponse.json({ error: "organizationId or slug required." }, { status: 400 });
     }
 
     const { data: org, error: orgError } = await serviceSupabase
