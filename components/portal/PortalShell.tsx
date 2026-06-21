@@ -1,8 +1,10 @@
 "use client";
 
+import { useState } from "react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { Cog } from "lucide-react";
+import { PortalLoadingScreen } from "@/components/portal/PortalLoadingScreen";
 import { cn } from "@/lib/utils";
 import type { MemberRole } from "@/lib/supabase/database.types";
 
@@ -20,15 +22,27 @@ interface PortalShellProps {
 export function PortalShell({ children, orgName, role }: PortalShellProps) {
   const pathname = usePathname();
   const router = useRouter();
+  const [signingOut, setSigningOut] = useState(false);
 
   const visibleNav = nav.filter(
     (item) => item.href !== "/portal/dashboard" || role === "administrator"
   );
 
   async function signOut() {
-    await fetch("/api/portal/auth", { method: "DELETE" });
-    router.push("/portal/login");
-    router.refresh();
+    setSigningOut(true);
+
+    try {
+      const res = await fetch("/api/portal/auth", { method: "DELETE" });
+      if (!res.ok) {
+        setSigningOut(false);
+        return;
+      }
+
+      router.push("/portal/login");
+      router.refresh();
+    } catch {
+      setSigningOut(false);
+    }
   }
 
   return (
@@ -78,9 +92,10 @@ export function PortalShell({ children, orgName, role }: PortalShellProps) {
             <button
               type="button"
               onClick={signOut}
-              className="rounded-lg border border-border px-3 py-1.5 text-sm text-muted hover:text-foreground"
+              disabled={signingOut}
+              className="rounded-lg border border-border px-3 py-1.5 text-sm text-muted hover:text-foreground disabled:opacity-50"
             >
-              Sign out
+              {signingOut ? "Signing out…" : "Sign out"}
             </button>
           </div>
         </div>
@@ -97,6 +112,12 @@ export function PortalShell({ children, orgName, role }: PortalShellProps) {
         </nav>
       </header>
       <main className="mx-auto max-w-6xl px-4 py-8 sm:px-6">{children}</main>
+
+      {signingOut && (
+        <div className="fixed inset-0 z-50 bg-background">
+          <PortalLoadingScreen fullScreen />
+        </div>
+      )}
     </div>
   );
 }

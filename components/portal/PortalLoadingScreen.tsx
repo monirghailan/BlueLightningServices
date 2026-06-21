@@ -2,6 +2,7 @@
 
 import { motion, useReducedMotion } from "framer-motion";
 import { LogoImage } from "@/components/logo/LogoImage";
+import { cn } from "@/lib/utils";
 
 const COLS = 12;
 const ROWS = 9;
@@ -31,13 +32,19 @@ function StampCell({ index }: { index: number }) {
   );
 }
 
-export function PortalLoadingScreen() {
+interface PortalLoadingScreenProps {
+  fullScreen?: boolean;
+}
+
+export function PortalLoadingScreen({ fullScreen = false }: PortalLoadingScreenProps) {
   const reducedMotion = useReducedMotion();
+  const minHeight = fullScreen ? "min-h-dvh" : "min-h-[calc(100dvh-10rem)]";
+  const inset = fullScreen ? "" : "-mx-4 -my-8 sm:-mx-6";
 
   if (reducedMotion) {
     return (
       <div
-        className="flex min-h-[calc(100dvh-10rem)] items-center justify-center"
+        className={cn("flex items-center justify-center", minHeight)}
         aria-busy
         aria-label="Loading"
       >
@@ -48,7 +55,7 @@ export function PortalLoadingScreen() {
 
   return (
     <div
-      className="relative -mx-4 -my-8 min-h-[calc(100dvh-10rem)] overflow-hidden sm:-mx-6"
+      className={cn("relative overflow-hidden", minHeight, inset)}
       aria-busy
       aria-label="Loading"
     >
