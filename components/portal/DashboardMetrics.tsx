@@ -95,7 +95,10 @@ export function DashboardMetrics() {
       </div>
 
       <div className="grid gap-4 sm:grid-cols-2">
-        <PortalCard title="By status" description="Where your tickets sit in the workflow">
+        <PortalCard
+          title="By status"
+          description="All tickets, all time — where they sit in the workflow"
+        >
           {statusEntries.length === 0 ? (
             <p className="text-sm text-muted">No ticket data yet.</p>
           ) : (
@@ -122,7 +125,10 @@ export function DashboardMetrics() {
           )}
         </PortalCard>
 
-        <PortalCard title="By type" description="Feature / Bug / Request mix">
+        <PortalCard
+          title="By type"
+          description="All tickets, all time — Feature / Bug / Request mix"
+        >
           {Object.keys(metrics.byType).length === 0 ? (
             <p className="text-sm text-muted">No ticket data yet.</p>
           ) : (
