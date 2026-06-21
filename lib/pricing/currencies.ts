@@ -20,7 +20,7 @@ export const currencies: Record<CurrencyCode, CurrencyConfig> = {
   eur: {
     code: "eur",
     iso: "EUR",
-    locale: "de-DE",
+    locale: "en-GB",
     label: "EU (€)",
     prices: {
       monthly: 4599,
