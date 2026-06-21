@@ -16,10 +16,11 @@ function statusTone(status: string) {
   return "bg-bolt-fill/20 text-bolt-outline";
 }
 
-export function DashboardDemo() {
+export function DashboardDemo({ compact = false }: { compact?: boolean }) {
   const containerRef = useRef<HTMLDivElement>(null);
   const inView = useInView(containerRef, { amount: 0.25, once: true });
   const [phase, setPhase] = useState(0);
+  const backlogRows = compact ? demo.backlog.slice(0, 2) : demo.backlog;
 
   useEffect(() => {
     if (!inView) return;
@@ -39,9 +40,12 @@ export function DashboardDemo() {
   return (
     <div
       ref={containerRef}
-      className="rounded-2xl border border-white/10 bg-surface/80 p-4 shadow-[0_8px_32px_rgba(0,0,0,0.35)] backdrop-blur sm:p-5"
+      className={cn(
+        "rounded-2xl border border-white/10 bg-surface/80 shadow-[0_8px_32px_rgba(0,0,0,0.35)] backdrop-blur",
+        compact ? "p-3 sm:p-4" : "p-4 sm:p-5"
+      )}
     >
-      <div className="mb-4 flex items-center justify-between gap-3">
+      <div className={cn("flex items-center justify-between gap-3", compact ? "mb-2" : "mb-4")}>
         <div>
           <p className="text-xs uppercase tracking-wider text-muted">Client Portal</p>
           <p className="text-sm font-semibold text-foreground">{demo.orgName} — Dashboard</p>
@@ -51,19 +55,27 @@ export function DashboardDemo() {
         </span>
       </div>
 
-      <div className="space-y-5 rounded-2xl border border-border bg-background/60 p-4">
+      <div
+        className={cn(
+          "rounded-2xl border border-border bg-background/60",
+          compact ? "space-y-3 p-3" : "space-y-5 p-4"
+        )}
+      >
         {/* Stat cards */}
-        <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+        <div className={cn("grid gap-3 sm:grid-cols-2 lg:grid-cols-4", compact && "gap-2")}>
           {demo.stats.map((stat, index) => (
             <motion.div
               key={stat.label}
               initial={{ opacity: 0, y: 12 }}
               animate={phase >= 1 ? { opacity: 1, y: 0 } : { opacity: 0, y: 12 }}
               transition={{ ...defaultTransition, delay: index * 0.08 }}
-              className="rounded-2xl border border-border bg-surface p-4"
+              className={cn(
+                "rounded-2xl border border-border bg-surface",
+                compact ? "p-2.5" : "p-4"
+              )}
             >
-              <p className="text-xs text-muted">{stat.label}</p>
-              <p className="mt-2 text-2xl font-semibold tracking-tight">
+              <p className={cn("text-muted", compact ? "text-[10px]" : "text-xs")}>{stat.label}</p>
+              <p className={cn("mt-1 font-semibold tracking-tight", compact ? "text-lg" : "mt-2 text-2xl")}>
                 {stat.value}
                 {"unit" in stat && stat.unit ? (
                   <span className="text-sm font-normal text-muted"> {stat.unit}</span>
@@ -77,16 +89,21 @@ export function DashboardDemo() {
         </div>
 
         {/* Charts */}
-        <div className="grid gap-4 sm:grid-cols-2">
+        <div className={cn("grid gap-4 sm:grid-cols-2", compact && "gap-3")}>
           <motion.div
             initial={{ opacity: 0, y: 12 }}
             animate={phase >= 2 ? { opacity: 1, y: 0 } : { opacity: 0, y: 12 }}
             transition={defaultTransition}
-            className="rounded-2xl border border-border bg-surface p-4"
+            className={cn(
+              "rounded-2xl border border-border bg-surface",
+              compact ? "p-3" : "p-4"
+            )}
           >
-            <h3 className="text-sm font-semibold">By status</h3>
-            <p className="mt-1 text-xs text-muted">All tickets, all time — where they sit in the workflow</p>
-            <ul className="mt-4 space-y-3">
+            <h3 className={cn("font-semibold", compact ? "text-xs" : "text-sm")}>By status</h3>
+            <p className={cn("text-muted", compact ? "mt-0.5 text-[10px]" : "mt-1 text-xs")}>
+              All tickets, all time — where they sit in the workflow
+            </p>
+            <ul className={cn(compact ? "mt-2 space-y-2" : "mt-4 space-y-3")}>
               {demo.byStatus.map((item, index) => {
                 const pct = Math.round((item.count / statusTotal) * 100);
                 return (
@@ -113,12 +130,17 @@ export function DashboardDemo() {
             initial={{ opacity: 0, y: 12 }}
             animate={phase >= 2 ? { opacity: 1, y: 0 } : { opacity: 0, y: 12 }}
             transition={{ ...defaultTransition, delay: 0.1 }}
-            className="rounded-2xl border border-border bg-surface p-4"
+            className={cn(
+              "rounded-2xl border border-border bg-surface",
+              compact ? "p-3" : "p-4"
+            )}
           >
-            <h3 className="text-sm font-semibold">By type</h3>
-            <p className="mt-1 text-xs text-muted">All tickets, all time — Feature / Bug / Request mix</p>
-            <div className="mt-2 scale-90 sm:scale-100">
-              <TypePieChart data={demo.byType} />
+            <h3 className={cn("font-semibold", compact ? "text-xs" : "text-sm")}>By type</h3>
+            <p className={cn("text-muted", compact ? "mt-0.5 text-[10px]" : "mt-1 text-xs")}>
+              All tickets, all time — Feature / Bug / Request mix
+            </p>
+            <div className={compact ? "mt-1" : "mt-2 scale-90 sm:scale-100"}>
+              <TypePieChart data={demo.byType} compact={compact} />
             </div>
           </motion.div>
         </div>
@@ -128,12 +150,15 @@ export function DashboardDemo() {
           initial={{ opacity: 0, y: 12 }}
           animate={phase >= 3 ? { opacity: 1, y: 0 } : { opacity: 0, y: 12 }}
           transition={defaultTransition}
-          className="rounded-2xl border border-border bg-surface p-4"
+          className={cn(
+            "rounded-2xl border border-border bg-surface",
+            compact ? "p-3" : "p-4"
+          )}
         >
-          <div className="mb-4 flex items-start justify-between gap-3">
+          <div className={cn("flex items-start justify-between gap-3", compact ? "mb-2" : "mb-4")}>
             <div>
-              <h3 className="text-sm font-semibold">Backlog</h3>
-              <p className="mt-1 text-xs text-muted">
+              <h3 className={cn("font-semibold", compact ? "text-xs" : "text-sm")}>Backlog</h3>
+              <p className={cn("text-muted", compact ? "mt-0.5 text-[10px]" : "mt-1 text-xs")}>
                 Prioritize items here, then mark them ready to move onto the delivery board.
               </p>
             </div>
@@ -155,7 +180,7 @@ export function DashboardDemo() {
                 </tr>
               </thead>
               <tbody>
-                {demo.backlog.map((item, index) => (
+                {backlogRows.map((item, index) => (
                   <motion.tr
                     key={item.key}
                     initial={{ opacity: 0, x: -8 }}
@@ -163,15 +188,19 @@ export function DashboardDemo() {
                     transition={{ ...defaultTransition, delay: index * 0.12 }}
                     className="border-b border-border/60 last:border-0"
                   >
-                    <td className="py-2.5 pr-3 font-mono text-bolt-outline">{item.key}</td>
-                    <td className="max-w-[12rem] truncate py-2.5 pr-3">{item.summary}</td>
-                    <td className="py-2.5 pr-3">
+                    <td className={cn("pr-3 font-mono text-bolt-outline", compact ? "py-1.5" : "py-2.5")}>
+                      {item.key}
+                    </td>
+                    <td className={cn("max-w-[12rem] truncate pr-3", compact ? "py-1.5" : "py-2.5")}>
+                      {item.summary}
+                    </td>
+                    <td className={cn("pr-3", compact ? "py-1.5" : "py-2.5")}>
                       <span className={cn("inline-flex rounded-full px-2 py-0.5 text-[11px]", statusTone("To Do"))}>
                         {item.type}
                       </span>
                     </td>
-                    <td className="py-2.5 pr-3 text-muted">{item.priority}</td>
-                    <td className="py-2.5">
+                    <td className={cn("pr-3 text-muted", compact ? "py-1.5" : "py-2.5")}>{item.priority}</td>
+                    <td className={compact ? "py-1.5" : "py-2.5"}>
                       {index === 0 ? (
                         <motion.span
                           initial={{ scale: 0.9, opacity: 0 }}
@@ -195,7 +224,9 @@ export function DashboardDemo() {
         </motion.div>
       </div>
 
-      <p className="mt-3 text-center text-[11px] text-muted">{demo.disclaimer}</p>
+      <p className={cn("text-center text-muted", compact ? "mt-2 text-[10px]" : "mt-3 text-[11px]")}>
+        {demo.disclaimer}
+      </p>
     </div>
   );
 }

@@ -74,13 +74,7 @@ function getSectionForSnapTarget(target: Element | null) {
   return target.closest(".snap-section");
 }
 
-export function SnapScrollRoot({
-  children,
-  portal = false,
-}: {
-  children: ReactNode;
-  portal?: boolean;
-}) {
+export function SnapScrollRoot({ children }: { children: ReactNode }) {
   const sectionCount = Children.count(children);
   const [showHint, setShowHint] = useState(false);
   const [settled, setSettled] = useState(true);
@@ -88,9 +82,6 @@ export function SnapScrollRoot({
 
   useEffect(() => {
     document.documentElement.classList.add("snap-scroll");
-    if (portal) {
-      document.documentElement.classList.add("snap-scroll--portal");
-    }
 
     const getSections = () =>
       Array.from(document.querySelectorAll<HTMLElement>(".snap-section"));
@@ -131,24 +122,7 @@ export function SnapScrollRoot({
       scrollTimeout.current = setTimeout(syncActive, 180);
     };
 
-    const onResize = () => {
-      syncHint();
-      // After viewport shrink, snap can leave scroll between sections — re-align once settled
-      clearTimeout(scrollTimeout.current);
-      scrollTimeout.current = setTimeout(() => {
-        if (window.matchMedia("(max-width: 1023px), (max-height: 960px)").matches) {
-          syncActive();
-          return;
-        }
-        const sections = getSections();
-        const index = findActiveSectionIndex(sections);
-        const section = sections[index] as HTMLElement | undefined;
-        if (section) {
-          section.scrollIntoView({ block: "start", behavior: "instant" });
-        }
-        syncActive();
-      }, 100);
-    };
+    const onResize = () => syncHint();
 
     const resizeObserver = new ResizeObserver(() => syncHint());
     for (const section of getSections()) {
@@ -162,14 +136,13 @@ export function SnapScrollRoot({
 
     return () => {
       document.documentElement.classList.remove("snap-scroll");
-      document.documentElement.classList.remove("snap-scroll--portal");
       document.documentElement.removeEventListener("scrollsnapchange", onSnapChange);
       window.removeEventListener("scroll", onScroll);
       window.removeEventListener("resize", onResize);
       resizeObserver.disconnect();
       clearTimeout(scrollTimeout.current);
     };
-  }, [sectionCount, portal]);
+  }, [sectionCount]);
 
   return (
     <>

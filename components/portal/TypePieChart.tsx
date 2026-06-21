@@ -1,3 +1,5 @@
+import { cn } from "@/lib/utils";
+
 const TYPE_COLORS: Record<string, string> = {
   Feature: "#3d7cb8",
   Bug: "#f87171",
@@ -12,9 +14,10 @@ function colorForType(type: string, index: number): string {
 
 interface TypePieChartProps {
   data: Record<string, number>;
+  compact?: boolean;
 }
 
-export function TypePieChart({ data }: TypePieChartProps) {
+export function TypePieChart({ data, compact = false }: TypePieChartProps) {
   const entries = Object.entries(data).sort(([, a], [, b]) => b - a);
   const total = entries.reduce((sum, [, count]) => sum + count, 0);
 
@@ -46,24 +49,37 @@ export function TypePieChart({ data }: TypePieChartProps) {
     .join(", ");
 
   return (
-    <div className="flex flex-col items-center gap-5 sm:flex-row sm:items-center">
+    <div
+      className={cn(
+        "flex flex-col items-center sm:flex-row sm:items-center",
+        compact ? "gap-3" : "gap-5"
+      )}
+    >
       <div
-        className="relative h-36 w-36 shrink-0 rounded-full ring-1 ring-border"
+        className={cn(
+          "relative shrink-0 rounded-full ring-1 ring-border",
+          compact ? "h-24 w-24" : "h-36 w-36"
+        )}
         style={{ background: `conic-gradient(${gradient})` }}
         role="img"
         aria-label={`Ticket types: ${ariaLabel}`}
       >
         <div className="absolute inset-[22%] flex items-center justify-center rounded-full bg-surface text-center">
           <div>
-            <p className="text-2xl font-semibold leading-none">{total}</p>
-            <p className="mt-1 text-xs text-muted">tickets</p>
+            <p className={cn("font-semibold leading-none", compact ? "text-lg" : "text-2xl")}>
+              {total}
+            </p>
+            <p className="mt-0.5 text-[10px] text-muted sm:mt-1 sm:text-xs">tickets</p>
           </div>
         </div>
       </div>
 
-      <ul className="w-full min-w-0 space-y-2.5">
+      <ul className={cn("w-full min-w-0", compact ? "space-y-1.5" : "space-y-2.5")}>
         {segments.map((segment) => (
-          <li key={segment.type} className="flex items-center gap-2.5 text-sm">
+          <li
+            key={segment.type}
+            className={cn("flex items-center gap-2 text-sm", compact && "gap-1.5 text-xs")}
+          >
             <span
               className="h-2.5 w-2.5 shrink-0 rounded-full"
               style={{ backgroundColor: segment.color }}

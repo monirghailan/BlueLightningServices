@@ -12,7 +12,7 @@ import { defaultTransition, fadeUp, staggerContainer } from "@/lib/animations";
 
 export function PortalLandingPage() {
   return (
-    <SnapScrollRoot portal>
+    <SnapScrollRoot>
       <SnapSection>
         <section className="portal-snap-hero gradient-mesh relative overflow-x-clip px-4 sm:px-6">
           <div className="mx-auto grid w-full max-w-6xl items-center gap-10 lg:grid-cols-[minmax(0,1.05fr)_minmax(0,0.95fr)] lg:gap-12">
@@ -68,7 +68,7 @@ export function PortalLandingPage() {
             transition={defaultTransition}
             className="mx-auto w-full max-w-6xl"
           >
-            <DashboardDemo />
+            <DashboardDemo compact />
           </motion.div>
         </section>
       </SnapSection>
