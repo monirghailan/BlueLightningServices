@@ -177,18 +177,24 @@ export function TeamManagement({ currentUserId }: TeamManagementProps) {
                 )}
               </div>
               <div className="flex items-center gap-2">
-                <select
-                  value={m.role}
-                  disabled={!m.profiles}
-                  onChange={(e) =>
-                    m.profiles &&
-                    updateRole(m.profiles.id, e.target.value as "standard" | "administrator")
-                  }
-                  className="rounded-lg border border-border bg-surface-elevated px-2 py-1 text-sm"
-                >
-                  <option value="standard">Standard</option>
-                  <option value="administrator">Administrator</option>
-                </select>
+                {isCurrentUser ? (
+                  <span className="rounded-lg border border-border bg-surface-elevated px-2 py-1 text-sm capitalize text-muted">
+                    {m.role}
+                  </span>
+                ) : (
+                  <select
+                    value={m.role}
+                    disabled={!m.profiles}
+                    onChange={(e) =>
+                      m.profiles &&
+                      updateRole(m.profiles.id, e.target.value as "standard" | "administrator")
+                    }
+                    className="rounded-lg border border-border bg-surface-elevated px-2 py-1 text-sm"
+                  >
+                    <option value="standard">Standard</option>
+                    <option value="administrator">Administrator</option>
+                  </select>
+                )}
                 {!isCurrentUser && (
                   <button
                     type="button"
