@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import type { PortalMetrics } from "@/lib/portal/metrics";
 import { PortalCard, StatCard } from "@/components/portal/PortalCard";
+import { TypePieChart } from "@/components/portal/TypePieChart";
 
 const emptyMetrics: PortalMetrics = {
   openTickets: 0,
@@ -125,14 +126,7 @@ export function DashboardMetrics() {
           {Object.keys(metrics.byType).length === 0 ? (
             <p className="text-sm text-muted">No ticket data yet.</p>
           ) : (
-            <ul className="space-y-2">
-              {Object.entries(metrics.byType).map(([type, count]) => (
-                <li key={type} className="flex justify-between text-sm">
-                  <span>{type}</span>
-                  <span className="text-muted">{count}</span>
-                </li>
-              ))}
-            </ul>
+            <TypePieChart data={metrics.byType} />
           )}
         </PortalCard>
       </div>
