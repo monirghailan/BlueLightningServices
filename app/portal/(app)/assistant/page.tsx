@@ -1,10 +1,8 @@
 import { getPortalSession } from "@/lib/portal/auth";
-import { redirect } from "next/navigation";
 import { AssistantChat } from "@/components/portal/AssistantChat";
 
 export default async function AssistantPage() {
   const session = await getPortalSession();
-  if (!session) redirect("/portal/login");
 
   return (
     <div className="space-y-6">
@@ -14,7 +12,15 @@ export default async function AssistantPage() {
           Plain-English help for using your Salesforce org — grounded in your organization guide.
         </p>
       </div>
-      <AssistantChat />
+      {session && (
+        <AssistantChat
+          initialMeta={{
+            assistantPersona: session.assistantPersona,
+            assistantEnabled: session.organization.assistant_enabled,
+            assistantLastIndexedAt: session.organization.assistant_last_indexed_at,
+          }}
+        />
+      )}
     </div>
   );
 }

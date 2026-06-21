@@ -1,18 +1,16 @@
 import { redirect } from "next/navigation";
-import { getPortalSession, requirePortalAdmin } from "@/lib/portal/auth";
+import { requirePortalAdmin } from "@/lib/portal/auth";
 import { createClient } from "@/lib/supabase/server";
 import { Profile } from "@/components/portal/Profile";
 import { TeamManagement } from "@/components/portal/TeamManagement";
 
 export default async function SettingsPage() {
+  let session;
   try {
-    await requirePortalAdmin();
+    session = await requirePortalAdmin();
   } catch {
     redirect("/portal/assistant");
   }
-
-  const session = await getPortalSession();
-  if (!session) redirect("/portal/login");
 
   const supabase = await createClient();
   const { data: profile } = await supabase

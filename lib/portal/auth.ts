@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { cache } from "react";
 import { createClient } from "@/lib/supabase/server";
 import type {
   AssistantPersona,
@@ -14,7 +15,7 @@ export interface PortalSession {
   assistantPersona: AssistantPersona;
 }
 
-export async function getPortalSession(): Promise<PortalSession | null> {
+export const getPortalSession = cache(async (): Promise<PortalSession | null> => {
   const supabase = await createClient();
   const {
     data: { user },
@@ -24,7 +25,7 @@ export async function getPortalSession(): Promise<PortalSession | null> {
 
   const { data: membership, error } = await supabase
     .from("organization_members")
-    .select("role, organization_id, assistant_persona")
+    .select("role, assistant_persona, organizations(*)")
     .eq("user_id", user.id)
     .limit(1)
     .maybeSingle();
@@ -33,20 +34,13 @@ export async function getPortalSession(): Promise<PortalSession | null> {
 
   const member = membership as {
     role: MemberRole;
-    organization_id: string;
     assistant_persona: AssistantPersona | null;
+    organizations: Organization | Organization[] | null;
   };
 
-  const { data: org, error: orgError } = await supabase
-    .from("organizations")
-    .select("*")
-    .eq("id", member.organization_id)
-    .maybeSingle();
-
-  if (orgError || !org) return null;
-
-  const organization = org as Organization;
-  if (organization.status !== "active") return null;
+  const orgRaw = member.organizations;
+  const organization = (Array.isArray(orgRaw) ? orgRaw[0] : orgRaw) as Organization | null;
+  if (!organization || organization.status !== "active") return null;
 
   return {
     userId: user.id,
@@ -55,7 +49,7 @@ export async function getPortalSession(): Promise<PortalSession | null> {
     role: member.role,
     assistantPersona: member.assistant_persona ?? "general",
   };
-}
+});
 
 export async function requirePortalSession(): Promise<PortalSession> {
   const session = await getPortalSession();

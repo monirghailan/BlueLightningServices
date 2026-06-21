@@ -20,9 +20,12 @@ interface AssistantMeta {
   assistantLastIndexedAt: string | null;
 }
 
-export function AssistantChat() {
-  const [meta, setMeta] = useState<AssistantMeta | null>(null);
-  const [loadingMeta, setLoadingMeta] = useState(true);
+interface AssistantChatProps {
+  initialMeta: AssistantMeta;
+}
+
+export function AssistantChat({ initialMeta }: AssistantChatProps) {
+  const [meta, setMeta] = useState<AssistantMeta>(initialMeta);
   const [personaSaving, setPersonaSaving] = useState(false);
   const [showPersonaPicker, setShowPersonaPicker] = useState(false);
   const [conversationId, setConversationId] = useState<string | undefined>();
@@ -54,24 +57,6 @@ export function AssistantChat() {
     transport,
   });
 
-  useEffect(() => {
-    let active = true;
-    async function loadMeta() {
-      const res = await fetch("/api/portal/assistant/persona");
-      if (!active || !res.ok) {
-        setLoadingMeta(false);
-        return;
-      }
-      const data = (await res.json()) as AssistantMeta;
-      setMeta(data);
-      setLoadingMeta(false);
-    }
-    void loadMeta();
-    return () => {
-      active = false;
-    };
-  }, []);
-
   async function savePersona(persona: AssistantPersona) {
     setPersonaSaving(true);
     const res = await fetch("/api/portal/assistant/persona", {
@@ -83,9 +68,7 @@ export function AssistantChat() {
 
     if (res.ok) {
       const data = await res.json();
-      setMeta((current) =>
-        current ? { ...current, assistantPersona: data.assistantPersona } : current
-      );
+      setMeta((current) => ({ ...current, assistantPersona: data.assistantPersona }));
       window.localStorage.setItem("bls-assistant-persona-confirmed", "1");
       setShowPersonaPicker(false);
     }
@@ -117,13 +100,9 @@ export function AssistantChat() {
     if (!confirmed && meta?.assistantPersona === "general") {
       setShowPersonaPicker(true);
     }
-  }, [meta?.assistantPersona]);
+  }, [meta.assistantPersona]);
 
-  if (loadingMeta) {
-    return <p className="text-sm text-muted">Loading assistant…</p>;
-  }
-
-  if (!meta?.assistantEnabled) {
+  if (!meta.assistantEnabled) {
     return (
       <PortalCard title="Assistant not ready yet">
         <p className="text-sm text-muted">
