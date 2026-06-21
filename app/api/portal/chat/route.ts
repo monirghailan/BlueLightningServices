@@ -24,6 +24,15 @@ import { chatSchema } from "@/lib/validations/portal";
 
 export const maxDuration = 60;
 
+function getAssistantServerConfigErrors(): string[] {
+  const missing: string[] = [];
+  if (!process.env.OPENAI_API_KEY) missing.push("OPENAI_API_KEY");
+  if (!process.env.GITHUB_PAT && !process.env.GITHUB_APP_TOKEN) {
+    missing.push("GITHUB_PAT");
+  }
+  return missing;
+}
+
 function getMessageText(message: UIMessage): string {
   return message.parts
     .filter((part): part is { type: "text"; text: string } => part.type === "text")
@@ -45,6 +54,18 @@ export async function POST(request: Request) {
     if (!org.assistant_enabled || !org.github_repo_url) {
       return Response.json(
         { error: "The assistant is not configured for your organization yet." },
+        { status: 503 }
+      );
+    }
+
+    const serverConfigErrors = getAssistantServerConfigErrors();
+    if (serverConfigErrors.length > 0) {
+      console.error("Assistant server misconfiguration:", serverConfigErrors.join(", "));
+      return Response.json(
+        {
+          error:
+            "The assistant is temporarily unavailable due to a server configuration issue. Please contact Blue Lightning Services.",
+        },
         { status: 503 }
       );
     }
@@ -115,7 +136,6 @@ export async function POST(request: Request) {
     }
 
     const repoRef = parseGitHubRepoUrl(org.github_repo_url, org.github_default_branch ?? "main");
-    const octokit = getGitHubClient();
     const collectedSources: Array<{ path: string; title: string }> = [];
 
     const result = streamText({
@@ -168,7 +188,7 @@ export async function POST(request: Request) {
             path: z.string().describe("Relative repo path, e.g. how-to/create-a-lead.md"),
           }),
           execute: async ({ path }) => {
-            const content = await fetchRepoFile(octokit, repoRef, path);
+            const content = await fetchRepoFile(getGitHubClient(), repoRef, path);
             collectedSources.push({
               path,
               title: path.split("/").pop() ?? path,
