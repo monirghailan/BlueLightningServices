@@ -22,6 +22,14 @@ export async function GET() {
 export async function PATCH(request: NextRequest) {
   try {
     const session = await requirePortalSession();
+
+    if (session.role === "standard") {
+      return NextResponse.json(
+        { error: "Your assistant persona is set by your organization administrator." },
+        { status: 403 }
+      );
+    }
+
     const body = await request.json();
     const parsed = updatePersonaSchema.safeParse(body);
 

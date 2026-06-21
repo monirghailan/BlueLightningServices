@@ -76,7 +76,7 @@ export async function GET() {
 
     const { data: memberRows, error: membersError } = await supabase
       .from("organization_members")
-      .select("id, role, joined_at, user_id")
+      .select("id, role, assistant_persona, joined_at, user_id")
       .eq("organization_id", session.organization.id)
       .order("joined_at", { ascending: true });
 
@@ -110,6 +110,7 @@ export async function GET() {
     const members = (memberRows ?? []).map((member) => ({
       id: member.id,
       role: member.role,
+      assistant_persona: member.assistant_persona ?? "general",
       joined_at: member.joined_at,
       profiles: profilesByUserId.get(member.user_id) ?? null,
     }));

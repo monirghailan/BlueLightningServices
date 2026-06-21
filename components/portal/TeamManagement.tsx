@@ -11,6 +11,7 @@ import { PortalCard } from "@/components/portal/PortalCard";
 interface MemberRow {
   id: string;
   role: string;
+  assistant_persona: AssistantPersona;
   joined_at: string;
   profiles: { id: string; email: string; full_name: string | null } | null;
 }
@@ -101,6 +102,15 @@ export function TeamManagement({ currentUserId }: TeamManagementProps) {
     await load();
   }
 
+  async function updatePersona(userId: string, persona: AssistantPersona) {
+    await fetch("/api/portal/team/members", {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ userId, assistantPersona: persona }),
+    });
+    await load();
+  }
+
   async function removeMember(userId: string) {
     if (!confirm("Remove this team member?")) return;
     await fetch(`/api/portal/team/members?userId=${userId}`, { method: "DELETE" });
@@ -176,7 +186,23 @@ export function TeamManagement({ currentUserId }: TeamManagementProps) {
                   <p className="text-xs text-muted">{m.profiles.email}</p>
                 )}
               </div>
-              <div className="flex items-center gap-2">
+              <div className="flex flex-wrap items-center gap-2">
+                <select
+                  value={m.assistant_persona}
+                  disabled={!m.profiles}
+                  onChange={(e) =>
+                    m.profiles &&
+                    updatePersona(m.profiles.id, e.target.value as AssistantPersona)
+                  }
+                  className="rounded-lg border border-border bg-surface-elevated px-2 py-1 text-sm"
+                  aria-label={`Assistant persona for ${m.profiles?.full_name ?? m.profiles?.email ?? "member"}`}
+                >
+                  {ASSISTANT_PERSONAS.map((persona) => (
+                    <option key={persona} value={persona}>
+                      {ASSISTANT_PERSONA_LABELS[persona]}
+                    </option>
+                  ))}
+                </select>
                 {isCurrentUser ? (
                   <span className="rounded-lg border border-border bg-surface-elevated px-2 py-1 text-sm capitalize text-muted">
                     {m.role}

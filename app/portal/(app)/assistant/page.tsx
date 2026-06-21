@@ -28,6 +28,7 @@ export default async function AssistantPage() {
             assistantLastIndexedAt: session.organization.assistant_last_indexed_at,
           }}
           suggestedQuestions={suggestedQuestions}
+          canChangePersona={session.role === "administrator"}
         />
       )}
     </div>

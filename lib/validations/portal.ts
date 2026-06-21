@@ -75,7 +75,20 @@ export const loginSchema = z.object({
   password: z.string().min(1),
 });
 
-export const updateMemberSchema = z.object({
-  userId: z.string().uuid(),
-  role: z.enum(["administrator", "standard"]),
-});
+const assistantPersonaEnum = z.enum([
+  "sales_rep",
+  "sales_manager",
+  "service_agent",
+  "service_manager",
+  "general",
+]);
+
+export const updateMemberSchema = z
+  .object({
+    userId: z.string().uuid(),
+    role: z.enum(["administrator", "standard"]).optional(),
+    assistantPersona: assistantPersonaEnum.optional(),
+  })
+  .refine((data) => data.role !== undefined || data.assistantPersona !== undefined, {
+    message: "Provide role or assistantPersona to update.",
+  });

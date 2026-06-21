@@ -19,9 +19,14 @@ interface AssistantMeta {
 interface AssistantChatProps {
   initialMeta: AssistantMeta;
   suggestedQuestions?: string[];
+  canChangePersona?: boolean;
 }
 
-export function AssistantChat({ initialMeta, suggestedQuestions = [] }: AssistantChatProps) {
+export function AssistantChat({
+  initialMeta,
+  suggestedQuestions = [],
+  canChangePersona = false,
+}: AssistantChatProps) {
   const [meta, setMeta] = useState<AssistantMeta>(initialMeta);
   const [personaSaving, setPersonaSaving] = useState(false);
   const [showPersonaPicker, setShowPersonaPicker] = useState(false);
@@ -93,11 +98,13 @@ export function AssistantChat({ initialMeta, suggestedQuestions = [] }: Assistan
   }
 
   useEffect(() => {
+    if (!canChangePersona) return;
+
     const confirmed = window.localStorage.getItem("bls-assistant-persona-confirmed");
     if (!confirmed && meta?.assistantPersona === "general") {
       setShowPersonaPicker(true);
     }
-  }, [meta.assistantPersona]);
+  }, [canChangePersona, meta.assistantPersona]);
 
   if (!meta.assistantEnabled) {
     return (
@@ -112,7 +119,7 @@ export function AssistantChat({ initialMeta, suggestedQuestions = [] }: Assistan
 
   return (
     <div className="space-y-6">
-      {showPersonaPicker && (
+      {canChangePersona && showPersonaPicker && (
         <PortalCard title="What best describes your Salesforce role?">
           <p className="mb-4 text-sm text-muted">
             This helps the assistant show the most relevant guidance for your day-to-day work.
@@ -151,13 +158,15 @@ export function AssistantChat({ initialMeta, suggestedQuestions = [] }: Assistan
             </p>
           )}
         </div>
-        <button
-          type="button"
-          onClick={() => setShowPersonaPicker((value) => !value)}
-          className="rounded-lg border border-border px-3 py-1.5 text-sm text-muted hover:text-foreground"
-        >
-          Change role
-        </button>
+        {canChangePersona && (
+          <button
+            type="button"
+            onClick={() => setShowPersonaPicker((value) => !value)}
+            className="rounded-lg border border-border px-3 py-1.5 text-sm text-muted hover:text-foreground"
+          >
+            Change role
+          </button>
+        )}
       </div>
 
       {suggestedQuestions.length > 0 && (

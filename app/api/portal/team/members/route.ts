@@ -19,17 +19,33 @@ export async function PATCH(request: NextRequest) {
       );
     }
 
-    if (parsed.data.userId === session.userId && parsed.data.role !== "administrator") {
+    if (
+      parsed.data.role !== undefined &&
+      parsed.data.userId === session.userId &&
+      parsed.data.role !== "administrator"
+    ) {
       return NextResponse.json(
         { error: "You cannot demote yourself." },
         { status: 400 }
       );
     }
 
+    const updates: {
+      role?: "administrator" | "standard";
+      assistant_persona?: (typeof parsed.data)["assistantPersona"];
+    } = {};
+
+    if (parsed.data.role !== undefined) {
+      updates.role = parsed.data.role;
+    }
+    if (parsed.data.assistantPersona !== undefined) {
+      updates.assistant_persona = parsed.data.assistantPersona;
+    }
+
     const supabase = await getServiceSupabase();
     const { error } = await supabase
       .from("organization_members")
-      .update({ role: parsed.data.role })
+      .update(updates)
       .eq("organization_id", session.organization.id)
       .eq("user_id", parsed.data.userId);
 
