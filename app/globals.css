@@ -96,6 +96,13 @@ html.snap-scroll {
   min-height: calc(100svh - var(--header-offset));
 }
 
+.snap-section:not(.snap-section--last) > .portal-snap-hero {
+  flex: none;
+  min-height: calc(100dvh - var(--header-offset));
+  min-height: calc(100svh - var(--header-offset));
+  justify-content: center;
+}
+
 .snap-section__last-main > section {
   flex: 1;
   display: flex;

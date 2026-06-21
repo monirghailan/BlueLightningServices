@@ -3,14 +3,10 @@
 import { usePathname } from "next/navigation";
 import { Footer } from "@/components/layout/Footer";
 
-function isPublicPortalLanding(pathname: string) {
-  return pathname === "/portal";
-}
-
-/** Footer lives inside the homepage snap section; other routes use the layout footer. */
+/** Footer lives inside snap sections on / and /portal; other routes use the layout footer. */
 export function ConditionalFooter() {
   const pathname = usePathname();
-  if (pathname === "/") return null;
-  if (pathname.startsWith("/portal") && !isPublicPortalLanding(pathname)) return null;
+  if (pathname === "/" || pathname === "/portal") return null;
+  if (pathname.startsWith("/portal")) return null;
   return <Footer />;
 }

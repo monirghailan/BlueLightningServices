@@ -73,6 +73,7 @@ function AssistantAnswer({ scenario }: { scenario: DemoScenario }) {
 
 export function AssistantDemo() {
   const containerRef = useRef<HTMLDivElement>(null);
+  const chatRef = useRef<HTMLDivElement>(null);
   const inView = useInView(containerRef, { amount: 0.4 });
   const [phase, setPhase] = useState<DemoPhase>("idle");
   const [activeIndex, setActiveIndex] = useState<number>(portalLanding.demo.defaultScenarioIndex);
@@ -81,6 +82,12 @@ export function AssistantDemo() {
 
   const scenarios = portalLanding.demo.scenarios;
   const activeScenario = scenarios[activeIndex];
+
+  const scrollChatToBottom = useCallback((behavior: ScrollBehavior = "smooth") => {
+    const el = chatRef.current;
+    if (!el) return;
+    el.scrollTo({ top: el.scrollHeight, behavior });
+  }, []);
 
   const clearScheduled = useCallback(() => {
     timeoutRef.current.forEach(clearTimeout);
@@ -91,6 +98,9 @@ export function AssistantDemo() {
     (scenarioIndex: number) => {
       clearScheduled();
       setActiveIndex(scenarioIndex);
+      if (chatRef.current) {
+        chatRef.current.scrollTop = 0;
+      }
       setPhase("user");
 
       const steps: { phase: DemoPhase; delay: number }[] = [
@@ -119,6 +129,12 @@ export function AssistantDemo() {
     return clearScheduled;
   }, [inView, clearScheduled, startDemo]);
 
+  useEffect(() => {
+    if (phase === "idle") return;
+    const timer = setTimeout(() => scrollChatToBottom(), 80);
+    return () => clearTimeout(timer);
+  }, [phase, activeIndex, scrollChatToBottom]);
+
   const showUser = ["user", "typing", "assistant", "done"].includes(phase);
   const showTyping = phase === "typing";
   const showAssistant = ["assistant", "done"].includes(phase);
@@ -143,7 +159,7 @@ export function AssistantDemo() {
         </span>
       </div>
 
-      <div className="mb-4 flex flex-wrap gap-2">
+      <div className="mb-4 flex min-h-[4.25rem] flex-wrap content-start gap-2">
         {scenarios.map((scenario, index) => {
           const isActive = index === activeIndex && phase !== "idle";
           return (
@@ -164,31 +180,36 @@ export function AssistantDemo() {
         })}
       </div>
 
-      <div className="min-h-[14rem] space-y-4 rounded-2xl border border-border bg-background/60 p-4">
-        {showUser && activeScenario && (
-          <motion.div
-            key={activeScenario.question}
-            initial={{ opacity: 0, y: 8 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={defaultTransition}
-            className="ml-8 rounded-2xl bg-surface-elevated px-4 py-3 text-sm"
-          >
-            <p className="mb-1 text-xs uppercase tracking-wide text-muted">You</p>
-            <p className="leading-relaxed">{activeScenario.question}</p>
-          </motion.div>
-        )}
-
-        {showTyping && <TypingIndicator key={`typing-${activeIndex}`} />}
-
-        {showAssistant && activeScenario && (
-          <AssistantAnswer scenario={activeScenario} />
-        )}
-
-        {phase === "idle" && (
+      <div
+        ref={chatRef}
+        className="h-[17.5rem] space-y-4 overflow-y-auto overscroll-contain rounded-2xl border border-border bg-background/60 p-4 scroll-smooth sm:h-[18.5rem]"
+      >
+        {phase === "idle" ? (
           <p className="text-sm text-muted">
             Ask how to use Salesforce in your organization — answers grounded in your org guide.
             Click a suggested question to try the demo.
           </p>
+        ) : (
+          <>
+            {showUser && activeScenario && (
+              <motion.div
+                key={activeScenario.question}
+                initial={{ opacity: 0, y: 8 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={defaultTransition}
+                className="ml-8 rounded-2xl bg-surface-elevated px-4 py-3 text-sm"
+              >
+                <p className="mb-1 text-xs uppercase tracking-wide text-muted">You</p>
+                <p className="leading-relaxed">{activeScenario.question}</p>
+              </motion.div>
+            )}
+
+            {showTyping && <TypingIndicator key={`typing-${activeIndex}`} />}
+
+            {showAssistant && activeScenario && (
+              <AssistantAnswer scenario={activeScenario} />
+            )}
+          </>
         )}
       </div>
 
