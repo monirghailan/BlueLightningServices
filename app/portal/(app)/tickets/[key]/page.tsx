@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
+import { MarkdownContent } from "@/components/portal/MarkdownContent";
 import { StatusBadge, PortalCard } from "@/components/portal/PortalCard";
 
 interface TicketDetail {
@@ -93,9 +94,14 @@ export default function TicketDetailPage({
       </div>
 
       <PortalCard title="Description">
-        <p className="whitespace-pre-wrap text-sm leading-relaxed text-foreground/90">
-          {ticket.description || "No description."}
-        </p>
+        {ticket.description ? (
+          <MarkdownContent
+            content={ticket.description}
+            className="text-sm leading-relaxed text-foreground/90"
+          />
+        ) : (
+          <p className="text-sm text-muted">No description.</p>
+        )}
       </PortalCard>
 
       <PortalCard title="Comments">
@@ -108,7 +114,7 @@ export default function TicketDetailPage({
                 <p className="text-xs text-muted">
                   {c.author} · {new Date(c.created).toLocaleString()}
                 </p>
-                <p className="mt-2 whitespace-pre-wrap text-sm">{c.body}</p>
+                <MarkdownContent content={c.body} className="mt-2 text-sm" />
               </li>
             ))
           )}

@@ -1,3 +1,4 @@
+import { adfToMarkdown } from "@/lib/jira/adf";
 
 const JIRA_BASE = process.env.JIRA_BASE_URL ?? "https://bluelightning.atlassian.net";
 const JIRA_EMAIL = process.env.JIRA_EMAIL ?? "";
@@ -115,26 +116,6 @@ function markdownToAdf(text: string) {
   };
 }
 
-function adfToPlain(body: JiraComment["body"]): string {
-  if (typeof body === "string") return body;
-  try {
-    const walk = (nodes: unknown[]): string =>
-      nodes
-        .map((node) => {
-          if (!node || typeof node !== "object") return "";
-          const n = node as { type?: string; text?: string; content?: unknown[] };
-          if (n.type === "text" && n.text) return n.text;
-          if (n.content) return walk(n.content);
-          return "";
-        })
-        .join("");
-    return walk(body.content ?? []).trim();
-  } catch {
-    return "";
-  }
-}
-
-export { adfToPlain };
 
 const ISSUE_SEARCH_FIELDS = [
   "summary",
@@ -408,7 +389,7 @@ export function serializeIssueDetail(issue: JiraIssue) {
     issue.fields.comment?.comments.map((c) => ({
       id: c.id,
       author: c.author.displayName,
-      body: adfToPlain(c.body),
+      body: adfToMarkdown(c.body),
       created: c.created,
     })) ?? [];
 
@@ -416,7 +397,7 @@ export function serializeIssueDetail(issue: JiraIssue) {
     ...serializeIssue(issue),
     description:
       issue.fields.description && typeof issue.fields.description !== "string"
-        ? adfToPlain(issue.fields.description as JiraComment["body"])
+        ? adfToMarkdown(issue.fields.description as JiraComment["body"])
         : (issue.fields.description as string | undefined) ?? "",
     comments,
   };
