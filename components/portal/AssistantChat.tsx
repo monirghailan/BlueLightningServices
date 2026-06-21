@@ -2,7 +2,7 @@
 
 import { useChat } from "@ai-sdk/react";
 import { DefaultChatTransport } from "ai";
-import { useEffect, useMemo, useState } from "react";
+import { useMemo, useState } from "react";
 import { ASSISTANT_PERSONA_LABELS, ASSISTANT_PERSONAS } from "@/lib/assistant/personas";
 import type { AssistantPersona } from "@/lib/supabase/database.types";
 import type { AssistantChatMessage } from "@/lib/assistant/chat-types";
@@ -28,7 +28,8 @@ export function AssistantChat({
   canChangePersona = false,
 }: AssistantChatProps) {
   const [meta, setMeta] = useState<AssistantMeta>(initialMeta);
-  const [personaSaving, setPersonaSaving] = useState(false);
+  const [savingPersona, setSavingPersona] = useState<AssistantPersona | null>(null);
+  const [personaError, setPersonaError] = useState<string | null>(null);
   const [showPersonaPicker, setShowPersonaPicker] = useState(false);
   const [conversationId, setConversationId] = useState<string | undefined>();
   const [input, setInput] = useState("");
@@ -60,20 +61,27 @@ export function AssistantChat({
   });
 
   async function savePersona(persona: AssistantPersona) {
-    setPersonaSaving(true);
+    const previousPersona = meta.assistantPersona;
+    setPersonaError(null);
+    setSavingPersona(persona);
+    setMeta((current) => ({ ...current, assistantPersona: persona }));
+
     const res = await fetch("/api/portal/assistant/persona", {
       method: "PATCH",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ assistantPersona: persona }),
     });
-    setPersonaSaving(false);
 
     if (res.ok) {
       const data = await res.json();
       setMeta((current) => ({ ...current, assistantPersona: data.assistantPersona }));
-      window.localStorage.setItem("bls-assistant-persona-confirmed", "1");
       setShowPersonaPicker(false);
+    } else {
+      setMeta((current) => ({ ...current, assistantPersona: previousPersona }));
+      setPersonaError("Couldn't save role. Try again.");
     }
+
+    setSavingPersona(null);
   }
 
   function handleSuggestedPrompt(prompt: string) {
@@ -97,15 +105,6 @@ export function AssistantChat({
     );
   }
 
-  useEffect(() => {
-    if (!canChangePersona) return;
-
-    const confirmed = window.localStorage.getItem("bls-assistant-persona-confirmed");
-    if (!confirmed && meta?.assistantPersona === "general") {
-      setShowPersonaPicker(true);
-    }
-  }, [canChangePersona, meta.assistantPersona]);
-
   if (!meta.assistantEnabled) {
     return (
       <PortalCard title="Assistant not ready yet">
@@ -125,18 +124,28 @@ export function AssistantChat({
             This helps the assistant show the most relevant guidance for your day-to-day work.
           </p>
           <div className="grid gap-2 sm:grid-cols-2">
-            {ASSISTANT_PERSONAS.map((persona) => (
-              <button
-                key={persona}
-                type="button"
-                disabled={personaSaving}
-                onClick={() => savePersona(persona)}
-                className="rounded-xl border border-border bg-surface-elevated px-4 py-3 text-left text-sm hover:border-bolt-fill/40"
-              >
-                {ASSISTANT_PERSONA_LABELS[persona]}
-              </button>
-            ))}
+            {ASSISTANT_PERSONAS.map((persona) => {
+              const isSaving = savingPersona === persona;
+
+              return (
+                <button
+                  key={persona}
+                  type="button"
+                  disabled={savingPersona !== null}
+                  onClick={() => savePersona(persona)}
+                  aria-busy={isSaving}
+                  className={`rounded-xl border bg-surface-elevated px-4 py-3 text-left text-sm transition-colors ${
+                    isSaving
+                      ? "border-bolt-fill/60 text-foreground"
+                      : "border-border hover:border-bolt-fill/40"
+                  } ${savingPersona !== null && !isSaving ? "opacity-50" : ""}`}
+                >
+                  {isSaving ? "Saving…" : ASSISTANT_PERSONA_LABELS[persona]}
+                </button>
+              );
+            })}
           </div>
+          {personaError && <p className="mt-3 text-sm text-red-200">{personaError}</p>}
         </PortalCard>
       )}
 
@@ -145,7 +154,9 @@ export function AssistantChat({
           <p className="text-sm text-muted">
             Persona:{" "}
             <span className="text-foreground">
-              {ASSISTANT_PERSONA_LABELS[meta.assistantPersona]}
+              {savingPersona
+                ? "Saving…"
+                : ASSISTANT_PERSONA_LABELS[meta.assistantPersona]}
             </span>
           </p>
           {meta.assistantLastIndexedAt && (
@@ -161,8 +172,9 @@ export function AssistantChat({
         {canChangePersona && (
           <button
             type="button"
+            disabled={savingPersona !== null}
             onClick={() => setShowPersonaPicker((value) => !value)}
-            className="rounded-lg border border-border px-3 py-1.5 text-sm text-muted hover:text-foreground"
+            className="rounded-lg border border-border px-3 py-1.5 text-sm text-muted hover:text-foreground disabled:opacity-50"
           >
             Change role
           </button>
