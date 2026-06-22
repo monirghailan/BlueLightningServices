@@ -8,7 +8,7 @@ Complete this checklist **before** linking a repo in Supabase and triggering ind
 
 ## What you are building
 
-For each onboarded client you create a **private GitHub repo** containing plain-English guides about *their* Salesforce org — not generic Salesforce help. The assistant indexes this repo, retrieves relevant sections at question time, and answers with citations.
+For each onboarded client you create a **private GitHub repo** containing plain-English guides about *their* Salesforce org — not generic Salesforce help. The assistant indexes this repo, retrieves relevant sections at question time, and delivers **complete inline answers** in chat — portal users cannot open the repo or follow links to guide files.
 
 **Target users:** sales reps, sales managers, service agents, service managers, and general/product-owner roles — all non-technical.
 
@@ -154,7 +154,7 @@ last_reviewed: 2026-06-20
 
 | Field | Required | Notes |
 |---|---|---|
-| `title` | Yes | Human-readable; shown in citations |
+| `title` | Yes | Human-readable; used for BLS-internal source tracking |
 | `personas` | Yes | Array of persona keys or `all` for everyone |
 | `summary` | Recommended | One sentence; helps retrieval match vague questions |
 | `last_reviewed` | Recommended | ISO date; you maintain this manually |
@@ -194,12 +194,12 @@ These rules make answers accurate, grounded, and non-technical.
 
 1. **Lead with what to click** — “Open the **Leads** tab → click **New**” not “Create a Lead record via the Lead object.”
 2. **Use the client’s actual UI labels** — match what users see on screen (tab names, button labels, picklist values).
-3. **One topic per file** — one how-to = one task (easier chunking and citation).
-4. **Use numbered steps** for procedures (max ~8 steps per section; split long flows across linked files).
+3. **One topic per file** — one how-to = one task (easier chunking and retrieval).
+4. **Use numbered steps** for procedures (max ~8 steps per section; split long flows across separate how-to files).
 5. **Define jargon inline** — “Opportunity (a deal you’re trying to close)” on first mention.
 6. **State prerequisites** — “You need access to the Sales app” or “Your manager must approve deals over £50k.”
 7. **Include “What happens next”** — what the user should expect after completing steps.
-8. **Cross-link related files** — `[Convert a lead](how-to/convert-a-lead.md)` using relative paths.
+8. **Write self-contained how-tos** — include all steps in the file; the assistant inlines them in chat. Do not tell users to “see another guide.”
 9. **Call out common mistakes** — short “If you don’t see X, check Y” blocks help the model handle follow-ups.
 10. **Keep sentences short** — aim for plain language readable at ~Year 9 level.
 
@@ -212,7 +212,7 @@ These rules make answers accurate, grounded, and non-technical.
 5. **Don’t combine unrelated topics** in one file — “Lead conversion AND quoting AND approvals” should be three files.
 6. **Don’t use screenshots as the only instructions** — always include text steps; images are supplementary.
 7. **Don’t reference “the old system”** without dates — confuses retrieval; archive outdated docs to an `archive/` folder (excluded from index if you add that later).
-8. **Don’t duplicate the same content** in multiple files — link instead; duplicates cause conflicting citations.
+8. **Don’t duplicate the same content** in multiple files — merge or keep one canonical how-to; duplicates cause conflicting answers.
 
 ### Ideal how-to structure
 
@@ -282,7 +282,7 @@ When you onboard a client, gather this from discovery calls / shadowing sessions
 ### FAQ (→ `faq.md`)
 
 - [ ] Real questions from users — use their exact phrasing in `## Question` headings
-- [ ] Short answers with links to full how-to guides
+- [ ] Short summary (1–3 sentences) under each heading; put full steps in the matching `how-to/` file (the assistant retrieves and inlines them — no markdown links in FAQ)
 
 ---
 
@@ -293,15 +293,16 @@ Copy this file into every client repo so future editors (including you) stay con
 ```markdown
 # Contributing to this org guide
 
-This repo powers the BLS Portal Assistant. Write for non-technical Salesforce users.
+This repo powers the BLS Portal Assistant. Write for non-technical Salesforce users. Content is retrieved at answer time and delivered **inline in chat** — portal users cannot open repo files or follow links.
 
 ## Rules
 
 1. Every guide needs YAML frontmatter with `title` and `personas`.
 2. Use UI labels from the live org, not API names in headings.
-3. One task per how-to file.
+3. One task per how-to file; include all steps in that file.
 4. No Setup/admin instructions — end-user steps only.
 5. Update `last_reviewed` when you change a file.
+6. Do not use markdown links in FAQ or how-to body text — the assistant inlines answers; users never see file paths.
 
 ## Personas
 
@@ -342,14 +343,15 @@ Run through this **before** connecting the repo to Supabase / triggering index.
 - [ ] Each active persona has at least **2 dedicated how-to guides**
 - [ ] Each how-to has numbered steps and a “If you don’t see…” fallback
 - [ ] FAQ uses real user phrasing
-- [ ] No duplicate procedures across files (merge or cross-link)
+- [ ] No duplicate procedures across files (merge into one canonical how-to)
 - [ ] No confidential data (passwords, API keys, personal customer data)
 
-### Links & maintenance
+### Maintenance
 
-- [ ] Relative links between files work on GitHub preview
 - [ ] `last_reviewed` dates set on all guides
 - [ ] Outdated pages moved to `archive/` or deleted
+
+> **Note:** Relative links between files are optional for BLS editors browsing on GitHub. Portal users never see those links — the assistant delivers content inline in chat.
 
 ### Smoke test (manual)
 
@@ -416,7 +418,7 @@ The chatbot indexes **only** published markdown in the org guide repo — not XM
 |---|---|---|
 | Generic Salesforce docs | Assistant hallucinates or gives wrong org-specific steps | Only document *this* client’s org |
 | Missing frontmatter | Content may not reach the right persona or index poorly | Add YAML to every guide |
-| One giant README | Poor chunking; citations point to vague blobs | Split into how-to / processes |
+| One giant README | Poor chunking; vague retrieval | Split into how-to / processes |
 | API-first language | Non-technical users don’t understand answers | UI labels first, API in glossary |
 | Stale content after org changes | Wrong answers erode trust | Update guides manually in `bls-org-docs`; re-index |
 

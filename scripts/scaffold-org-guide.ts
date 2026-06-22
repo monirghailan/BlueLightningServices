@@ -162,6 +162,8 @@ function buildFiles(options: Options): Record<string, string> {
 
 ${quickLinks}
 
+_Quick links are for BLS editors browsing on GitHub. Portal users receive this content inline in the Assistant — they do not see file paths or links._
+
 ## Maintained by
 
 Blue Lightning Services · Portal slug: \`${slug}\`
@@ -171,15 +173,16 @@ Last updated: ${todayIso()}
 
   files["CONTRIBUTING.md"] = `# Contributing to this org guide
 
-This repo powers the BLS Portal Assistant. Write for non-technical Salesforce users.
+This repo powers the BLS Portal Assistant. Write for non-technical Salesforce users. Content is retrieved at answer time and delivered **inline in chat** — portal users cannot open repo files or follow links.
 
 ## Rules
 
 1. Every guide needs YAML frontmatter with \`title\` and \`personas\`.
 2. Use UI labels from the live org, not API names in headings.
-3. One task per how-to file.
+3. One task per how-to file; include all steps in that file.
 4. No Setup/admin instructions — end-user steps only.
 5. Update \`last_reviewed\` when you change a file.
+6. Do not use markdown links in FAQ or how-to body text — the assistant inlines answers; users never see file paths.
 
 ## Personas
 
@@ -213,7 +216,7 @@ Add terms users hear in ${clientName}'s org. Use their **on-screen labels**.
 
 ## Record types
 
-<!-- TODO: Brief plain-English description of Account, Contact, Lead, etc. as used here. Link to objects/ for detail. -->
+<!-- TODO: Brief plain-English description of Account, Contact, Lead, etc. as used here. -->
 `;
 
   files["faq.md"] = `${frontmatter({
@@ -222,15 +225,17 @@ Add terms users hear in ${clientName}'s org. Use their **on-screen labels**.
     summary: "Common questions about using Salesforce in this org.",
   })}# FAQ
 
-Use real questions users ask. Link to full how-to guides where possible.
+Use real questions users ask. Each \`##\` heading becomes a suggested prompt in the Portal Assistant.
+
+Under each heading, write a 1–3 sentence summary. Put full step-by-step instructions in the matching \`how-to/\` file — the assistant retrieves and inlines them. Do not use markdown links.
 
 ## <!-- TODO: Replace with a real question, e.g. How do I create a lead? -->
 
-<!-- TODO: Short answer + link, e.g. See [How to create a lead](how-to/create-a-lead.md). -->
+<!-- TODO: Short summary, e.g. Open the Leads tab and click New to start a lead record. -->
 
 ## <!-- TODO: Second question -->
 
-<!-- TODO: Answer -->
+<!-- TODO: Short summary answer -->
 
 ## <!-- TODO: Third question -->
 
@@ -283,7 +288,7 @@ Use real questions users ask. Link to full how-to guides where possible.
 
 ## Related
 
-<!-- TODO: Link to processes/ and how-to/ files. -->
+<!-- TODO: Related processes and how-tos (write self-contained content in those files). -->
 `;
   }
 
@@ -327,7 +332,7 @@ Do not scaffold fictional example objects — they get indexed and produce wrong
 
 ## Related
 
-<!-- TODO: Link to verified how-to/ files when you create them. Do not link to guides that do not exist yet. -->
+<!-- TODO: Add verified how-to/ files when you create them. Do not reference guides that do not exist yet. -->
 `;
 
     files["processes/quoting.md"] = `${frontmatter({
@@ -374,7 +379,7 @@ Do not scaffold fictional example objects — they get indexed and produce wrong
 
 ## Related
 
-<!-- TODO: Link to verified how-to/ files when you create them. Do not link to guides that do not exist yet. -->
+<!-- TODO: Add verified how-to/ files when you create them. Do not reference guides that do not exist yet. -->
 `;
 
   }

@@ -231,7 +231,7 @@ export function AssistantChat({
               {message.parts.map((part, index) =>
                 part.type === "text" ? (
                   message.role === "assistant" ? (
-                    <MarkdownContent key={index} content={part.text} />
+                    <MarkdownContent key={index} content={part.text} assistantMode />
                   ) : (
                     <p key={index} className="whitespace-pre-wrap leading-relaxed">
                       {part.text}

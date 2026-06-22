@@ -62,7 +62,7 @@ function AssistantAnswer({ scenario }: { scenario: DemoScenario }) {
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={{ delay: 0.3, ...defaultTransition }}
-          className="mt-3 inline-flex rounded-full border border-border bg-surface px-2.5 py-1 font-mono text-[11px] text-muted"
+          className="mt-3 inline-flex rounded-full border border-border bg-surface px-2.5 py-1 text-[11px] text-muted"
         >
           {scenario.source}
         </motion.p>

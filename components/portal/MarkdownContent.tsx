@@ -4,9 +4,31 @@ import remarkGfm from "remark-gfm";
 interface MarkdownContentProps {
   content: string;
   className?: string;
+  /** When true, strip links/paths and render anchors as plain text (Portal Assistant). */
+  assistantMode?: boolean;
 }
 
-export function MarkdownContent({ content, className }: MarkdownContentProps) {
+/** Remove markdown links and bare repo paths from assistant output. */
+export function sanitizeAssistantMarkdown(content: string): string {
+  return content
+    .replace(/\[([^\]]+)\]\([^)]*\)/g, "$1")
+    .replace(
+      /\b(?:how-to|processes|objects|personas|knowledge|_internal|archive)\/[\w./-]+\.md\b/gi,
+      ""
+    )
+    .replace(/\b(?:faq|glossary|README|CONTRIBUTING)\.md\b/gi, "")
+    .replace(/ {2,}/g, " ")
+    .replace(/\n{3,}/g, "\n\n")
+    .trim();
+}
+
+export function MarkdownContent({
+  content,
+  className,
+  assistantMode = false,
+}: MarkdownContentProps) {
+  const renderedContent = assistantMode ? sanitizeAssistantMarkdown(content) : content;
+
   return (
     <div className={className}>
       <ReactMarkdown
@@ -35,16 +57,19 @@ export function MarkdownContent({ content, className }: MarkdownContentProps) {
           h3: ({ children }) => (
             <h3 className="mb-2 mt-3 text-sm font-semibold first:mt-0">{children}</h3>
           ),
-          a: ({ href, children }) => (
-            <a
-              href={href}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="text-bolt-glow underline underline-offset-2 hover:text-bolt-fill"
-            >
-              {children}
-            </a>
-          ),
+          a: ({ href, children }) =>
+            assistantMode ? (
+              <span>{children}</span>
+            ) : (
+              <a
+                href={href}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-bolt-glow underline underline-offset-2 hover:text-bolt-fill"
+              >
+                {children}
+              </a>
+            ),
           code: ({ className, children }) => {
             const isBlock = className?.includes("language-");
             if (isBlock) {
@@ -72,7 +97,7 @@ export function MarkdownContent({ content, className }: MarkdownContentProps) {
           ),
         }}
       >
-        {content}
+        {renderedContent}
       </ReactMarkdown>
     </div>
   );

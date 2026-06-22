@@ -234,19 +234,19 @@ export const portalLanding = {
         question: "How do I create a lead?",
         answer:
           "From the **Leads** tab, click **New**. Enter the person's name, company, and email — at minimum. Set **Lead Source** so reporting stays accurate, then click **Save**.\n\nIf the company already exists as an account, search first to avoid duplicates. The org guide lists required fields for your team.",
-        source: "how-to/create-a-lead.md",
+        source: "From your org guide",
       },
       {
         question: "How do I log a case?",
         answer:
           "Open the **Cases** tab and click **New**. Select the account or contact the case is for, enter a subject and description, and set **Status** to New.\n\nChoose the **Type** and **Reason** that best match the issue — your service team uses these for routing. Click **Save** and the case owner is assigned automatically.",
-        source: "how-to/log-a-case.md",
+        source: "From your org guide",
       },
       {
         question: "How do I convert a lead?",
         answer:
           "Open the lead record and confirm the details are complete. Before you can convert, **Country**, **Website**, and **Number of Employees** must be filled in — conversion is blocked until all three are present.\n\nOnce those fields are set, click **Convert**. Choose an existing account or create a new one, add contact details if prompted, and optionally create an opportunity. Click **Convert** to finish.",
-        source: "processes/lead-to-opportunity.md",
+        source: "From your org guide",
       },
     ],
   },

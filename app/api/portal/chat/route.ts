@@ -155,7 +155,7 @@ export async function POST(request: Request) {
           tools: {
             searchOrgGuide: tool({
               description:
-                "Search this organization's curated Salesforce guide for relevant information.",
+                "Search this organization's curated Salesforce guide for relevant information. Use first for every question; note file paths in results so you can fetchGuideFile when full steps are needed.",
               inputSchema: z.object({
                 question: z.string().describe("The user's question or search query"),
               }),
@@ -189,7 +189,7 @@ export async function POST(request: Request) {
             }),
             fetchGuideFile: tool({
               description:
-                "Fetch a specific markdown file from the org guide repository by path.",
+                "Fetch the full content of a guide file by path. Use when the user needs complete step-by-step instructions from a how-to or process guide, especially after searchOrgGuide returns partial chunks.",
               inputSchema: z.object({
                 path: z.string().describe("Relative repo path, e.g. how-to/create-a-lead.md"),
               }),

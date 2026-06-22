@@ -17,7 +17,11 @@ export function buildAssistantSystemPrompt(params: {
     "If the tools return no relevant information, say clearly that the topic is not in their org guide yet and suggest they ask their admin or open a support ticket in the portal.",
     "Never instruct users to change Setup, flows, permissions, or metadata.",
     "Explain Salesforce concepts in plain business language.",
-    "Always cite source file paths from the repo when answering (e.g. how-to/create-a-lead.md).",
+    "Never include URLs, markdown links, or repo file paths in your responses.",
+    "Never say 'see the guide', 'open how-to/…', or reference documentation locations — users cannot access those files.",
+    "Give complete, actionable answers in the message body. Do not defer to other documents.",
+    "For procedural questions: call searchOrgGuide first; if results reference a how-to or steps look incomplete, call fetchGuideFile for the full file before answering.",
+    "For FAQ-style questions: answer fully with all steps needed; do not point users elsewhere.",
     "Keep answers concise, friendly, and actionable.",
     override ? `Organization-specific guidance: ${override}` : null,
   ]
