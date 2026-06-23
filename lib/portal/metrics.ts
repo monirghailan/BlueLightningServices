@@ -12,6 +12,9 @@ import { resolvePortalBoardId } from "@/lib/jira/board";
 import { clientScopeJql } from "@/lib/jira/client-field";
 import type { Organization } from "@/lib/supabase/database.types";
 
+/** Tickets blocked on client feedback before we had a waiting status — omit from close-time KPI. */
+export const PORTAL_EXCLUDE_CLOSE_METRIC_LABEL = "portal-exclude-close-metric";
+
 export interface PortalMetrics {
   openTickets: number;
   closedThisMonth: number;
@@ -47,6 +50,11 @@ function weekLabel(date: Date): string {
   return date.toISOString().slice(0, 10);
 }
 
+function hasLabel(issue: JiraIssue, label: string): boolean {
+  const needle = label.toLowerCase();
+  return (issue.fields.labels ?? []).some((value) => value.toLowerCase() === needle);
+}
+
 export async function computeMetrics(org: Organization): Promise<PortalMetrics> {
   const clientLabel = org.jira_component_name;
   if (!clientLabel) {
@@ -67,6 +75,7 @@ export async function computeMetrics(org: Organization): Promise<PortalMetrics> 
   });
 
   const closeTimes = closedThisMonth
+    .filter((i) => !hasLabel(i, PORTAL_EXCLUDE_CLOSE_METRIC_LABEL))
     .filter((i) => i.fields.created && i.fields.resolutiondate)
     .map((i) => businessDaysBetween(i.fields.created!, i.fields.resolutiondate!))
     .filter((d) => d >= 0);
