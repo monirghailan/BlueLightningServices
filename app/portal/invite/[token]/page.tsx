@@ -1,12 +1,12 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { useRouter } from "next/navigation";
 import Link from "next/link";
 import {
   PortalAuthShell,
   PortalBackToWebsiteLink,
 } from "@/components/portal/PortalAuthShell";
+import { PortalLoadingScreen } from "@/components/portal/PortalLoadingScreen";
 import { site } from "@/lib/content";
 
 export default function AcceptInvitePage({
@@ -14,7 +14,6 @@ export default function AcceptInvitePage({
 }: {
   params: Promise<{ token: string }>;
 }) {
-  const router = useRouter();
   const [token, setToken] = useState<string | null>(null);
   const [invite, setInvite] = useState<{ email: string; orgName: string; role: string } | null>(
     null
@@ -22,6 +21,7 @@ export default function AcceptInvitePage({
   const [password, setPassword] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
+  const [redirecting, setRedirecting] = useState(false);
 
   useEffect(() => {
     void params.then((p) => setToken(p.token));
@@ -67,9 +67,17 @@ export default function AcceptInvitePage({
         const home =
           authData.home ??
           (invite?.role === "administrator" ? "/portal/dashboard" : "/portal/assistant");
-        router.push(home);
-        router.refresh();
+        setRedirecting(true);
+        window.location.assign(home);
       });
+  }
+
+  if (redirecting) {
+    return (
+      <div className="fixed inset-0 z-50 bg-background">
+        <PortalLoadingScreen fullScreen />
+      </div>
+    );
   }
 
   return (

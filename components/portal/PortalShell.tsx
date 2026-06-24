@@ -2,9 +2,13 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { usePathname, useRouter } from "next/navigation";
+import { usePathname } from "next/navigation";
 import { Cog } from "lucide-react";
 import { PortalLoadingScreen } from "@/components/portal/PortalLoadingScreen";
+import {
+  PortalNavigationProvider,
+  usePortalNavigation,
+} from "@/components/portal/PortalNavigationProvider";
 import { cn } from "@/lib/utils";
 import type { MemberRole } from "@/lib/supabase/database.types";
 
@@ -20,8 +24,18 @@ interface PortalShellProps {
 }
 
 export function PortalShell({ children, orgName, role }: PortalShellProps) {
+  return (
+    <PortalNavigationProvider>
+      <PortalShellInner orgName={orgName} role={role}>
+        {children}
+      </PortalShellInner>
+    </PortalNavigationProvider>
+  );
+}
+
+function PortalShellInner({ children, orgName, role }: PortalShellProps) {
   const pathname = usePathname();
-  const router = useRouter();
+  const { isNavigating, push, refresh } = usePortalNavigation();
   const [signingOut, setSigningOut] = useState(false);
 
   const visibleNav = nav.filter(
@@ -38,8 +52,8 @@ export function PortalShell({ children, orgName, role }: PortalShellProps) {
         return;
       }
 
-      router.push("/portal/login");
-      router.refresh();
+      push("/portal/login");
+      refresh();
     } catch {
       setSigningOut(false);
     }
@@ -111,7 +125,14 @@ export function PortalShell({ children, orgName, role }: PortalShellProps) {
           ))}
         </nav>
       </header>
-      <main className="mx-auto max-w-6xl px-4 py-8 sm:px-6">{children}</main>
+      <main className="relative mx-auto max-w-6xl px-4 py-8 sm:px-6">
+        {children}
+        {isNavigating && !signingOut && (
+          <div className="absolute inset-0 z-10 -mx-4 -my-8 bg-background sm:-mx-6">
+            <PortalLoadingScreen />
+          </div>
+        )}
+      </main>
 
       {signingOut && (
         <div className="fixed inset-0 z-50 bg-background">

@@ -1,16 +1,16 @@
 "use client";
 
 import { useState } from "react";
-import { useRouter, useSearchParams } from "next/navigation";
+import { useSearchParams } from "next/navigation";
 import Link from "next/link";
 import {
   PortalAuthShell,
   PortalBackToWebsiteLink,
 } from "@/components/portal/PortalAuthShell";
+import { PortalLoadingScreen } from "@/components/portal/PortalLoadingScreen";
 import { site, portalLanding } from "@/lib/content";
 
 export default function PortalLoginPage() {
-  const router = useRouter();
   const searchParams = useSearchParams();
   const nextParam = searchParams.get("next");
 
@@ -27,6 +27,7 @@ export default function PortalLoginPage() {
     return null;
   });
   const [loading, setLoading] = useState(false);
+  const [redirecting, setRedirecting] = useState(false);
 
   async function onSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -48,8 +49,16 @@ export default function PortalLoginPage() {
 
     const destination =
       nextParam && nextParam !== "/portal" ? nextParam : (data.home ?? "/portal/assistant");
-    router.push(destination);
-    router.refresh();
+    setRedirecting(true);
+    window.location.assign(destination);
+  }
+
+  if (redirecting) {
+    return (
+      <div className="fixed inset-0 z-50 bg-background">
+        <PortalLoadingScreen fullScreen />
+      </div>
+    );
   }
 
   return (

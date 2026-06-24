@@ -1,9 +1,11 @@
+import { Suspense } from "react";
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { getPortalSession } from "@/lib/portal/auth";
 import { PortalShell } from "@/components/portal/PortalShell";
+import { PortalLoadingScreen } from "@/components/portal/PortalLoadingScreen";
 
-export default async function PortalAppLayout({
+async function AuthenticatedPortalShell({
   children,
 }: {
   children: React.ReactNode;
@@ -22,5 +24,23 @@ export default async function PortalAppLayout({
     <PortalShell orgName={session.organization.name} role={session.role}>
       {children}
     </PortalShell>
+  );
+}
+
+export default function PortalAppLayout({
+  children,
+}: {
+  children: React.ReactNode;
+}) {
+  return (
+    <Suspense
+      fallback={
+        <div className="portal-shell min-h-screen bg-background text-foreground">
+          <PortalLoadingScreen fullScreen />
+        </div>
+      }
+    >
+      <AuthenticatedPortalShell>{children}</AuthenticatedPortalShell>
+    </Suspense>
   );
 }

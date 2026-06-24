@@ -1,17 +1,28 @@
 import { Suspense } from "react";
 import { redirect } from "next/navigation";
 import { getPortalSession, getPortalHomePath } from "@/lib/portal/auth";
+import { PortalLoadingScreen } from "@/components/portal/PortalLoadingScreen";
 import PortalLoginPage from "./PortalLoginClient";
 
-export default async function Page() {
+async function LoginGate() {
   const session = await getPortalSession();
   if (session) {
     redirect(getPortalHomePath(session.role));
   }
 
+  return <PortalLoginPage />;
+}
+
+export default function Page() {
   return (
-    <Suspense fallback={<div className="flex min-h-screen items-center justify-center text-muted">Loading…</div>}>
-      <PortalLoginPage />
+    <Suspense
+      fallback={
+        <div className="fixed inset-0 z-50 bg-background">
+          <PortalLoadingScreen fullScreen />
+        </div>
+      }
+    >
+      <LoginGate />
     </Suspense>
   );
 }
