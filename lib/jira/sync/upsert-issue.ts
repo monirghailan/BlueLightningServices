@@ -40,7 +40,9 @@ export async function upsertIssueFromJira(
     organization_id: orgId,
     jira_key: issue.key,
     summary: issue.fields.summary,
-    description: descriptionToMarkdown(issue.fields.description),
+    ...(issue.fields.description !== undefined
+      ? { description: descriptionToMarkdown(issue.fields.description) }
+      : {}),
     issue_type: issue.fields.issuetype?.name ?? "Task",
     priority: issue.fields.priority?.name ?? null,
     status: issue.fields.status?.name ?? "Unknown",

@@ -134,6 +134,7 @@ function markdownToAdf(text: string) {
 
 const ISSUE_SEARCH_FIELDS = [
   "summary",
+  "description",
   "status",
   "issuetype",
   "parent",
