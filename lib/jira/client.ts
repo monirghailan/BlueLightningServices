@@ -103,6 +103,21 @@ export interface JiraSearchResult {
   total: number;
 }
 
+export interface JiraChangelogItem {
+  field: string;
+  fromString?: string | null;
+  toString?: string | null;
+}
+
+export interface JiraChangelogHistory {
+  created: string;
+  items: JiraChangelogItem[];
+}
+
+export interface JiraChangelog {
+  histories: JiraChangelogHistory[];
+}
+
 function markdownToAdf(text: string) {
   return {
     type: "doc",
@@ -193,6 +208,28 @@ export async function getIssue(key: string) {
   return jiraFetch<JiraIssue>(
     `/rest/api/3/issue/${key}?fields=summary,description,status,issuetype,parent,priority,labels,created,updated,resolutiondate,comment`
   );
+}
+
+export async function getIssueChangelog(issueKey: string): Promise<JiraChangelog> {
+  const histories: JiraChangelogHistory[] = [];
+  let startAt = 0;
+  const maxResults = 100;
+
+  while (true) {
+    const page = await jiraFetch<{
+      histories?: JiraChangelogHistory[];
+      total?: number;
+    }>(`/rest/api/3/issue/${issueKey}/changelog?startAt=${startAt}&maxResults=${maxResults}`);
+
+    const batch = page.histories ?? [];
+    histories.push(...batch);
+
+    const total = page.total ?? histories.length;
+    startAt += batch.length;
+    if (batch.length === 0 || startAt >= total) break;
+  }
+
+  return { histories };
 }
 
 export async function createIssue(input: {

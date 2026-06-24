@@ -2,6 +2,7 @@ import {
   getBacklogIssues,
   getBoardIssues,
   getIssue,
+  getIssueChangelog,
   isSubtaskIssue,
   parentIssuesOnly,
   searchIssues,
@@ -10,9 +11,10 @@ import {
 } from "@/lib/jira/client";
 import { resolvePortalBoardId } from "@/lib/jira/board";
 import { clientScopeJql } from "@/lib/jira/client-field";
+import { activeBusinessDaysToClose } from "@/lib/portal/close-time";
 import type { Organization } from "@/lib/supabase/database.types";
 
-/** Tickets blocked on client feedback before we had a waiting status — omit from close-time KPI. */
+/** Legacy tickets without reliable In Review history — omit from close-time KPI. */
 export const PORTAL_EXCLUDE_CLOSE_METRIC_LABEL = "portal-exclude-close-metric";
 
 export interface PortalMetrics {
@@ -27,53 +29,6 @@ export interface PortalMetrics {
 
 function daysSince(iso: string): number {
   return Math.floor((Date.now() - new Date(iso).getTime()) / (1000 * 60 * 60 * 24));
-}
-
-const MS_PER_HOUR = 60 * 60 * 1000;
-const MS_PER_BUSINESS_DAY = 8 * MS_PER_HOUR;
-const MS_PER_CALENDAR_DAY = 24 * MS_PER_HOUR;
-
-function utcDayStart(date: Date): number {
-  return Date.UTC(date.getUTCFullYear(), date.getUTCMonth(), date.getUTCDate());
-}
-
-function isWeekday(date: Date): boolean {
-  const day = date.getUTCDay();
-  return day !== 0 && day !== 6;
-}
-
-/** Weekdays only: partial days as hours/8, full intermediate weekdays as 1.0 each. */
-function fractionalBusinessDaysBetween(startIso: string, endIso: string): number {
-  const start = new Date(startIso);
-  const end = new Date(endIso);
-  const startMs = start.getTime();
-  const endMs = end.getTime();
-  if (endMs <= startMs) return 0;
-
-  const startDay = utcDayStart(start);
-  const endDay = utcDayStart(end);
-
-  if (startDay === endDay) {
-    if (!isWeekday(start)) return 0;
-    return Math.min(endMs - startMs, MS_PER_BUSINESS_DAY) / MS_PER_BUSINESS_DAY;
-  }
-
-  let total = 0;
-
-  if (isWeekday(start)) {
-    const firstDayEnd = startDay + MS_PER_CALENDAR_DAY;
-    total += Math.min(firstDayEnd - startMs, MS_PER_BUSINESS_DAY) / MS_PER_BUSINESS_DAY;
-  }
-
-  if (isWeekday(end)) {
-    total += Math.min(endMs - endDay, MS_PER_BUSINESS_DAY) / MS_PER_BUSINESS_DAY;
-  }
-
-  for (let cursor = startDay + MS_PER_CALENDAR_DAY; cursor < endDay; cursor += MS_PER_CALENDAR_DAY) {
-    if (isWeekday(new Date(cursor))) total += 1;
-  }
-
-  return total;
 }
 
 function weekLabel(date: Date): string {
@@ -104,11 +59,22 @@ export async function computeMetrics(org: Organization): Promise<PortalMetrics> 
     return resolved && new Date(resolved) >= monthStart;
   });
 
-  const closeTimes = closedThisMonth
+  const closeMetricIssues = closedThisMonth
     .filter((i) => !hasLabel(i, PORTAL_EXCLUDE_CLOSE_METRIC_LABEL))
-    .filter((i) => i.fields.created && i.fields.resolutiondate)
-    .map((i) => fractionalBusinessDaysBetween(i.fields.created!, i.fields.resolutiondate!))
-    .filter((d) => d >= 0);
+    .filter((i) => i.fields.created && i.fields.resolutiondate);
+
+  const closeTimes = (
+    await Promise.all(
+      closeMetricIssues.map(async (issue) => {
+        const changelog = await getIssueChangelog(issue.key);
+        return activeBusinessDaysToClose(
+          issue.fields.created!,
+          issue.fields.resolutiondate!,
+          changelog
+        );
+      })
+    )
+  ).filter((d) => d >= 0);
   const avgTimeToCloseDays =
     closeTimes.length > 0
       ? Math.round((closeTimes.reduce((a, b) => a + b, 0) / closeTimes.length) * 10) / 10
