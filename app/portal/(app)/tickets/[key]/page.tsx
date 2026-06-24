@@ -27,6 +27,7 @@ export default function TicketDetailPage({
   const [key, setKey] = useState<string | null>(null);
   const [ticket, setTicket] = useState<TicketDetail | null>(null);
   const [comment, setComment] = useState("");
+  const [posting, setPosting] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
@@ -45,23 +46,28 @@ export default function TicketDetailPage({
 
   async function submitComment(e: React.FormEvent) {
     e.preventDefault();
-    if (!key || !comment.trim()) return;
+    if (!key || !comment.trim() || posting) return;
 
-    const res = await fetch(`/api/portal/tickets/${key}/comments`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ body: comment }),
-    });
+    setPosting(true);
+    try {
+      const res = await fetch(`/api/portal/tickets/${key}/comments`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ body: comment }),
+      });
 
-    if (!res.ok) {
-      const data = await res.json();
-      setError(data.error ?? "Failed to post comment.");
-      return;
+      if (!res.ok) {
+        const data = await res.json();
+        setError(data.error ?? "Failed to post comment.");
+        return;
+      }
+
+      setComment("");
+      const refreshed = await fetch(`/api/portal/tickets/${key}`).then((r) => r.json());
+      setTicket(refreshed);
+    } finally {
+      setPosting(false);
     }
-
-    setComment("");
-    const refreshed = await fetch(`/api/portal/tickets/${key}`).then((r) => r.json());
-    setTicket(refreshed);
   }
 
   if (!ticket && !error) {
@@ -135,13 +141,37 @@ export default function TicketDetailPage({
             onChange={(e) => setComment(e.target.value)}
             rows={3}
             placeholder="Add a comment…"
-            className="w-full rounded-xl border border-border bg-surface-elevated px-3 py-2 text-sm"
+            disabled={posting}
+            className="w-full rounded-xl border border-border bg-surface-elevated px-3 py-2 text-sm disabled:opacity-50"
           />
           <button
             type="submit"
-            className="rounded-xl bg-bolt-fill px-4 py-2 text-sm font-medium text-white"
+            disabled={posting || !comment.trim()}
+            className="inline-flex items-center gap-2 rounded-xl bg-bolt-fill px-4 py-2 text-sm font-medium text-white disabled:opacity-50"
           >
-            Post comment
+            {posting && (
+              <svg
+                className="h-4 w-4 animate-spin"
+                viewBox="0 0 24 24"
+                fill="none"
+                aria-hidden="true"
+              >
+                <circle
+                  className="opacity-25"
+                  cx="12"
+                  cy="12"
+                  r="10"
+                  stroke="currentColor"
+                  strokeWidth="4"
+                />
+                <path
+                  className="opacity-75"
+                  fill="currentColor"
+                  d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                />
+              </svg>
+            )}
+            {posting ? "Posting…" : "Post comment"}
           </button>
         </form>
       </PortalCard>

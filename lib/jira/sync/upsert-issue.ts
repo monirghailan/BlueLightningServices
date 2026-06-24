@@ -110,15 +110,27 @@ async function syncIssueComments(issueId: string, issue: JiraIssue) {
 
     const { data: existing } = await supabase
       .from("jira_comments")
-      .select("id")
+      .select("id, source")
       .eq("jira_comment_id", comment.id)
       .maybeSingle();
 
     if (existing?.id) {
-      await supabase.from("jira_comments").update(row).eq("id", existing.id);
-    } else {
-      await supabase.from("jira_comments").insert(row);
+      const updateRow =
+        existing.source === "portal" ? { ...row, source: "portal" as const } : row;
+      await supabase.from("jira_comments").update(updateRow).eq("id", existing.id);
+      continue;
     }
+
+    const portalMatchId = await findUnlinkedPortalComment(supabase, issueId, body);
+    if (portalMatchId) {
+      await supabase
+        .from("jira_comments")
+        .update({ ...row, source: "portal" as const })
+        .eq("id", portalMatchId);
+      continue;
+    }
+
+    await supabase.from("jira_comments").insert(row);
   }
 
   const { data: mirrored } = await supabase
@@ -132,6 +144,33 @@ async function syncIssueComments(issueId: string, issue: JiraIssue) {
       await supabase.from("jira_comments").delete().eq("id", row.id);
     }
   }
+}
+
+function normalizeCommentBody(body: string): string {
+  return body.replace(/\r\n/g, "\n").trim();
+}
+
+async function findUnlinkedPortalComment(
+  supabase: ReturnType<typeof createServiceClient>,
+  issueId: string,
+  body: string
+): Promise<string | null> {
+  const normalizedBody = normalizeCommentBody(body);
+  const { data: candidates } = await supabase
+    .from("jira_comments")
+    .select("id, body_markdown")
+    .eq("issue_id", issueId)
+    .eq("source", "portal")
+    .is("jira_comment_id", null)
+    .order("created_at", { ascending: false });
+
+  for (const candidate of candidates ?? []) {
+    if (normalizeCommentBody(candidate.body_markdown) === normalizedBody) {
+      return candidate.id;
+    }
+  }
+
+  return null;
 }
 
 async function syncIssueTransitions(issueId: string, issueKey: string) {

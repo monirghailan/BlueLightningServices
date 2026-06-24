@@ -260,8 +260,8 @@ export async function createIssue(input: {
   });
 }
 
-export async function addComment(issueKey: string, body: string) {
-  return jiraFetch(`/rest/api/3/issue/${issueKey}/comment`, {
+export async function addComment(issueKey: string, body: string): Promise<JiraComment> {
+  return jiraFetch<JiraComment>(`/rest/api/3/issue/${issueKey}/comment`, {
     method: "POST",
     body: JSON.stringify({ body: markdownToAdf(body) }),
   });

@@ -154,11 +154,24 @@ async function handleAddComment(
     body: string;
   };
 
-  await addComment(payload.jiraKey, payload.body);
+  const created = await addComment(payload.jiraKey, payload.body);
+
+  const { data: existingJiraRow } = await supabase
+    .from("jira_comments")
+    .select("id")
+    .eq("jira_comment_id", created.id)
+    .maybeSingle();
+
+  if (existingJiraRow && existingJiraRow.id !== payload.commentId) {
+    await supabase.from("jira_comments").delete().eq("id", existingJiraRow.id);
+  }
 
   await supabase
     .from("jira_comments")
-    .update({ sync_status: "synced" })
+    .update({
+      jira_comment_id: created.id,
+      sync_status: "synced",
+    })
     .eq("id", payload.commentId);
 
   await syncIssueByKey(payload.jiraKey, org.id);
