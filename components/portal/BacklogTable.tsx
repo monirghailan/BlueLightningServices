@@ -33,9 +33,11 @@ export function BacklogTable({ onTicketReady, reloadToken = 0 }: BacklogTablePro
   const [busyKey, setBusyKey] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
 
-  const load = useCallback(async () => {
-    setLoading(true);
-    setError(null);
+  const load = useCallback(async (options?: { silent?: boolean }) => {
+    if (!options?.silent) {
+      setLoading(true);
+      setError(null);
+    }
     const params = new URLSearchParams({
       page: String(page),
       pageSize: String(pageSize),
@@ -48,11 +50,13 @@ export function BacklogTable({ onTicketReady, reloadToken = 0 }: BacklogTablePro
       setTotalPages(data.totalPages ?? 0);
       setLeadingKey(data.leadingKey ?? null);
       setTrailingKey(data.trailingKey ?? null);
-    } else {
+    } else if (!options?.silent) {
       const data = await res.json();
       setError(data.error ?? "Failed to load backlog.");
     }
-    setLoading(false);
+    if (!options?.silent) {
+      setLoading(false);
+    }
   }, [page, pageSize]);
 
   useEffect(() => {
@@ -63,6 +67,28 @@ export function BacklogTable({ onTicketReady, reloadToken = 0 }: BacklogTablePro
     if (reloadToken === 0) return;
     void load();
   }, [reloadToken, load]);
+
+  const hasPendingSync = items.some(
+    (item) => !item.key || item.syncStatus === "pending_create"
+  );
+
+  useEffect(() => {
+    if (!hasPendingSync || loading) return;
+
+    let attempts = 0;
+    const maxAttempts = 40;
+
+    const interval = setInterval(() => {
+      attempts += 1;
+      if (attempts > maxAttempts) {
+        clearInterval(interval);
+        return;
+      }
+      void load({ silent: true });
+    }, 3000);
+
+    return () => clearInterval(interval);
+  }, [hasPendingSync, loading, load]);
 
   async function markReady(key: string) {
     setBusyKey(key);

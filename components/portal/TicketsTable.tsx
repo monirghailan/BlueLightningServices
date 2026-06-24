@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import Link from "next/link";
 import { StatusBadge } from "@/components/portal/PortalCard";
 
@@ -31,24 +31,57 @@ export function TicketsTable({ refreshKey = 0 }: TicketsTableProps) {
   const [totalPages, setTotalPages] = useState(0);
   const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
-    const params = new URLSearchParams();
-    if (status) params.set("status", status);
-    if (type) params.set("type", type);
-    if (q) params.set("q", q);
-    params.set("page", String(page));
-    params.set("pageSize", String(pageSize));
+  const load = useCallback(
+    async (options?: { silent?: boolean }) => {
+      const params = new URLSearchParams();
+      if (status) params.set("status", status);
+      if (type) params.set("type", type);
+      if (q) params.set("q", q);
+      params.set("page", String(page));
+      params.set("pageSize", String(pageSize));
 
-    setLoading(true);
-    fetch(`/api/portal/tickets?${params}`)
-      .then((r) => r.json())
-      .then((data) => {
-        setIssues(data.issues ?? []);
-        setTotal(data.total ?? 0);
-        setTotalPages(data.totalPages ?? 0);
-      })
-      .finally(() => setLoading(false));
-  }, [status, type, q, page, pageSize, refreshKey]);
+      if (!options?.silent) {
+        setLoading(true);
+      }
+
+      const res = await fetch(`/api/portal/tickets?${params}`);
+      const data = await res.json();
+      setIssues(data.issues ?? []);
+      setTotal(data.total ?? 0);
+      setTotalPages(data.totalPages ?? 0);
+
+      if (!options?.silent) {
+        setLoading(false);
+      }
+    },
+    [status, type, q, page, pageSize]
+  );
+
+  useEffect(() => {
+    void load();
+  }, [load, refreshKey]);
+
+  const hasPendingSync = issues.some(
+    (issue) => !issue.key || issue.syncStatus === "pending_create"
+  );
+
+  useEffect(() => {
+    if (!hasPendingSync || loading) return;
+
+    let attempts = 0;
+    const maxAttempts = 40;
+
+    const interval = setInterval(() => {
+      attempts += 1;
+      if (attempts > maxAttempts) {
+        clearInterval(interval);
+        return;
+      }
+      void load({ silent: true });
+    }, 3000);
+
+    return () => clearInterval(interval);
+  }, [hasPendingSync, loading, load]);
 
   const rangeStart = total === 0 ? 0 : (page - 1) * pageSize + 1;
   const rangeEnd = total === 0 ? 0 : Math.min(page * pageSize, total);

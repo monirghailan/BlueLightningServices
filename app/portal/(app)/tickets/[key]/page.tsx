@@ -1,7 +1,8 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { MarkdownContent } from "@/components/portal/MarkdownContent";
 import { StatusBadge, PortalCard } from "@/components/portal/PortalCard";
 
@@ -24,6 +25,7 @@ export default function TicketDetailPage({
 }: {
   params: Promise<{ key: string }>;
 }) {
+  const router = useRouter();
   const [key, setKey] = useState<string | null>(null);
   const [ticket, setTicket] = useState<TicketDetail | null>(null);
   const [comment, setComment] = useState("");
@@ -34,15 +36,54 @@ export default function TicketDetailPage({
     void params.then((p) => setKey(p.key));
   }, [params]);
 
+  const loadTicket = useCallback(
+    async (ticketKey: string, options?: { silent?: boolean }) => {
+      const res = await fetch(`/api/portal/tickets/${ticketKey}`);
+      const data = await res.json();
+
+      if (data.error) {
+        if (!options?.silent) setError(data.error);
+        return null;
+      }
+
+      setTicket(data);
+      setError(null);
+      return data as TicketDetail;
+    },
+    []
+  );
+
   useEffect(() => {
     if (!key) return;
-    fetch(`/api/portal/tickets/${key}`)
-      .then((r) => r.json())
-      .then((data) => {
-        if (data.error) setError(data.error);
-        else setTicket(data);
+    void loadTicket(key);
+  }, [key, loadTicket]);
+
+  const isPendingSync =
+    ticket?.syncStatus === "pending_create" || (ticket != null && !ticket.key);
+
+  useEffect(() => {
+    if (!key || !isPendingSync) return;
+
+    let attempts = 0;
+    const maxAttempts = 40;
+
+    const interval = setInterval(() => {
+      attempts += 1;
+      if (attempts > maxAttempts) {
+        clearInterval(interval);
+        return;
+      }
+
+      void loadTicket(key, { silent: true }).then((data) => {
+        if (data?.key && data.key !== key) {
+          router.replace(`/portal/tickets/${data.key}`, { scroll: false });
+          setKey(data.key);
+        }
       });
-  }, [key]);
+    }, 3000);
+
+    return () => clearInterval(interval);
+  }, [key, isPendingSync, loadTicket, router]);
 
   async function submitComment(e: React.FormEvent) {
     e.preventDefault();
@@ -63,8 +104,7 @@ export default function TicketDetailPage({
       }
 
       setComment("");
-      const refreshed = await fetch(`/api/portal/tickets/${key}`).then((r) => r.json());
-      setTicket(refreshed);
+      await loadTicket(key);
     } finally {
       setPosting(false);
     }
