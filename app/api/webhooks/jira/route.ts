@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { deleteIssueByKey } from "@/lib/jira/sync/upsert-issue";
-import { syncIssueByKey } from "@/lib/jira/sync/upsert-comment";
+import { deleteCommentByJiraId, syncIssueByKey } from "@/lib/jira/sync/upsert-comment";
 import { verifyJiraWebhookAuth } from "@/lib/jira/sync/verify-webhook";
 
 export async function POST(request: NextRequest) {
@@ -35,11 +35,17 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ ok: true, action: "deleted" });
     }
 
+    if (event === "comment_deleted" && body.comment?.id) {
+      const deleted = await deleteCommentByJiraId(body.comment.id);
+      return NextResponse.json({ ok: true, action: "comment_deleted", deleted });
+    }
+
     if (
       issueKey &&
       (event === "jira:issue_created" ||
         event === "jira:issue_updated" ||
-        event.startsWith("comment_"))
+        event === "comment_created" ||
+        event === "comment_updated")
     ) {
       const result = await syncIssueByKey(issueKey);
       return NextResponse.json({ ok: true, synced: !!result });

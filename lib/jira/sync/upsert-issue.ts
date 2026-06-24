@@ -91,11 +91,11 @@ export async function upsertIssueFromJira(
 
 async function syncIssueComments(issueId: string, issue: JiraIssue) {
   const comments = issue.fields.comment?.comments ?? [];
-  if (comments.length === 0) return;
-
   const supabase = createServiceClient();
+  const jiraIds = new Set<string>();
 
   for (const comment of comments) {
+    jiraIds.add(comment.id);
     const body = adfToMarkdown(comment.body);
     const row = {
       issue_id: issueId,
@@ -118,6 +118,18 @@ async function syncIssueComments(issueId: string, issue: JiraIssue) {
       await supabase.from("jira_comments").update(row).eq("id", existing.id);
     } else {
       await supabase.from("jira_comments").insert(row);
+    }
+  }
+
+  const { data: mirrored } = await supabase
+    .from("jira_comments")
+    .select("id, jira_comment_id")
+    .eq("issue_id", issueId)
+    .not("jira_comment_id", "is", null);
+
+  for (const row of mirrored ?? []) {
+    if (row.jira_comment_id && !jiraIds.has(row.jira_comment_id)) {
+      await supabase.from("jira_comments").delete().eq("id", row.id);
     }
   }
 }
