@@ -1,17 +1,16 @@
 import { NextRequest, NextResponse } from "next/server";
 import { deleteIssueByKey } from "@/lib/jira/sync/upsert-issue";
 import { syncIssueByKey } from "@/lib/jira/sync/upsert-comment";
-import { createServiceClient } from "@/lib/supabase/server";
-
-function verifyWebhookSecret(request: NextRequest): boolean {
-  const secret = process.env.JIRA_WEBHOOK_SECRET;
-  if (!secret) return false;
-  const header = request.headers.get("x-jira-webhook-secret");
-  return header === secret;
-}
+import { verifyJiraWebhookAuth } from "@/lib/jira/sync/verify-webhook";
 
 export async function POST(request: NextRequest) {
-  if (!verifyWebhookSecret(request)) {
+  if (!process.env.JIRA_WEBHOOK_SECRET) {
+    return NextResponse.json({ error: "Webhook not configured." }, { status: 503 });
+  }
+
+  const payload = await request.text();
+
+  if (!verifyJiraWebhookAuth(payload, request.headers)) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
@@ -22,7 +21,7 @@ export async function POST(request: NextRequest) {
   };
 
   try {
-    body = await request.json();
+    body = JSON.parse(payload);
   } catch {
     return NextResponse.json({ error: "Invalid payload." }, { status: 400 });
   }
