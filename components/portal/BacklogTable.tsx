@@ -1,8 +1,9 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { ChevronDown, ChevronUp } from "lucide-react";
+import { DASHBOARD_DEFAULT_PAGE_SIZE } from "@/lib/portal/dashboard-constants";
 
 interface BacklogItem {
   id: string;
@@ -14,22 +15,44 @@ interface BacklogItem {
   syncStatus?: string;
 }
 
+export interface BacklogInitialData {
+  backlog: BacklogItem[];
+  total: number;
+  page: number;
+  pageSize: number;
+  totalPages: number;
+  leadingKey: string | null;
+  trailingKey: string | null;
+}
+
 interface BacklogTableProps {
+  initialData?: BacklogInitialData;
   onTicketReady?: () => void;
   reloadToken?: number;
 }
 
 const PAGE_SIZES = [5, 10, 25, 50] as const;
 
-export function BacklogTable({ onTicketReady, reloadToken = 0 }: BacklogTableProps) {
-  const [items, setItems] = useState<BacklogItem[]>([]);
-  const [page, setPage] = useState(1);
-  const [pageSize, setPageSize] = useState<number>(5);
-  const [total, setTotal] = useState(0);
-  const [totalPages, setTotalPages] = useState(0);
-  const [leadingKey, setLeadingKey] = useState<string | null>(null);
-  const [trailingKey, setTrailingKey] = useState<string | null>(null);
-  const [loading, setLoading] = useState(true);
+export function BacklogTable({
+  initialData,
+  onTicketReady,
+  reloadToken = 0,
+}: BacklogTableProps) {
+  const skipInitialFetch = useRef(initialData != null);
+  const [items, setItems] = useState<BacklogItem[]>(initialData?.backlog ?? []);
+  const [page, setPage] = useState(initialData?.page ?? 1);
+  const [pageSize, setPageSize] = useState<number>(
+    initialData?.pageSize ?? DASHBOARD_DEFAULT_PAGE_SIZE
+  );
+  const [total, setTotal] = useState(initialData?.total ?? 0);
+  const [totalPages, setTotalPages] = useState(initialData?.totalPages ?? 0);
+  const [leadingKey, setLeadingKey] = useState<string | null>(
+    initialData?.leadingKey ?? null
+  );
+  const [trailingKey, setTrailingKey] = useState<string | null>(
+    initialData?.trailingKey ?? null
+  );
+  const [loading, setLoading] = useState(initialData == null);
   const [busyKey, setBusyKey] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
 
@@ -60,6 +83,10 @@ export function BacklogTable({ onTicketReady, reloadToken = 0 }: BacklogTablePro
   }, [page, pageSize]);
 
   useEffect(() => {
+    if (skipInitialFetch.current) {
+      skipInitialFetch.current = false;
+      return;
+    }
     void load();
   }, [load]);
 

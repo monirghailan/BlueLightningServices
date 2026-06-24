@@ -1,5 +1,5 @@
-import { PortalLoadingScreen } from "@/components/portal/PortalLoadingScreen";
+import { PortalRouteLoading } from "@/components/portal/PortalRouteLoading";
 
 export default function PortalAppLoading() {
-  return <PortalLoadingScreen />;
+  return <PortalRouteLoading />;
 }

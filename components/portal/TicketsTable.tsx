@@ -1,8 +1,9 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { StatusBadge } from "@/components/portal/PortalCard";
+import { DASHBOARD_DEFAULT_PAGE_SIZE } from "@/lib/portal/dashboard-constants";
 
 interface TicketRow {
   id: string;
@@ -14,22 +15,34 @@ interface TicketRow {
   syncStatus?: string;
 }
 
+export interface TicketsInitialData {
+  issues: TicketRow[];
+  total: number;
+  page: number;
+  pageSize: number;
+  totalPages: number;
+}
+
 const PAGE_SIZES = [5, 10, 25, 50] as const;
 
 interface TicketsTableProps {
+  initialData?: TicketsInitialData;
   refreshKey?: number;
 }
 
-export function TicketsTable({ refreshKey = 0 }: TicketsTableProps) {
-  const [issues, setIssues] = useState<TicketRow[]>([]);
+export function TicketsTable({ initialData, refreshKey = 0 }: TicketsTableProps) {
+  const skipInitialFetch = useRef(initialData != null);
+  const [issues, setIssues] = useState<TicketRow[]>(initialData?.issues ?? []);
   const [status, setStatus] = useState("open");
   const [type, setType] = useState("");
   const [q, setQ] = useState("");
-  const [page, setPage] = useState(1);
-  const [pageSize, setPageSize] = useState<number>(5);
-  const [total, setTotal] = useState(0);
-  const [totalPages, setTotalPages] = useState(0);
-  const [loading, setLoading] = useState(true);
+  const [page, setPage] = useState(initialData?.page ?? 1);
+  const [pageSize, setPageSize] = useState<number>(
+    initialData?.pageSize ?? DASHBOARD_DEFAULT_PAGE_SIZE
+  );
+  const [total, setTotal] = useState(initialData?.total ?? 0);
+  const [totalPages, setTotalPages] = useState(initialData?.totalPages ?? 0);
+  const [loading, setLoading] = useState(initialData == null);
 
   const load = useCallback(
     async (options?: { silent?: boolean }) => {
@@ -58,6 +71,10 @@ export function TicketsTable({ refreshKey = 0 }: TicketsTableProps) {
   );
 
   useEffect(() => {
+    if (skipInitialFetch.current) {
+      skipInitialFetch.current = false;
+      return;
+    }
     void load();
   }, [load, refreshKey]);
 

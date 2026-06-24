@@ -5,7 +5,9 @@ import {
   useCallback,
   useContext,
   useEffect,
+  useLayoutEffect,
   useMemo,
+  useRef,
   useState,
   useTransition,
 } from "react";
@@ -16,6 +18,8 @@ interface PortalNavigationContextValue {
   startNavigation: () => void;
   push: (href: string) => void;
   refresh: () => void;
+  beginRouteLoading: () => void;
+  endRouteLoading: () => void;
 }
 
 const PortalNavigationContext = createContext<PortalNavigationContextValue | null>(
@@ -45,10 +49,28 @@ export function PortalNavigationProvider({ children }: { children: React.ReactNo
   const pathname = usePathname();
   const router = useRouter();
   const [clicked, setClicked] = useState(false);
+  const [routeLoadingCount, setRouteLoadingCount] = useState(0);
   const [isPending, startTransition] = useTransition();
+  const routeLoadingCountRef = useRef(0);
 
   const startNavigation = useCallback(() => {
     setClicked(true);
+  }, []);
+
+  const beginRouteLoading = useCallback(() => {
+    setRouteLoadingCount((count) => {
+      const next = count + 1;
+      routeLoadingCountRef.current = next;
+      return next;
+    });
+  }, []);
+
+  const endRouteLoading = useCallback(() => {
+    setRouteLoadingCount((count) => {
+      const next = Math.max(0, count - 1);
+      routeLoadingCountRef.current = next;
+      return next;
+    });
   }, []);
 
   const push = useCallback(
@@ -66,8 +88,17 @@ export function PortalNavigationProvider({ children }: { children: React.ReactNo
   }, [router]);
 
   useEffect(() => {
-    setClicked(false);
-  }, [pathname]);
+    if (routeLoadingCount === 0) {
+      setClicked(false);
+    }
+  }, [routeLoadingCount]);
+
+  useLayoutEffect(() => {
+    if (!clicked) return;
+    if (routeLoadingCountRef.current === 0) {
+      setClicked(false);
+    }
+  }, [pathname, clicked]);
 
   useEffect(() => {
     function handleClick(event: MouseEvent) {
@@ -107,14 +138,18 @@ export function PortalNavigationProvider({ children }: { children: React.ReactNo
     };
   }, [pathname, startNavigation]);
 
+  const isNavigating = clicked || routeLoadingCount > 0 || isPending;
+
   const value = useMemo(
     () => ({
-      isNavigating: clicked || isPending,
+      isNavigating,
       startNavigation,
       push,
       refresh,
+      beginRouteLoading,
+      endRouteLoading,
     }),
-    [clicked, isPending, push, refresh, startNavigation]
+    [isNavigating, push, refresh, startNavigation, beginRouteLoading, endRouteLoading]
   );
 
   return (

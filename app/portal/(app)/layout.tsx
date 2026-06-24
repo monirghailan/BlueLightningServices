@@ -3,7 +3,7 @@ import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { getPortalSession } from "@/lib/portal/auth";
 import { PortalShell } from "@/components/portal/PortalShell";
-import { PortalLoadingScreen } from "@/components/portal/PortalLoadingScreen";
+import { PortalAppLoadingFallback } from "@/components/portal/PortalAppLoadingFallback";
 
 async function AuthenticatedPortalShell({
   children,
@@ -33,13 +33,7 @@ export default function PortalAppLayout({
   children: React.ReactNode;
 }) {
   return (
-    <Suspense
-      fallback={
-        <div className="portal-shell min-h-screen bg-background text-foreground">
-          <PortalLoadingScreen fullScreen />
-        </div>
-      }
-    >
+    <Suspense fallback={<PortalAppLoadingFallback />}>
       <AuthenticatedPortalShell>{children}</AuthenticatedPortalShell>
     </Suspense>
   );

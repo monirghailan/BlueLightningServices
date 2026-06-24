@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { Cog } from "lucide-react";
@@ -59,9 +59,20 @@ function PortalShellInner({ children, orgName, role }: PortalShellProps) {
     }
   }
 
+  const showNavLoader = isNavigating && !signingOut;
+  const [loaderKey, setLoaderKey] = useState(0);
+  const wasShowingNavLoader = useRef(false);
+
+  useEffect(() => {
+    if (showNavLoader && !wasShowingNavLoader.current) {
+      setLoaderKey((key) => key + 1);
+    }
+    wasShowingNavLoader.current = showNavLoader;
+  }, [showNavLoader]);
+
   return (
-    <div className="portal-shell min-h-screen bg-background text-foreground">
-      <header className="border-b border-border bg-surface/80 backdrop-blur">
+    <div className="portal-shell grid h-dvh grid-rows-[auto_minmax(0,1fr)] bg-background text-foreground">
+      <header className="relative z-20 border-b border-border bg-surface/80 backdrop-blur">
         <div className="mx-auto flex max-w-6xl items-center justify-between gap-4 px-4 py-4 sm:px-6">
           <div>
             <p className="text-xs uppercase tracking-wider text-muted">Client Portal</p>
@@ -125,13 +136,25 @@ function PortalShellInner({ children, orgName, role }: PortalShellProps) {
           ))}
         </nav>
       </header>
-      <main className="relative mx-auto max-w-6xl px-4 py-8 sm:px-6">
-        {children}
-        {isNavigating && !signingOut && (
-          <div className="absolute inset-0 z-10 -mx-4 -my-8 bg-background sm:-mx-6">
-            <PortalLoadingScreen />
-          </div>
-        )}
+      <main data-portal-main className="relative min-h-0 overflow-hidden">
+        <div
+          className={cn(
+            "absolute inset-0 z-10 bg-background",
+            showNavLoader ? "visible" : "invisible pointer-events-none"
+          )}
+          aria-busy={showNavLoader}
+          aria-hidden={!showNavLoader}
+        >
+          <PortalLoadingScreen key={loaderKey} />
+        </div>
+        <div
+          className={cn(
+            "mx-auto h-full max-w-6xl overflow-y-auto px-4 py-8 sm:px-6",
+            showNavLoader && "invisible"
+          )}
+        >
+          {children}
+        </div>
       </main>
 
       {signingOut && (

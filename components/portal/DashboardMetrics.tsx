@@ -38,10 +38,18 @@ function MetricsSkeleton() {
   );
 }
 
-export function DashboardMetrics() {
-  const [metrics, setMetrics] = useState<PortalMetrics | null>(null);
+interface DashboardMetricsProps {
+  initialMetrics?: PortalMetrics | null;
+}
+
+export function DashboardMetrics({ initialMetrics }: DashboardMetricsProps) {
+  const [metrics, setMetrics] = useState<PortalMetrics | null>(
+    initialMetrics ?? null
+  );
 
   useEffect(() => {
+    if (initialMetrics != null) return;
+
     let active = true;
 
     async function load() {
@@ -62,7 +70,7 @@ export function DashboardMetrics() {
     return () => {
       active = false;
     };
-  }, []);
+  }, [initialMetrics]);
 
   if (!metrics) {
     return <MetricsSkeleton />;

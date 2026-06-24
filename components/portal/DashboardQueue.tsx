@@ -5,8 +5,8 @@ import { useState } from "react";
 import { Plus } from "lucide-react";
 import { Button } from "@/components/ui/Button";
 import { PortalCard } from "@/components/portal/PortalCard";
-import { BacklogTable } from "@/components/portal/BacklogTable";
-import { TicketsTable } from "@/components/portal/TicketsTable";
+import { BacklogTable, type BacklogInitialData } from "@/components/portal/BacklogTable";
+import { TicketsTable, type TicketsInitialData } from "@/components/portal/TicketsTable";
 
 const NewTicketModal = dynamic(
   () =>
@@ -16,7 +16,15 @@ const NewTicketModal = dynamic(
   { ssr: false }
 );
 
-export function DashboardQueue() {
+interface DashboardQueueProps {
+  initialBacklog?: BacklogInitialData;
+  initialTickets?: TicketsInitialData;
+}
+
+export function DashboardQueue({
+  initialBacklog,
+  initialTickets,
+}: DashboardQueueProps) {
   const [ticketsRefreshKey, setTicketsRefreshKey] = useState(0);
   const [backlogReloadToken, setBacklogReloadToken] = useState(0);
   const [modalOpen, setModalOpen] = useState(false);
@@ -43,13 +51,14 @@ export function DashboardQueue() {
         }
       >
         <BacklogTable
+          initialData={initialBacklog}
           reloadToken={backlogReloadToken}
           onTicketReady={() => setTicketsRefreshKey((key) => key + 1)}
         />
       </PortalCard>
 
       <PortalCard title="Tickets" description="Browse and filter your organization's tickets">
-        <TicketsTable refreshKey={ticketsRefreshKey} />
+        <TicketsTable initialData={initialTickets} refreshKey={ticketsRefreshKey} />
       </PortalCard>
 
       {modalOpen && (
