@@ -5,11 +5,13 @@ import Link from "next/link";
 import { StatusBadge } from "@/components/portal/PortalCard";
 
 interface TicketRow {
-  key: string;
+  id: string;
+  key: string | null;
   summary: string;
   status: string;
   type: string;
   updated: string | null;
+  syncStatus?: string;
 }
 
 const PAGE_SIZES = [5, 10, 25, 50] as const;
@@ -118,14 +120,16 @@ export function TicketsTable({ refreshKey = 0 }: TicketsTableProps) {
                 </td>
               </tr>
             ) : (
-              issues.map((issue) => (
-                <tr key={issue.key} className="border-t border-border">
+              issues.map((issue) => {
+                const ticketRef = issue.key ?? issue.id;
+                return (
+                <tr key={issue.id} className="border-t border-border">
                   <td className="px-4 py-3 font-mono">
                     <Link
-                      href={`/portal/tickets/${issue.key}`}
+                      href={`/portal/tickets/${ticketRef}`}
                       className="text-bolt-outline hover:underline"
                     >
-                      {issue.key}
+                      {issue.key ?? "Pending…"}
                     </Link>
                   </td>
                   <td className="max-w-md truncate px-4 py-3">{issue.summary}</td>
@@ -134,7 +138,8 @@ export function TicketsTable({ refreshKey = 0 }: TicketsTableProps) {
                     <StatusBadge status={issue.status} />
                   </td>
                 </tr>
-              ))
+              );
+              })
             )}
           </tbody>
         </table>

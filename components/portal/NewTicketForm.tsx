@@ -3,7 +3,7 @@
 import { useState } from "react";
 
 interface NewTicketFormProps {
-  onCreated: (key: string) => void;
+  onCreated: (result: { id: string; key: string | null; syncStatus: string }) => void;
   onCancel?: () => void;
 }
 
@@ -33,7 +33,11 @@ export function NewTicketForm({ onCreated, onCancel }: NewTicketFormProps) {
       return;
     }
 
-    onCreated(data.key);
+    onCreated({
+      id: data.id,
+      key: data.key ?? null,
+      syncStatus: data.syncStatus ?? "pending_create",
+    });
   }
 
   return (

@@ -6,7 +6,8 @@ import { MarkdownContent } from "@/components/portal/MarkdownContent";
 import { StatusBadge, PortalCard } from "@/components/portal/PortalCard";
 
 interface TicketDetail {
-  key: string;
+  id?: string;
+  key: string | null;
   summary: string;
   description: string;
   status: string;
@@ -14,7 +15,8 @@ interface TicketDetail {
   priority: string | null;
   created: string | null;
   updated: string | null;
-  comments: { id: string; author: string; body: string; created: string }[];
+  syncStatus?: string;
+  comments: { id: string; author: string; body: string; created: string; syncStatus?: string }[];
 }
 
 export default function TicketDetailPage({
@@ -86,9 +88,16 @@ export default function TicketDetailPage({
           ← Back to dashboard
         </Link>
         <div className="mt-3 flex flex-wrap items-center gap-3">
-          <h1 className="font-mono text-lg text-bolt-outline">{ticket.key}</h1>
+          <h1 className="font-mono text-lg text-bolt-outline">
+            {ticket.key ?? "Pending sync"}
+          </h1>
           <StatusBadge status={ticket.status} />
           <span className="text-sm text-muted">{ticket.type}</span>
+          {ticket.syncStatus === "pending_create" && (
+            <span className="rounded-full border border-amber-500/40 bg-amber-500/10 px-2 py-0.5 text-xs text-amber-200">
+              Syncing to Jira…
+            </span>
+          )}
         </div>
         <p className="mt-2 text-xl font-semibold">{ticket.summary}</p>
       </div>

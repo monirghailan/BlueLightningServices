@@ -7,6 +7,18 @@
     {
       "path": "/api/cron/process-lead-provisioning",
       "schedule": "* * * * *"
+    },
+    {
+      "path": "/api/cron/process-jira-outbox",
+      "schedule": "* * * * *"
+    },
+    {
+      "path": "/api/cron/sync-jira-mirror",
+      "schedule": "*/15 * * * *"
+    },
+    {
+      "path": "/api/cron/compute-org-metrics",
+      "schedule": "0 * * * *"
     }
   ]
 }

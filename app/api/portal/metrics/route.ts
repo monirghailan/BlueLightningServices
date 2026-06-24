@@ -1,20 +1,23 @@
-import { NextResponse } from "next/server";
-import { JiraConfigError } from "@/lib/jira/client";
+import { NextRequest, NextResponse } from "next/server";
 import {
   portalErrorResponse,
   requirePortalAdmin,
 } from "@/lib/portal/auth";
-import { computeMetrics } from "@/lib/portal/metrics";
+import { persistOrgMetrics } from "@/lib/jira/sync/compute-metrics-db";
+import { getOrgMetrics } from "@/lib/portal/jira-db";
 
-export async function GET() {
+export async function GET(request: NextRequest) {
   try {
     const session = await requirePortalAdmin();
-    const metrics = await computeMetrics(session.organization);
+    const fresh = request.nextUrl.searchParams.get("fresh") === "1";
+
+    if (fresh) {
+      await persistOrgMetrics(session.organization);
+    }
+
+    const metrics = await getOrgMetrics(session.organization);
     return NextResponse.json(metrics);
   } catch (error) {
-    if (error instanceof JiraConfigError) {
-      return NextResponse.json({ error: error.message }, { status: 503 });
-    }
     return portalErrorResponse(error);
   }
 }

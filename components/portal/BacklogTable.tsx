@@ -5,11 +5,13 @@ import Link from "next/link";
 import { ChevronDown, ChevronUp } from "lucide-react";
 
 interface BacklogItem {
-  key: string;
+  id: string;
+  key: string | null;
   summary: string;
   status: string;
   type: string;
   priority: string | null;
+  syncStatus?: string;
 }
 
 interface BacklogTableProps {
@@ -158,17 +160,19 @@ export function BacklogTable({ onTicketReady, reloadToken = 0 }: BacklogTablePro
             ) : (
               items.map((item, index) => {
                 const globalIndex = (page - 1) * pageSize + index;
-                const canMoveUp = globalIndex > 0;
-                const canMoveDown = globalIndex < total - 1;
+                const canMoveUp = globalIndex > 0 && !!item.key;
+                const canMoveDown = globalIndex < total - 1 && !!item.key;
+                const ticketRef = item.key ?? item.id;
+                const isPending = !item.key || item.syncStatus === "pending_create";
 
                 return (
-                  <tr key={item.key} className="border-t border-border">
+                  <tr key={item.id} className="border-t border-border">
                     <td className="px-4 py-3 font-mono">
                       <Link
-                        href={`/portal/tickets/${item.key}`}
+                        href={`/portal/tickets/${ticketRef}`}
                         className="text-bolt-outline hover:underline"
                       >
-                        {item.key}
+                        {item.key ?? "Pending…"}
                       </Link>
                     </td>
                     <td className="max-w-md truncate px-4 py-3">{item.summary}</td>
@@ -177,8 +181,8 @@ export function BacklogTable({ onTicketReady, reloadToken = 0 }: BacklogTablePro
                       <div className="flex items-center justify-end gap-2">
                         <button
                           type="button"
-                          disabled={busyKey === item.key || !canMoveUp}
-                          onClick={() => reorder(item.key, "up", index)}
+                          disabled={busyKey === ticketRef || !canMoveUp}
+                          onClick={() => item.key && reorder(item.key, "up", index)}
                           className="rounded-lg border border-border p-1.5 text-muted hover:text-foreground disabled:opacity-40"
                           aria-label="Move up"
                         >
@@ -186,8 +190,8 @@ export function BacklogTable({ onTicketReady, reloadToken = 0 }: BacklogTablePro
                         </button>
                         <button
                           type="button"
-                          disabled={busyKey === item.key || !canMoveDown}
-                          onClick={() => reorder(item.key, "down", index)}
+                          disabled={busyKey === ticketRef || !canMoveDown}
+                          onClick={() => item.key && reorder(item.key, "down", index)}
                           className="rounded-lg border border-border p-1.5 text-muted hover:text-foreground disabled:opacity-40"
                           aria-label="Move down"
                         >
@@ -195,11 +199,11 @@ export function BacklogTable({ onTicketReady, reloadToken = 0 }: BacklogTablePro
                         </button>
                         <button
                           type="button"
-                          disabled={busyKey === item.key}
-                          onClick={() => markReady(item.key)}
+                          disabled={busyKey === ticketRef || isPending}
+                          onClick={() => item.key && markReady(item.key)}
                           className="rounded-lg bg-bolt-fill px-3 py-1.5 text-sm font-medium text-white hover:bg-bolt-fill/90 disabled:opacity-50"
                         >
-                          Ready
+                          {isPending ? "Syncing…" : "Ready"}
                         </button>
                       </div>
                     </td>

@@ -1,5 +1,11 @@
 import type { JiraChangelog } from "@/lib/jira/client";
 
+export interface StatusTransitionRow {
+  from_status: string;
+  to_status: string;
+  transitioned_at: string;
+}
+
 /** Time in this status is excluded from portal avg-time-to-close (client wait). */
 export const CLOSE_METRIC_EXCLUDED_STATUS = "In Review";
 
@@ -103,6 +109,42 @@ function intervalsInStatus(
   return intervals;
 }
 
+function intervalsInStatusFromRows(
+  created: string,
+  resolved: string,
+  transitions: StatusTransitionRow[],
+  statusName: string
+): [string, string][] {
+  const changes = transitions
+    .map((row) => ({
+      at: row.transitioned_at,
+      from: row.from_status,
+      to: row.to_status,
+    }))
+    .sort((a, b) => new Date(a.at).getTime() - new Date(b.at).getTime());
+
+  const needle = statusName.toLowerCase();
+  const initialStatus = changes[0]?.from || "To Do";
+
+  let cursor = created;
+  let currentStatus = initialStatus;
+  const intervals: [string, string][] = [];
+
+  for (const change of changes) {
+    if (currentStatus.toLowerCase() === needle) {
+      intervals.push([cursor, change.at]);
+    }
+    cursor = change.at;
+    currentStatus = change.to;
+  }
+
+  if (currentStatus.toLowerCase() === needle) {
+    intervals.push([cursor, resolved]);
+  }
+
+  return intervals;
+}
+
 /** Business days from created to resolved, minus time spent in the excluded status. */
 export function activeBusinessDaysToClose(
   created: string,
@@ -112,6 +154,28 @@ export function activeBusinessDaysToClose(
 ): number {
   const total = fractionalBusinessDaysBetween(created, resolved);
   const excludedIntervals = intervalsInStatus(created, resolved, changelog, excludedStatus);
+  const excluded = excludedIntervals.reduce(
+    (sum, [start, end]) => sum + fractionalBusinessDaysBetween(start, end),
+    0
+  );
+
+  return Math.max(0, total - excluded);
+}
+
+/** Same as activeBusinessDaysToClose but using DB transition rows. */
+export function activeBusinessDaysToCloseFromTransitions(
+  created: string,
+  resolved: string,
+  transitions: StatusTransitionRow[],
+  excludedStatus = CLOSE_METRIC_EXCLUDED_STATUS
+): number {
+  const total = fractionalBusinessDaysBetween(created, resolved);
+  const excludedIntervals = intervalsInStatusFromRows(
+    created,
+    resolved,
+    transitions,
+    excludedStatus
+  );
   const excluded = excludedIntervals.reduce(
     (sum, [start, end]) => sum + fractionalBusinessDaysBetween(start, end),
     0

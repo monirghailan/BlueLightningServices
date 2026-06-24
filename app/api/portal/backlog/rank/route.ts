@@ -1,10 +1,9 @@
 import { NextRequest, NextResponse } from "next/server";
-import { rankIssue, JiraConfigError } from "@/lib/jira/client";
 import {
   portalErrorResponse,
   requirePortalSession,
 } from "@/lib/portal/auth";
-import { validateOrgIssue } from "@/lib/portal/metrics";
+import { enqueueRankBacklog, validateOrgIssue } from "@/lib/portal/jira-db";
 import { rankSchema } from "@/lib/validations/portal";
 
 export async function PUT(request: NextRequest) {
@@ -48,12 +47,14 @@ export async function PUT(request: NextRequest) {
       }
     }
 
-    await rankIssue([issueKey], rankBeforeIssue, rankAfterIssue);
-    return NextResponse.json({ ok: true });
+    await enqueueRankBacklog(
+      session.organization,
+      issueKey,
+      rankBeforeIssue,
+      rankAfterIssue
+    );
+    return NextResponse.json({ ok: true, queued: true });
   } catch (error) {
-    if (error instanceof JiraConfigError) {
-      return NextResponse.json({ error: error.message }, { status: 503 });
-    }
     return portalErrorResponse(error);
   }
 }

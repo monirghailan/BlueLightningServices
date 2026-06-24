@@ -1,10 +1,9 @@
 import { NextRequest, NextResponse } from "next/server";
-import { addComment, JiraConfigError } from "@/lib/jira/client";
 import {
   portalErrorResponse,
   requirePortalAdmin,
 } from "@/lib/portal/auth";
-import { validateOrgIssue } from "@/lib/portal/metrics";
+import { createPendingComment } from "@/lib/portal/jira-db";
 import { commentSchema } from "@/lib/validations/portal";
 
 export async function POST(
@@ -15,11 +14,6 @@ export async function POST(
     const session = await requirePortalAdmin();
     const { key } = await params;
 
-    const allowed = await validateOrgIssue(session.organization, key);
-    if (!allowed) {
-      return NextResponse.json({ error: "Not found." }, { status: 404 });
-    }
-
     const body = await request.json();
     const parsed = commentSchema.safeParse(body);
     if (!parsed.success) {
@@ -29,14 +23,22 @@ export async function POST(
       );
     }
 
-    const prefixed = `[Portal — ${session.email}]\n${parsed.data.body}`;
-    await addComment(key, prefixed);
+    const comment = await createPendingComment(
+      session.organization,
+      key,
+      parsed.data.body,
+      session.email
+    );
 
-    return NextResponse.json({ ok: true }, { status: 201 });
-  } catch (error) {
-    if (error instanceof JiraConfigError) {
-      return NextResponse.json({ error: error.message }, { status: 503 });
+    if (!comment) {
+      return NextResponse.json({ error: "Not found." }, { status: 404 });
     }
+
+    return NextResponse.json(
+      { ok: true, id: comment.id, syncStatus: comment.sync_status },
+      { status: 201 }
+    );
+  } catch (error) {
     return portalErrorResponse(error);
   }
 }

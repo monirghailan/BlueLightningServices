@@ -1,10 +1,9 @@
 import { NextRequest, NextResponse } from "next/server";
-import { JiraConfigError } from "@/lib/jira/client";
 import {
   portalErrorResponse,
   requirePortalSession,
 } from "@/lib/portal/auth";
-import { getPaginatedBacklog } from "@/lib/portal/metrics";
+import { getPaginatedBacklog } from "@/lib/portal/jira-db";
 
 const PAGE_SIZES = [5, 10, 25, 50] as const;
 
@@ -23,9 +22,6 @@ export async function GET(request: NextRequest) {
     const result = await getPaginatedBacklog(session.organization, page, pageSize);
     return NextResponse.json(result);
   } catch (error) {
-    if (error instanceof JiraConfigError) {
-      return NextResponse.json({ error: error.message }, { status: 503 });
-    }
     return portalErrorResponse(error);
   }
 }

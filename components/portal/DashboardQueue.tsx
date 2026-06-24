@@ -21,7 +21,7 @@ export function DashboardQueue() {
   const [backlogReloadToken, setBacklogReloadToken] = useState(0);
   const [modalOpen, setModalOpen] = useState(false);
 
-  function handleTicketCreated(_key: string) {
+  function handleTicketCreated(_result: { id: string; key: string | null }) {
     setBacklogReloadToken((token) => token + 1);
   }
 

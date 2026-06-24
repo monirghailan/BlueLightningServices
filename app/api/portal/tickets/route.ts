@@ -1,17 +1,9 @@
 import { NextRequest, NextResponse } from "next/server";
 import {
-  countIssues,
-  createIssue,
-  searchIssues,
-  serializeIssue,
-  JiraConfigError,
-} from "@/lib/jira/client";
-import { clientScopeJql } from "@/lib/jira/client-field";
-import {
   portalErrorResponse,
   requirePortalAdmin,
 } from "@/lib/portal/auth";
-import { getClientBacklogKeys } from "@/lib/portal/metrics";
+import { createPendingTicket, listTickets } from "@/lib/portal/jira-db";
 import { ticketCreateSchema } from "@/lib/validations/portal";
 import { isRateLimited } from "@/lib/rate-limit";
 
@@ -36,43 +28,16 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ issues: [], total: 0, page: 1, pageSize, totalPages: 0 });
     }
 
-    let jql = clientScopeJql(
-      session.organization.jira_component_name,
-      session.organization.jira_project_key
-    );
-    if (status === "open") {
-      jql += ` AND statusCategory != Done`;
-    } else if (status) {
-      jql += ` AND status = "${status}"`;
-    }
-    if (type) jql += ` AND issuetype = "${type}"`;
-    if (q) jql += ` AND summary ~ "${q.replace(/"/g, '\\"')}"`;
-
-    const backlogKeys = await getClientBacklogKeys(session.organization);
-    if (backlogKeys.length > 0) {
-      jql += ` AND key not in (${backlogKeys.join(", ")})`;
-    }
-
-    jql += " ORDER BY updated DESC";
-
-    const startAt = (page - 1) * pageSize;
-    const [result, total] = await Promise.all([
-      searchIssues(jql, pageSize, startAt),
-      countIssues(jql),
-    ]);
-    const totalPages = total > 0 ? Math.ceil(total / pageSize) : 0;
-
-    return NextResponse.json({
-      issues: (result.issues ?? []).map(serializeIssue),
-      total,
+    const result = await listTickets(session.organization, {
+      status,
+      type,
+      q,
       page,
       pageSize,
-      totalPages,
     });
+
+    return NextResponse.json(result);
   } catch (error) {
-    if (error instanceof JiraConfigError) {
-      return NextResponse.json({ error: error.message }, { status: 503 });
-    }
     return portalErrorResponse(error);
   }
 }
@@ -107,19 +72,22 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const issue = await createIssue({
+    const issue = await createPendingTicket(session.organization, {
       summary: parsed.data.summary,
       description: parsed.data.description,
-      issueTypeName: parsed.data.issueType,
-      clientLabel,
+      issueType: parsed.data.issueType,
       priority: parsed.data.priority,
     });
 
-    return NextResponse.json({ key: issue.key }, { status: 201 });
+    return NextResponse.json(
+      {
+        id: issue.id,
+        key: issue.jira_key,
+        syncStatus: issue.sync_status,
+      },
+      { status: 201 }
+    );
   } catch (error) {
-    if (error instanceof JiraConfigError) {
-      return NextResponse.json({ error: error.message }, { status: 503 });
-    }
     return portalErrorResponse(error);
   }
 }

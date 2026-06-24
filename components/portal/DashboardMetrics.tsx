@@ -39,7 +39,7 @@ function MetricsSkeleton() {
 }
 
 export function DashboardMetrics() {
-  const [metrics, setMetrics] = useState<PortalMetrics | null>(null);
+  const [metrics, setMetrics] = useState<(PortalMetrics & { computedAt?: string }) | null>(null);
 
   useEffect(() => {
     let active = true;
@@ -72,6 +72,11 @@ export function DashboardMetrics() {
 
   return (
     <div className="space-y-8">
+      {metrics.computedAt && (
+        <p className="text-xs text-muted">
+          Metrics updated {new Date(metrics.computedAt).toLocaleString()}
+        </p>
+      )}
       <div className="grid gap-4 sm:grid-cols-2 md:grid-cols-4">
         <StatCard label="Open tickets" value={metrics.openTickets} unit="tickets" />
         <StatCard

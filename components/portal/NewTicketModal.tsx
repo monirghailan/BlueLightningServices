@@ -7,7 +7,7 @@ import { NewTicketForm } from "@/components/portal/NewTicketForm";
 interface NewTicketModalProps {
   open: boolean;
   onClose: () => void;
-  onCreated: (key: string) => void;
+  onCreated: (result: { id: string; key: string | null; syncStatus: string }) => void;
 }
 
 export function NewTicketModal({ open, onClose, onCreated }: NewTicketModalProps) {
@@ -24,8 +24,8 @@ export function NewTicketModal({ open, onClose, onCreated }: NewTicketModalProps
     }
   }, [open]);
 
-  function handleCreated(key: string) {
-    onCreated(key);
+  function handleCreated(result: { id: string; key: string | null; syncStatus: string }) {
+    onCreated(result);
     onClose();
   }
 
