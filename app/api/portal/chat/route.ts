@@ -131,11 +131,18 @@ export async function POST(request: Request) {
     const lastUserText = lastUser ? getMessageText(lastUser) : "";
 
     if (lastUserText) {
-      await supabase.from("assistant_messages").insert({
-        conversation_id: conversationId,
-        role: "user",
-        content: lastUserText,
-      });
+      void supabase
+        .from("assistant_messages")
+        .insert({
+          conversation_id: conversationId,
+          role: "user",
+          content: lastUserText,
+        })
+        .then(({ error: insertError }) => {
+          if (insertError) {
+            console.error("Failed to save user message:", insertError);
+          }
+        });
     }
 
     const repoRef = parseGitHubRepoUrl(org.github_repo_url, org.github_default_branch ?? "main");

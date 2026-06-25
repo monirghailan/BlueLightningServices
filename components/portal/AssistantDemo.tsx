@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useRef, useState } from "react";
 import { motion, useInView } from "framer-motion";
+import { AssistantTypingIndicator } from "@/components/portal/AssistantTypingIndicator";
 import { portalLanding } from "@/lib/content";
 import { defaultTransition } from "@/lib/animations";
 import { cn } from "@/lib/utils";
@@ -16,24 +17,6 @@ const PHASE_DELAYS = {
   assistant: 1400,
   done: 2200,
 } as const;
-
-function TypingIndicator() {
-  return (
-    <div className="mr-8 rounded-2xl border border-border px-4 py-3 text-sm">
-      <p className="mb-2 text-xs uppercase tracking-wide text-muted">Assistant</p>
-      <div className="flex gap-1">
-        {[0, 1, 2].map((i) => (
-          <motion.span
-            key={i}
-            className="inline-block h-2 w-2 rounded-full bg-muted"
-            animate={{ opacity: [0.35, 1, 0.35] }}
-            transition={{ duration: 1, repeat: Infinity, delay: i * 0.2 }}
-          />
-        ))}
-      </div>
-    </div>
-  );
-}
 
 function AssistantAnswer({ scenario }: { scenario: DemoScenario }) {
   const paragraphs = scenario.answer.split("\n\n");
@@ -204,7 +187,7 @@ export function AssistantDemo() {
               </motion.div>
             )}
 
-            {showTyping && <TypingIndicator key={`typing-${activeIndex}`} />}
+            {showTyping && <AssistantTypingIndicator key={`typing-${activeIndex}`} />}
 
             {showAssistant && activeScenario && (
               <AssistantAnswer scenario={activeScenario} />

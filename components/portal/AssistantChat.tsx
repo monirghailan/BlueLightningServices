@@ -2,11 +2,12 @@
 
 import { useChat } from "@ai-sdk/react";
 import { DefaultChatTransport } from "ai";
-import { useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { ASSISTANT_PERSONA_LABELS, ASSISTANT_PERSONAS } from "@/lib/assistant/personas";
 import type { AssistantPersona } from "@/lib/supabase/database.types";
 import type { AssistantChatMessage } from "@/lib/assistant/chat-types";
 import { AssistantMessageFeedbackBar } from "@/components/portal/AssistantMessageFeedback";
+import { AssistantTypingIndicator } from "@/components/portal/AssistantTypingIndicator";
 import { MarkdownContent } from "@/components/portal/MarkdownContent";
 import { PortalCard } from "@/components/portal/PortalCard";
 
@@ -33,6 +34,7 @@ export function AssistantChat({
   const [showPersonaPicker, setShowPersonaPicker] = useState(false);
   const [conversationId, setConversationId] = useState<string | undefined>();
   const [input, setInput] = useState("");
+  const messagesContainerRef = useRef<HTMLDivElement>(null);
 
   const transport = useMemo(
     () =>
@@ -59,6 +61,27 @@ export function AssistantChat({
   const { messages, sendMessage, status, error } = useChat<AssistantChatMessage>({
     transport,
   });
+
+  const lastMessage = messages.at(-1);
+  const showTypingIndicator =
+    status === "submitted" ||
+    (status === "streaming" &&
+      lastMessage?.role === "assistant" &&
+      !lastMessage.parts.some(
+        (part) => part.type === "text" && part.text.trim().length > 0
+      ));
+
+  const scrollChatToBottom = useCallback((behavior: ScrollBehavior = "smooth") => {
+    const el = messagesContainerRef.current;
+    if (!el) return;
+    el.scrollTo({ top: el.scrollHeight, behavior });
+  }, []);
+
+  useEffect(() => {
+    if (messages.length === 0 && !showTypingIndicator) return;
+    const timer = setTimeout(() => scrollChatToBottom(), 80);
+    return () => clearTimeout(timer);
+  }, [messages, status, showTypingIndicator, scrollChatToBottom]);
 
   async function savePersona(persona: AssistantPersona) {
     const previousPersona = meta.assistantPersona;
@@ -198,7 +221,10 @@ export function AssistantChat({
       )}
 
       <div className="rounded-2xl border border-border bg-surface">
-        <div className="max-h-[32rem] space-y-4 overflow-y-auto p-4">
+        <div
+          ref={messagesContainerRef}
+          className="max-h-[32rem] space-y-4 overflow-y-auto p-4 scroll-smooth"
+        >
           {messages.length === 0 && (
             <p className="text-sm text-muted">
               Ask how to use Salesforce in your organization — for example, how to create a lead,
@@ -215,6 +241,10 @@ export function AssistantChat({
             const hasText = message.parts.some(
               (part) => part.type === "text" && part.text.trim().length > 0
             );
+
+            if (isAssistant && isStreamingThisMessage && !hasText) {
+              return null;
+            }
 
             return (
             <div
@@ -248,6 +278,7 @@ export function AssistantChat({
             </div>
             );
           })}
+          {showTypingIndicator && <AssistantTypingIndicator />}
         </div>
 
         <form onSubmit={handleSubmit} className="border-t border-border p-4">
