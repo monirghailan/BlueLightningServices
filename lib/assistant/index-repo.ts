@@ -9,6 +9,7 @@ import {
   listMarkdownFiles,
   parseGitHubRepoUrl,
 } from "@/lib/assistant/github";
+import { invalidateOrgGuideFileCache } from "@/lib/assistant/guide-file-cache";
 import { isIndexableGuidePath } from "@/lib/assistant/paths";
 
 export interface IndexOrgGuideResult {
@@ -109,6 +110,8 @@ export async function indexOrgGuide(
       assistant_enabled: true,
     })
     .eq("id", org.id);
+
+  invalidateOrgGuideFileCache(org.id);
 
   return {
     organizationId: org.id,

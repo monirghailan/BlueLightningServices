@@ -32,9 +32,10 @@ export function AssistantChat({
   const [savingPersona, setSavingPersona] = useState<AssistantPersona | null>(null);
   const [personaError, setPersonaError] = useState<string | null>(null);
   const [showPersonaPicker, setShowPersonaPicker] = useState(false);
-  const [conversationId, setConversationId] = useState<string | undefined>();
   const [input, setInput] = useState("");
   const messagesContainerRef = useRef<HTMLDivElement>(null);
+  const conversationIdRef = useRef<string | undefined>(undefined);
+  const statusLabelRef = useRef<string | null>(null);
 
   const transport = useMemo(
     () =>
@@ -44,22 +45,32 @@ export function AssistantChat({
           const response = await fetch(input, init);
           const id = response.headers.get("X-Conversation-Id");
           if (id) {
-            setConversationId(id);
+            conversationIdRef.current = id;
           }
           return response;
         },
         prepareSendMessagesRequest: ({ messages, body }) => ({
           body: {
             messages,
-            conversationId: body?.conversationId ?? conversationId,
+            conversationId: body?.conversationId ?? conversationIdRef.current,
           },
         }),
       }),
-    [conversationId]
+    []
+  );
+
+  const handleAssistantData = useCallback(
+    (dataPart: { type: string; data: { label: string } }) => {
+      if (dataPart.type === "data-assistantStatus") {
+        statusLabelRef.current = dataPart.data.label;
+      }
+    },
+    []
   );
 
   const { messages, sendMessage, status, error } = useChat<AssistantChatMessage>({
     transport,
+    onData: handleAssistantData,
   });
 
   const lastMessage = messages.at(-1);
@@ -108,9 +119,10 @@ export function AssistantChat({
   }
 
   function handleSuggestedPrompt(prompt: string) {
+    statusLabelRef.current = null;
     void sendMessage(
       { text: prompt },
-      { body: { conversationId } }
+      { body: { conversationId: conversationIdRef.current } }
     );
   }
 
@@ -120,10 +132,11 @@ export function AssistantChat({
     if (!text || status !== "ready") return;
 
     setInput("");
+    statusLabelRef.current = null;
     await sendMessage(
       { text },
       {
-        body: { conversationId },
+        body: { conversationId: conversationIdRef.current },
       }
     );
   }
@@ -278,7 +291,9 @@ export function AssistantChat({
             </div>
             );
           })}
-          {showTypingIndicator && <AssistantTypingIndicator />}
+          {showTypingIndicator && (
+            <AssistantTypingIndicator label={statusLabelRef.current ?? undefined} />
+          )}
         </div>
 
         <form onSubmit={handleSubmit} className="border-t border-border p-4">

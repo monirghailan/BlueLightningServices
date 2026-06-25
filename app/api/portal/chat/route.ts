@@ -10,20 +10,31 @@ import {
 import { openai } from "@ai-sdk/openai";
 import { z } from "zod";
 import {
-  portalErrorResponse,
-  requirePortalSession,
-  getAuthenticatedSupabase,
-} from "@/lib/portal/auth";
-import { buildAssistantSystemPrompt } from "@/lib/assistant/prompts";
-import { isChatRateLimited } from "@/lib/assistant/rate-limit";
-import { searchOrgGuide } from "@/lib/assistant/search";
+  ASSISTANT_STATUS_LABELS,
+  type AssistantChatMessage,
+} from "@/lib/assistant/chat-types";
+import { resolveAssistantConversation } from "@/lib/assistant/conversation";
+import { fetchCachedGuideFile } from "@/lib/assistant/guide-file-cache";
 import {
   fetchRepoFile,
   getGitHubClient,
   parseGitHubRepoUrl,
 } from "@/lib/assistant/github";
+import {
+  collectSourcesFromResults,
+  findHowToPath,
+  prefetchGuideFile,
+} from "@/lib/assistant/prefetch";
+import { buildAssistantSystemPrompt } from "@/lib/assistant/prompts";
+import { isChatRateLimited } from "@/lib/assistant/rate-limit";
+import { searchOrgGuide } from "@/lib/assistant/search";
+import { trimChatMessages } from "@/lib/assistant/trim-messages";
+import {
+  portalErrorResponse,
+  requirePortalSession,
+  getAuthenticatedSupabase,
+} from "@/lib/portal/auth";
 import { chatSchema } from "@/lib/validations/portal";
-import type { AssistantChatMessage } from "@/lib/assistant/chat-types";
 
 export const maxDuration = 60;
 
@@ -42,6 +53,17 @@ function getMessageText(message: UIMessage): string {
     .map((part) => part.text)
     .join("\n")
     .trim();
+}
+
+function writeAssistantStatus(
+  writer: { write: (part: { type: "data-assistantStatus"; data: { label: string }; transient: true }) => void },
+  label: string
+) {
+  writer.write({
+    type: "data-assistantStatus",
+    data: { label },
+    transient: true,
+  });
 }
 
 export async function POST(request: Request) {
@@ -89,46 +111,31 @@ export async function POST(request: Request) {
       );
     }
 
-    const supabase = await getAuthenticatedSupabase();
-    let conversationId = parsed.data.conversationId;
-
-    if (conversationId) {
-      const { data: existing } = await supabase
-        .from("assistant_conversations")
-        .select("id")
-        .eq("id", conversationId)
-        .eq("user_id", session.userId)
-        .eq("organization_id", org.id)
-        .maybeSingle();
-
-      if (!existing) {
-        conversationId = undefined;
-      }
-    }
-
-    if (!conversationId) {
-      const lastUserMessage = parsed.data.messages.filter((m) => m.role === "user").at(-1);
-      const { data: created, error } = await supabase
-        .from("assistant_conversations")
-        .insert({
-          organization_id: org.id,
-          user_id: session.userId,
-          title: lastUserMessage?.content.slice(0, 80) ?? "Assistant chat",
-        })
-        .select("id")
-        .single();
-
-      if (error || !created) {
-        console.error(error);
-        return Response.json({ error: "Failed to start conversation." }, { status: 500 });
-      }
-
-      conversationId = created.id;
-    }
-
-    const uiMessages = body.messages as AssistantChatMessage[];
-    const lastUser = uiMessages.filter((m) => m.role === "user").at(-1);
+    const uiMessages = trimChatMessages(body.messages as AssistantChatMessage[]);
+    const lastUser = uiMessages.filter((message) => message.role === "user").at(-1);
     const lastUserText = lastUser ? getMessageText(lastUser) : "";
+    const conversationTitle =
+      parsed.data.messages.filter((message) => message.role === "user").at(-1)?.content.slice(0, 80) ??
+      "Assistant chat";
+
+    const supabase = await getAuthenticatedSupabase();
+    const repoRef = parseGitHubRepoUrl(org.github_repo_url, org.github_default_branch ?? "main");
+
+    const [conversationId, searchResults] = await Promise.all([
+      resolveAssistantConversation(supabase, {
+        conversationId: parsed.data.conversationId,
+        userId: session.userId,
+        organizationId: org.id,
+        title: conversationTitle,
+      }),
+      lastUserText
+        ? searchOrgGuide(supabase, {
+            organizationId: org.id,
+            question: lastUserText,
+            persona: session.assistantPersona,
+          })
+        : Promise.resolve([]),
+    ]);
 
     if (lastUserText) {
       void supabase
@@ -145,24 +152,39 @@ export async function POST(request: Request) {
         });
     }
 
-    const repoRef = parseGitHubRepoUrl(org.github_repo_url, org.github_default_branch ?? "main");
-    const collectedSources: Array<{ path: string; title: string }> = [];
-    const modelMessages = await convertToModelMessages(uiMessages);
+    const howToPath = findHowToPath(searchResults);
+
+    const [prefetchedFile, modelMessages] = await Promise.all([
+      howToPath
+        ? prefetchGuideFile({
+            orgId: org.id,
+            repoRef,
+            path: howToPath,
+          })
+        : Promise.resolve(null),
+      convertToModelMessages(uiMessages),
+    ]);
+
+    const collectedSources = collectSourcesFromResults(searchResults, prefetchedFile);
 
     const stream = createUIMessageStream<AssistantChatMessage>({
       execute: ({ writer }) => {
+        writeAssistantStatus(writer, ASSISTANT_STATUS_LABELS.drafting);
+
         const result = streamText({
           model: openai("gpt-4o-mini"),
           system: buildAssistantSystemPrompt({
             org,
             persona: session.assistantPersona,
+            searchResults,
+            prefetchedFile,
           }),
           messages: modelMessages,
-          stopWhen: stepCountIs(5),
+          stopWhen: stepCountIs(3),
           tools: {
             searchOrgGuide: tool({
               description:
-                "Search this organization's curated Salesforce guide for relevant information. Use first for every question; note file paths in results so you can fetchGuideFile when full steps are needed.",
+                "Search this organization's curated Salesforce guide for relevant information. Use only when the pre-search results are insufficient.",
               inputSchema: z.object({
                 question: z.string().describe("The user's question or search query"),
               }),
@@ -174,7 +196,7 @@ export async function POST(request: Request) {
                 });
 
                 for (const item of results) {
-                  if (!collectedSources.some((s) => s.path === item.path)) {
+                  if (!collectedSources.some((source) => source.path === item.path)) {
                     collectedSources.push({ path: item.path, title: item.title });
                   }
                 }
@@ -196,25 +218,40 @@ export async function POST(request: Request) {
             }),
             fetchGuideFile: tool({
               description:
-                "Fetch the full content of a guide file by path. Use when the user needs complete step-by-step instructions from a how-to or process guide, especially after searchOrgGuide returns partial chunks.",
+                "Fetch the full content of a guide file by path. Use when you need complete step-by-step instructions not already in the pre-loaded content.",
               inputSchema: z.object({
                 path: z.string().describe("Relative repo path, e.g. how-to/create-a-lead.md"),
               }),
               execute: async ({ path }) => {
-                const content = await fetchRepoFile(getGitHubClient(), repoRef, path);
-                collectedSources.push({
-                  path,
-                  title: path.split("/").pop() ?? path,
-                });
-                return { path, content: content.slice(0, 12000) };
+                const content = await fetchCachedGuideFile(org.id, repoRef, path, () =>
+                  fetchRepoFile(getGitHubClient(), repoRef, path)
+                );
+
+                if (!collectedSources.some((source) => source.path === path)) {
+                  collectedSources.push({
+                    path,
+                    title: path.split("/").pop() ?? path,
+                  });
+                }
+
+                return { path, content: content.slice(0, 12_000) };
               },
             }),
+          },
+          experimental_onToolCallStart: ({ toolCall }) => {
+            if (toolCall.toolName === "searchOrgGuide") {
+              writeAssistantStatus(writer, ASSISTANT_STATUS_LABELS.searching);
+            }
+
+            if (toolCall.toolName === "fetchGuideFile") {
+              writeAssistantStatus(writer, ASSISTANT_STATUS_LABELS.loadingSteps);
+            }
           },
           onFinish: async ({ text }) => {
             const { data: savedMessage, error: saveError } = await supabase
               .from("assistant_messages")
               .insert({
-                conversation_id: conversationId!,
+                conversation_id: conversationId,
                 role: "assistant",
                 content: text,
                 sources: collectedSources,
@@ -229,7 +266,7 @@ export async function POST(request: Request) {
             await supabase
               .from("assistant_conversations")
               .update({ updated_at: new Date().toISOString() })
-              .eq("id", conversationId!);
+              .eq("id", conversationId);
 
             if (savedMessage) {
               writer.write({
@@ -254,10 +291,14 @@ export async function POST(request: Request) {
     return createUIMessageStreamResponse({
       stream,
       headers: {
-        "X-Conversation-Id": conversationId!,
+        "X-Conversation-Id": conversationId,
       },
     });
   } catch (error) {
+    if (error instanceof Error && error.message === "Failed to start conversation.") {
+      return Response.json({ error: error.message }, { status: 500 });
+    }
+
     return portalErrorResponse(error);
   }
 }

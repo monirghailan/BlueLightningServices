@@ -2,15 +2,20 @@
 
 import { motion } from "framer-motion";
 
-export function AssistantTypingIndicator() {
+interface AssistantTypingIndicatorProps {
+  label?: string;
+}
+
+export function AssistantTypingIndicator({ label }: AssistantTypingIndicatorProps) {
   return (
     <div
       className="mr-8 rounded-2xl border border-border px-4 py-3 text-sm"
       aria-live="polite"
       aria-busy="true"
-      aria-label="Assistant is typing"
+      aria-label={label ?? "Assistant is typing"}
     >
       <p className="mb-2 text-xs uppercase tracking-wide text-muted">Assistant</p>
+      {label ? <p className="mb-2 text-sm text-muted">{label}</p> : null}
       <div className="flex gap-1">
         {[0, 1, 2].map((i) => (
           <motion.span

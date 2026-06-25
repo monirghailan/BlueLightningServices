@@ -7,4 +7,16 @@ export type AssistantChatMetadata = {
   feedback?: AssistantMessageFeedback | null;
 };
 
-export type AssistantChatMessage = UIMessage<AssistantChatMetadata>;
+export type AssistantChatDataParts = {
+  assistantStatus: {
+    label: string;
+  };
+};
+
+export type AssistantChatMessage = UIMessage<AssistantChatMetadata, AssistantChatDataParts>;
+
+export const ASSISTANT_STATUS_LABELS = {
+  searching: "Searching your org guide…",
+  loadingSteps: "Loading step-by-step instructions…",
+  drafting: "Drafting your answer…",
+} as const;
