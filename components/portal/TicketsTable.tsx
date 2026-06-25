@@ -147,13 +147,13 @@ export function TicketsTable({ initialData, refreshKey = 0 }: TicketsTableProps)
       </div>
 
       <div className="overflow-hidden rounded-xl border border-border">
-        <table className="min-w-full text-sm">
+        <table className="w-full table-fixed text-sm">
           <thead className="bg-surface-elevated text-left text-muted">
             <tr>
-              <th className="px-4 py-3 font-medium">Key</th>
+              <th className="w-24 px-4 py-3 font-medium">Key</th>
               <th className="px-4 py-3 font-medium">Summary</th>
-              <th className="px-4 py-3 font-medium">Type</th>
-              <th className="px-4 py-3 font-medium">Status</th>
+              <th className="w-28 px-4 py-3 font-medium">Type</th>
+              <th className="w-32 px-4 py-3 font-medium">Status</th>
             </tr>
           </thead>
           <tbody>
@@ -174,7 +174,7 @@ export function TicketsTable({ initialData, refreshKey = 0 }: TicketsTableProps)
                 const ticketRef = issue.key ?? issue.id;
                 return (
                 <tr key={issue.id} className="border-t border-border">
-                  <td className="px-4 py-3 font-mono">
+                  <td className="whitespace-nowrap px-4 py-3 font-mono">
                     <Link
                       href={`/portal/tickets/${ticketRef}`}
                       className="text-bolt-outline hover:underline"
@@ -182,9 +182,11 @@ export function TicketsTable({ initialData, refreshKey = 0 }: TicketsTableProps)
                       {issue.key ?? "Pending…"}
                     </Link>
                   </td>
-                  <td className="max-w-md truncate px-4 py-3">{issue.summary}</td>
-                  <td className="px-4 py-3 text-muted">{issue.type}</td>
-                  <td className="px-4 py-3">
+                  <td className="truncate px-4 py-3" title={issue.summary}>
+                    {issue.summary}
+                  </td>
+                  <td className="whitespace-nowrap px-4 py-3 text-muted">{issue.type}</td>
+                  <td className="whitespace-nowrap px-4 py-3">
                     <StatusBadge status={issue.status} />
                   </td>
                 </tr>

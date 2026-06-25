@@ -188,13 +188,13 @@ export function BacklogTable({
       )}
 
       <div className="overflow-hidden rounded-xl border border-border">
-        <table className="min-w-full text-sm">
+        <table className="w-full table-fixed text-sm">
           <thead className="bg-surface-elevated text-left text-muted">
             <tr>
-              <th className="px-4 py-3 font-medium">Key</th>
+              <th className="w-24 px-4 py-3 font-medium">Key</th>
               <th className="px-4 py-3 font-medium">Summary</th>
-              <th className="px-4 py-3 font-medium">Type</th>
-              <th className="px-4 py-3 font-medium text-right">Actions</th>
+              <th className="w-28 px-4 py-3 font-medium">Type</th>
+              <th className="w-44 px-4 py-3 font-medium text-right">Actions</th>
             </tr>
           </thead>
           <tbody>
@@ -220,7 +220,7 @@ export function BacklogTable({
 
                 return (
                   <tr key={item.id} className="border-t border-border">
-                    <td className="px-4 py-3 font-mono">
+                    <td className="whitespace-nowrap px-4 py-3 font-mono">
                       <Link
                         href={`/portal/tickets/${ticketRef}`}
                         className="text-bolt-outline hover:underline"
@@ -228,9 +228,11 @@ export function BacklogTable({
                         {item.key ?? "Pending…"}
                       </Link>
                     </td>
-                    <td className="max-w-md truncate px-4 py-3">{item.summary}</td>
-                    <td className="px-4 py-3 text-muted">{item.type}</td>
-                    <td className="px-4 py-3">
+                    <td className="truncate px-4 py-3" title={item.summary}>
+                      {item.summary}
+                    </td>
+                    <td className="whitespace-nowrap px-4 py-3 text-muted">{item.type}</td>
+                    <td className="whitespace-nowrap px-4 py-3">
                       <div className="flex items-center justify-end gap-2">
                         <button
                           type="button"
