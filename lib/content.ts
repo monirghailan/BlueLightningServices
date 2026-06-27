@@ -7,8 +7,9 @@ export const site = {
 
 export const icp = {
   primary:
-    "Mid-market B2B companies (100–1,000 employees) with an active Salesforce org, a 1–4 person Salesforce team, and a backlog that outpaces capacity.",
-  buyer: "VP Engineering, CTO, COO, or Head of Business Systems",
+    "Small to mid-size B2B companies (10–1,000 employees) with an active Salesforce org, a 1–4 person Salesforce team, and a backlog that outpaces capacity.",
+  buyer:
+    "Founder, owner, CEO, COO, VP Engineering, CTO, or Head of Business Systems",
 } as const;
 
 export const hero = {
@@ -140,7 +141,7 @@ export const faqs = [
   {
     question: "Who is Blue Lightning Services for?",
     answer:
-      "Mid-market B2B companies with an active Salesforce org, a small in-house team, and a backlog that outpaces capacity. Typical buyers are VP Engineering, CTO, COO, or Head of Business Systems.",
+      "Small to mid-size B2B companies (10–1,000 employees) with an active Salesforce org, a small in-house team, and a backlog that outpaces capacity. Typical buyers are founders, owners, CEOs, and operational leaders such as COO, VP Engineering, CTO, or Head of Business Systems.",
   },
   {
     question: "How is this different from staff augmentation?",
