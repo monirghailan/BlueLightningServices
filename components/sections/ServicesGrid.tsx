@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { motion } from "framer-motion";
 import {
   Bot,
@@ -56,6 +57,17 @@ export function ServicesGrid({ limit }: { limit?: number }) {
               );
             })}
           </div>
+          {limit ? (
+            <p className="mt-10 text-center text-sm text-muted">
+              <Link href="/services" className="text-bolt-outline hover:text-bolt-glow">
+                View all services
+              </Link>{" "}
+              ·{" "}
+              <Link href="/pricing" className="text-bolt-outline hover:text-bolt-glow">
+                See pricing
+              </Link>
+            </p>
+          ) : null}
         </motion.div>
       </div>
     </section>

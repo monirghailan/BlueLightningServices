@@ -1,11 +1,14 @@
 import type { Metadata } from "next";
 import { Analytics } from "@vercel/analytics/next";
+import { SpeedInsights } from "@vercel/speed-insights/next";
 import { Geist, Geist_Mono } from "next/font/google";
+import { JsonLd } from "@/components/seo/JsonLd";
 import { ConditionalFooter } from "@/components/layout/ConditionalFooter";
 import { ConditionalHeader } from "@/components/layout/ConditionalHeader";
 import { ClientProviders } from "@/components/providers/ClientProviders";
 import { ScrollToTop } from "@/components/layout/ScrollToTop";
 import { site } from "@/lib/content";
+import { siteStructuredDataGraph } from "@/lib/structured-data";
 import "./globals.css";
 
 const geistSans = Geist({
@@ -41,6 +44,11 @@ export const metadata: Metadata = {
       "Replace your in-house Salesforce development team with an agentic engineering partner.",
   },
   icons: { icon: "/icon" },
+  ...(process.env.GOOGLE_SITE_VERIFICATION && {
+    verification: {
+      google: process.env.GOOGLE_SITE_VERIFICATION,
+    },
+  }),
 };
 
 export default function RootLayout({
@@ -56,20 +64,8 @@ export default function RootLayout({
           <ConditionalFooter />
         </ClientProviders>
         <Analytics />
-        <script
-          type="application/ld+json"
-          dangerouslySetInnerHTML={{
-            __html: JSON.stringify({
-              "@context": "https://schema.org",
-              "@type": "ProfessionalService",
-              name: site.name,
-              description: site.tagline,
-              url: site.url,
-              email: site.email,
-              priceRange: "£££",
-            }),
-          }}
-        />
+        <SpeedInsights />
+        <JsonLd data={siteStructuredDataGraph()} />
       </body>
     </html>
   );

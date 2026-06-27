@@ -1,3 +1,5 @@
+import { buildPageMetadata } from "@/lib/seo";
+import { JsonLd } from "@/components/seo/JsonLd";
 import { Footer } from "@/components/layout/Footer";
 import { SnapScrollRoot, SnapSection } from "@/components/layout/SnapScroll";
 import { AboveFold } from "@/components/sections/AboveFold";
@@ -6,10 +8,20 @@ import { ServicesGrid } from "@/components/sections/ServicesGrid";
 import { PricingSection } from "@/components/sections/PricingSection";
 import { FAQSection } from "@/components/sections/FAQSection";
 import { CTASection } from "@/components/sections/CTASection";
+import { faqPageJsonLd } from "@/lib/structured-data";
+
+export const metadata = buildPageMetadata({
+  path: "/",
+  title: "Home",
+  description:
+    "Replace your in-house Salesforce development team with an agentic engineering partner. Decades of Salesforce mastery. From £3,499/mo.",
+});
 
 export default function HomePage() {
   return (
-    <SnapScrollRoot>
+    <>
+      <JsonLd data={faqPageJsonLd()} />
+      <SnapScrollRoot>
       <SnapSection>
         <AboveFold />
       </SnapSection>
@@ -34,6 +46,7 @@ export default function HomePage() {
         </div>
         <div className="snap-section__last-end" aria-hidden />
       </SnapSection>
-    </SnapScrollRoot>
+      </SnapScrollRoot>
+    </>
   );
 }

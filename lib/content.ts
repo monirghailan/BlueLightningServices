@@ -137,6 +137,46 @@ export const faqs = [
     answer:
       "Typical 2–4 week knowledge transfer before we assume full ownership of your Salesforce engineering function.",
   },
+  {
+    question: "Who is Blue Lightning Services for?",
+    answer:
+      "Mid-market B2B companies with an active Salesforce org, a small in-house team, and a backlog that outpaces capacity. Typical buyers are VP Engineering, CTO, COO, or Head of Business Systems.",
+  },
+  {
+    question: "How is this different from staff augmentation?",
+    answer:
+      "We replace your Salesforce development function with fixed-scope managed engineering — not hourly contractors added to your backlog. We own delivery cadence, releases, and outcomes.",
+  },
+  {
+    question: "Do you work with existing Salesforce partners or SI firms?",
+    answer:
+      "Yes. We can take over from an in-house team or an underperforming vendor. Our audit phase maps current state, contracts, and knowledge gaps before transition.",
+  },
+  {
+    question: "What Salesforce technologies do you cover?",
+    answer:
+      "LWC, Apex, Flow, integrations, Agentforce, Einstein, architecture reviews, and managed releases — full-stack Salesforce engineering from build through production operations.",
+  },
+  {
+    question: "Where are you based and who do you serve?",
+    answer:
+      "We serve B2B companies globally with pricing in GBP, EUR, and USD. Delivery is remote-first with senior Salesforce experts on every release.",
+  },
+  {
+    question: "What does onboarding look like?",
+    answer:
+      "Start with a free team audit: we map your org, backlog, team roles, and spend. If we are a fit, we run a structured 2–4 week knowledge transfer before assuming full engineering ownership.",
+  },
+  {
+    question: "Can we keep some work in-house?",
+    answer:
+      "Our model works best when we own the full Salesforce engineering function end to end. Partial ownership creates handoff friction and slows release cadence — we can discuss scope during the audit.",
+  },
+  {
+    question: "What is included in the client portal?",
+    answer:
+      "Every Blue Lightning client gets a portal at no extra cost: AI assistant grounded in your org guide, ticket submission, backlog prioritization, and delivery metrics. See our portal page for details.",
+  },
 ] as const;
 
 export const navLinks = [

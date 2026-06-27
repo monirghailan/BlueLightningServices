@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { motion } from "framer-motion";
 import { differentiators, icp } from "@/lib/content";
 import { CTASection } from "@/components/sections/CTASection";
@@ -11,7 +12,15 @@ export function WhyUsContent() {
       <div className="gradient-mesh px-6 py-16 text-center">
         <h1 className="text-4xl font-bold sm:text-5xl">Why Blue Lightning</h1>
         <p className="mx-auto mt-4 max-w-2xl text-lg text-muted">
-          Decades of Salesforce experience meets production-grade agentic AI — not generic consulting.
+          Decades of Salesforce experience meets production-grade agentic AI — not generic consulting.{" "}
+          <Link href="/how-it-works" className="text-bolt-outline hover:text-bolt-glow">
+            See how we work
+          </Link>{" "}
+          or{" "}
+          <Link href="/contact" className="text-bolt-outline hover:text-bolt-glow">
+            get in touch
+          </Link>
+          .
         </p>
       </div>
 

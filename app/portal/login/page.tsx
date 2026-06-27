@@ -1,8 +1,12 @@
+import type { Metadata } from "next";
 import { Suspense } from "react";
 import { redirect } from "next/navigation";
 import { getPortalSession, getPortalHomePath } from "@/lib/portal/auth";
 import { PortalLoadingScreen } from "@/components/portal/PortalLoadingScreen";
+import { noIndexMetadata } from "@/lib/seo";
 import PortalLoginPage from "./PortalLoginClient";
+
+export const metadata: Metadata = noIndexMetadata;
 
 async function LoginGate() {
   const session = await getPortalSession();

@@ -1,9 +1,13 @@
+import type { Metadata } from "next";
 import { Suspense } from "react";
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { getPortalSession } from "@/lib/portal/auth";
 import { PortalShell } from "@/components/portal/PortalShell";
 import { PortalAppLoadingFallback } from "@/components/portal/PortalAppLoadingFallback";
+import { noIndexMetadata } from "@/lib/seo";
+
+export const metadata: Metadata = noIndexMetadata;
 
 async function AuthenticatedPortalShell({
   children,

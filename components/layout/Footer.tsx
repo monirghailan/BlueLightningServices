@@ -40,6 +40,10 @@ export function Footer({ embedded = false }: { embedded?: boolean }) {
               <Link href="/privacy" className="hover:text-foreground">
                 Privacy Policy
               </Link>
+              <span className="mx-2">·</span>
+              <Link href="/insights" className="hover:text-foreground">
+                Insights
+              </Link>
             </p>
           </div>
         </div>
