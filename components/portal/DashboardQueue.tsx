@@ -16,14 +16,16 @@ const NewTicketModal = dynamic(
   { ssr: false }
 );
 
-interface DashboardQueueProps {
+export interface DashboardQueueProps {
   initialBacklog?: BacklogInitialData;
   initialTickets?: TicketsInitialData;
+  onTicketSynced?: () => void;
 }
 
 export function DashboardQueue({
   initialBacklog,
   initialTickets,
+  onTicketSynced,
 }: DashboardQueueProps) {
   const [ticketsRefreshKey, setTicketsRefreshKey] = useState(0);
   const [backlogReloadToken, setBacklogReloadToken] = useState(0);
@@ -54,6 +56,7 @@ export function DashboardQueue({
           initialData={initialBacklog}
           reloadToken={backlogReloadToken}
           onTicketReady={() => setTicketsRefreshKey((key) => key + 1)}
+          onPendingSyncResolved={onTicketSynced}
         />
       </PortalCard>
 

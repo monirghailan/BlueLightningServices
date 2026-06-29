@@ -1,8 +1,7 @@
 import { redirect } from "next/navigation";
 import { requirePortalAdmin } from "@/lib/portal/auth";
 import { getDashboardInitialData } from "@/lib/portal/dashboard-data";
-import { DashboardMetrics } from "@/components/portal/DashboardMetrics";
-import { DashboardQueue } from "@/components/portal/DashboardQueue";
+import { DashboardView } from "@/components/portal/DashboardView";
 
 export default async function PortalDashboardPage() {
   let session;
@@ -17,9 +16,10 @@ export default async function PortalDashboardPage() {
   );
 
   return (
-    <div className="space-y-8">
-      <DashboardMetrics initialMetrics={metrics} />
-      <DashboardQueue initialBacklog={backlog} initialTickets={tickets} />
-    </div>
+    <DashboardView
+      initialMetrics={metrics}
+      initialBacklog={backlog}
+      initialTickets={tickets}
+    />
   );
 }

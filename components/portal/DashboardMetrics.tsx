@@ -40,21 +40,27 @@ function MetricsSkeleton() {
 
 interface DashboardMetricsProps {
   initialMetrics?: PortalMetrics | null;
+  refreshToken?: number;
 }
 
-export function DashboardMetrics({ initialMetrics }: DashboardMetricsProps) {
+export function DashboardMetrics({
+  initialMetrics,
+  refreshToken = 0,
+}: DashboardMetricsProps) {
   const [metrics, setMetrics] = useState<PortalMetrics | null>(
     initialMetrics ?? null
   );
 
   useEffect(() => {
-    if (initialMetrics != null) return;
+    if (initialMetrics != null && refreshToken === 0) return;
 
     let active = true;
 
     async function load() {
       try {
-        const res = await fetch("/api/portal/metrics");
+        const url =
+          refreshToken > 0 ? "/api/portal/metrics?fresh=1" : "/api/portal/metrics";
+        const res = await fetch(url);
         if (!active) return;
         if (res.ok) {
           setMetrics((await res.json()) as PortalMetrics);
@@ -70,7 +76,7 @@ export function DashboardMetrics({ initialMetrics }: DashboardMetricsProps) {
     return () => {
       active = false;
     };
-  }, [initialMetrics]);
+  }, [initialMetrics, refreshToken]);
 
   if (!metrics) {
     return <MetricsSkeleton />;

@@ -8,6 +8,7 @@ import {
 import { resolvePortalBoardId } from "@/lib/jira/board";
 import { linkPendingIssueToJiraKey } from "@/lib/jira/sync/upsert-issue";
 import { syncIssueByKey } from "@/lib/jira/sync/upsert-comment";
+import { persistMetricsForOrganizationId } from "@/lib/jira/sync/compute-metrics-db";
 import { syncBacklogForOrg } from "@/lib/jira/sync/sync-backlog";
 import { createServiceClient } from "@/lib/supabase/server";
 import type {
@@ -125,6 +126,7 @@ async function handleCreateIssue(
 
   await linkPendingIssueToJiraKey(payload.issueId, created.key);
   await syncIssueByKey(created.key, org.id);
+  await persistMetricsForOrganizationId(org.id);
 
   const { data: pendingComments } = await supabase
     .from("jira_comments")

@@ -28,6 +28,7 @@ export interface BacklogInitialData {
 interface BacklogTableProps {
   initialData?: BacklogInitialData;
   onTicketReady?: () => void;
+  onPendingSyncResolved?: () => void;
   reloadToken?: number;
 }
 
@@ -36,9 +37,11 @@ const PAGE_SIZES = [5, 10, 25, 50] as const;
 export function BacklogTable({
   initialData,
   onTicketReady,
+  onPendingSyncResolved,
   reloadToken = 0,
 }: BacklogTableProps) {
   const skipInitialFetch = useRef(initialData != null);
+  const wasPendingRef = useRef(false);
   const [items, setItems] = useState<BacklogItem[]>(initialData?.backlog ?? []);
   const [page, setPage] = useState(initialData?.page ?? 1);
   const [pageSize, setPageSize] = useState<number>(
@@ -98,6 +101,13 @@ export function BacklogTable({
   const hasPendingSync = items.some(
     (item) => !item.key || item.syncStatus === "pending_create"
   );
+
+  useEffect(() => {
+    if (wasPendingRef.current && !hasPendingSync && !loading) {
+      onPendingSyncResolved?.();
+    }
+    wasPendingRef.current = hasPendingSync;
+  }, [hasPendingSync, loading, onPendingSyncResolved]);
 
   useEffect(() => {
     if (!hasPendingSync || loading) return;
