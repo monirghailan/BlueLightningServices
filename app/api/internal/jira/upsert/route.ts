@@ -1,8 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { syncIssueByKey } from "@/lib/jira/sync/upsert-comment";
-import { persistOrgMetrics } from "@/lib/jira/sync/compute-metrics-db";
-import { createServiceClient } from "@/lib/supabase/server";
-import type { Organization } from "@/lib/supabase/database.types";
+import { persistMetricsForOrganizationId } from "@/lib/jira/sync/compute-metrics-db";
 
 function verifySyncSecret(request: NextRequest): boolean {
   const secret = process.env.JIRA_SYNC_SECRET;
@@ -16,7 +14,7 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
-  let body: { issueKey?: string; organizationId?: string; recomputeMetrics?: boolean };
+  let body: { issueKey?: string; organizationId?: string };
 
   try {
     body = await request.json();
@@ -31,17 +29,8 @@ export async function POST(request: NextRequest) {
   try {
     const result = await syncIssueByKey(body.issueKey, body.organizationId ?? null);
 
-    if (body.recomputeMetrics && result?.organizationId) {
-      const supabase = createServiceClient();
-      const { data: org } = await supabase
-        .from("organizations")
-        .select("*")
-        .eq("id", result.organizationId)
-        .maybeSingle();
-
-      if (org) {
-        await persistOrgMetrics(org as Organization);
-      }
+    if (result?.organizationId) {
+      await persistMetricsForOrganizationId(result.organizationId);
     }
 
     return NextResponse.json({ ok: true, ...result });

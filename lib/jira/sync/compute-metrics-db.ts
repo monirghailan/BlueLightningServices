@@ -128,6 +128,22 @@ export async function computeMetricsFromDb(org: Organization): Promise<PortalMet
   };
 }
 
+export async function persistMetricsForOrganizationId(
+  organizationId: string
+): Promise<PortalMetrics | null> {
+  const supabase = createServiceClient();
+  const { data: org, error } = await supabase
+    .from("organizations")
+    .select("*")
+    .eq("id", organizationId)
+    .maybeSingle();
+
+  if (error) throw error;
+  if (!org) return null;
+
+  return persistOrgMetrics(org as Organization);
+}
+
 export async function persistOrgMetrics(org: Organization): Promise<PortalMetrics> {
   const metrics = await computeMetricsFromDb(org);
   const supabase = createServiceClient();
