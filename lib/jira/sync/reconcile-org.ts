@@ -1,5 +1,6 @@
 import { getIssueChangelog, parentIssuesOnly, searchIssues } from "@/lib/jira/client";
 import { clientScopeJql } from "@/lib/jira/client-field";
+import { persistOrgMetrics } from "@/lib/jira/sync/compute-metrics-db";
 import { upsertIssueFromJira } from "@/lib/jira/sync/upsert-issue";
 import { syncBacklogForOrg } from "@/lib/jira/sync/sync-backlog";
 import { createServiceClient } from "@/lib/supabase/server";
@@ -33,6 +34,8 @@ export async function reconcileOrg(org: Organization, full = false): Promise<num
     .from("organizations")
     .update({ jira_last_synced_at: new Date().toISOString() })
     .eq("id", org.id);
+
+  await persistOrgMetrics(org);
 
   return synced;
 }
