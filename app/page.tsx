@@ -34,7 +34,7 @@ export default function HomePage() {
       <SnapSection>
         <PricingSection compact />
       </SnapSection>
-      <SnapSection>
+      <SnapSection tall>
         <FAQSection />
       </SnapSection>
       <SnapSection isLast>

@@ -67,13 +67,13 @@ html.snap-scroll {
   min-height: calc(100svh - var(--header-offset));
 }
 
-.snap-section:not(.snap-section--last) {
+.snap-section:not(.snap-section--last):not(.snap-section--tall) {
   max-height: calc(100dvh - var(--header-offset));
   max-height: calc(100svh - var(--header-offset));
   overflow: hidden;
 }
 
-.snap-section:not(.snap-section--last) > section {
+.snap-section:not(.snap-section--last):not(.snap-section--tall) > section {
   flex: 1;
   min-height: 0;
   width: 100%;
@@ -82,6 +82,12 @@ html.snap-scroll {
   justify-content: center;
   padding-top: 0;
   padding-bottom: 0;
+}
+
+.snap-section.snap-section--tall:not(.snap-section--last) > section {
+  flex: none;
+  min-height: auto;
+  justify-content: flex-start;
 }
 
 .snap-section:not(.snap-section--last) > section > div {

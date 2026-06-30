@@ -155,12 +155,20 @@ export function SnapScrollRoot({ children }: { children: ReactNode }) {
 export function SnapSection({
   children,
   isLast = false,
+  tall = false,
 }: {
   children: ReactNode;
   isLast?: boolean;
+  tall?: boolean;
 }) {
   return (
-    <div className={cn("snap-section", isLast && "snap-section--last")}>
+    <div
+      className={cn(
+        "snap-section",
+        isLast && "snap-section--last",
+        tall && "snap-section--tall"
+      )}
+    >
       {children}
       {!isLast && <div className="snap-section__end" aria-hidden />}
     </div>
