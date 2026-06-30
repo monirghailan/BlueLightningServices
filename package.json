@@ -7,7 +7,9 @@
     "build": "next build",
     "start": "next start",
     "lint": "eslint",
-    "linkedin:prepare-script": "tsx scripts/linkedin-pipeline/prepare-script.ts"
+    "linkedin:prepare-script": "tsx scripts/linkedin-pipeline/prepare-script.ts",
+    "outreach:import-csv": "tsx scripts/outreach/import-csv.ts",
+    "outreach:run": "tsx scripts/outreach/run.ts"
   },
   "dependencies": {
     "@ai-sdk/openai": "^3.0.73",

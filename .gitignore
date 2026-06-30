@@ -47,3 +47,4 @@ next-env.d.ts
 # linkedin script helper (local state)
 scripts/linkedin-pipeline/.daily-*.json
 scripts/linkedin-pipeline/.used-sources.json
+scripts/outreach/.run-prompt.json
