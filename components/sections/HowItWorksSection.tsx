@@ -17,7 +17,7 @@ export function HowItWorksSection({ showLink = true }: { showLink?: boolean }) {
           <motion.div variants={fadeUp} transition={defaultTransition} className="mb-12 text-center">
             <h2 className="text-3xl font-bold sm:text-4xl">How it works</h2>
             <p className="mx-auto mt-4 max-w-2xl text-muted">
-              A structured path from audit to full engineering ownership — typically 2–4 weeks.
+              A structured path from audit to full engineering ownership — typically within a week.
             </p>
           </motion.div>
           <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">

@@ -137,7 +137,7 @@ export const faqs = [
   {
     question: "What's the transition timeline?",
     answer:
-      "Typical 2–4 week knowledge transfer before we assume full ownership of your Salesforce engineering function.",
+      "Knowledge transfer typically completes within a week before we assume full ownership of your Salesforce engineering function.",
   },
   {
     question: "Who is Blue Lightning Services for?",
@@ -167,7 +167,7 @@ export const faqs = [
   {
     question: "What does onboarding look like?",
     answer:
-      "Start with a free team audit: we map your org, backlog, team roles, and spend. If we are a fit, we run a structured 2–4 week knowledge transfer before assuming full engineering ownership.",
+      "Start with a free team audit: we map your org, backlog, team roles, and spend. If we are a fit, we run a structured knowledge transfer — typically within a week — before assuming full engineering ownership.",
   },
   {
     question: "Can we keep some work in-house?",

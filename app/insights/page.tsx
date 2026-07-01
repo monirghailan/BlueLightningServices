@@ -30,7 +30,7 @@ const articles = [
       "A structured audit, transition, and operate model that de-risks knowledge transfer and keeps releases moving.",
     body: [
       "Transferring Salesforce engineering ownership fails when transition is treated as a handoff memo instead of a programme. We start with a free team audit: org map, roles, backlog, spend, and release cadence.",
-      "Knowledge transfer typically runs 2–4 weeks before we assume full ownership. Admins can move to business-side roles; we absorb engineering, releases, and operational work.",
+      "Knowledge transfer typically completes within a week before we assume full ownership. Admins can move to business-side roles; we absorb engineering, releases, and operational work.",
       "The goal is zero-drama continuity — your users keep shipping, your backlog keeps moving, and your leadership gets predictable monthly capacity instead of hiring cycles.",
     ],
   },
