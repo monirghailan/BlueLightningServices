@@ -25,7 +25,7 @@ function StampCell({ index }: { index: number }) {
         ease: "easeOut",
       }}
     >
-      <LogoImage className="h-full max-h-10 w-auto sm:max-h-12" />
+      <LogoImage className="h-full max-h-10 w-auto sm:max-h-12" decorative />
     </motion.div>
   );
 }
@@ -38,6 +38,7 @@ function CenterLogo() {
         <LogoImage
           className="logo-pulse relative h-20 w-auto drop-shadow-[0_0_28px_rgba(96,165,250,0.45)] sm:h-24"
           priority
+          decorative
         />
       </div>
     </div>
@@ -82,7 +83,7 @@ export function PortalLoadingScreen({ fullScreen = false }: PortalLoadingScreenP
         aria-busy
         aria-label="Loading"
       >
-        <LogoImage className="logo-pulse h-16 w-auto" priority />
+        <LogoImage className="logo-pulse h-16 w-auto" priority decorative />
       </div>
     );
   }

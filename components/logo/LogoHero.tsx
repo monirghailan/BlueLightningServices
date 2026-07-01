@@ -33,7 +33,7 @@ export function LogoHero({
   if (reducedMotion) {
     return (
       <div className={cn("flex items-center justify-center", containerClass, className)}>
-        <LogoImage className={sizeClass} priority />
+        <LogoImage className={sizeClass} priority decorative />
       </div>
     );
   }
@@ -84,6 +84,7 @@ export function LogoHero({
             sizeClass
           )}
           priority
+          decorative
         />
       </motion.div>
     </div>

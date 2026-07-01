@@ -28,6 +28,7 @@ export function LogoMark({
         <LogoImage
           className="logo-pulse h-full max-h-full w-auto object-contain"
           priority
+          decorative={showText}
         />
       </span>
       {showText && (
