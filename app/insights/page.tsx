@@ -8,7 +8,7 @@ export const metadata = buildPageMetadata({
   path: "/insights",
   title: "Insights",
   description:
-    "Salesforce engineering insights on managed services, replacing in-house teams, and Agentforce delivery from Blue Lightning Services.",
+    "Salesforce engineering insights on managed services, engineering ownership, and Agentforce delivery from Blue Lightning Services.",
 });
 
 const articles = [
@@ -18,18 +18,18 @@ const articles = [
     summary:
       "Why mid-market B2B companies outgrow hourly contractors — and what full engineering ownership looks like instead.",
     body: [
-      "Staff augmentation adds bodies to your backlog. Managed Salesforce development replaces the function: fixed capacity, weekly releases, and accountability for outcomes.",
+      "Staff augmentation adds bodies to your backlog. Managed Salesforce development owns the function: fixed capacity, weekly releases, and accountability for outcomes.",
       "If your org has a 1–4 person Salesforce team and a backlog that never shrinks, the bottleneck is usually ownership — not headcount. A managed partner owns architecture, releases, and roadmap delivery end to end.",
       "Blue Lightning combines agentic AI-accelerated development with senior expert review on every production change. You get 3–5× delivery velocity at a fraction of in-house team cost.",
     ],
   },
   {
-    id: "replacing-in-house-salesforce-team",
-    title: "How to replace your in-house Salesforce team without drama",
+    id: "transitioning-salesforce-engineering-ownership",
+    title: "How to transition Salesforce engineering ownership without drama",
     summary:
       "A structured audit, transition, and operate model that de-risks knowledge transfer and keeps releases moving.",
     body: [
-      "Replacing an internal Salesforce function fails when transition is treated as a handoff memo instead of a programme. We start with a free team audit: org map, roles, backlog, spend, and release cadence.",
+      "Transferring Salesforce engineering ownership fails when transition is treated as a handoff memo instead of a programme. We start with a free team audit: org map, roles, backlog, spend, and release cadence.",
       "Knowledge transfer typically runs 2–4 weeks before we assume full ownership. Admins can move to business-side roles; we absorb engineering, releases, and operational work.",
       "The goal is zero-drama continuity — your users keep shipping, your backlog keeps moving, and your leadership gets predictable monthly capacity instead of hiring cycles.",
     ],
@@ -59,7 +59,7 @@ export default function InsightsPage() {
       <div className="gradient-mesh px-6 py-16 text-center">
         <h1 className="text-4xl font-bold sm:text-5xl">Insights</h1>
         <p className="mx-auto mt-4 max-w-2xl text-lg text-muted">
-          Practical perspectives on managed Salesforce engineering, team replacement, and agentic delivery.
+          Practical perspectives on managed Salesforce engineering, engineering ownership, and agentic delivery.
         </p>
       </div>
 

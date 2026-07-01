@@ -20,7 +20,7 @@ export default function HowItWorksPage() {
       <div className="gradient-mesh px-6 py-16 text-center">
         <h1 className="text-4xl font-bold sm:text-5xl">How it works</h1>
         <p className="mx-auto mt-4 max-w-2xl text-lg text-muted">
-          From first audit to full ownership — a structured transition that de-risks replacing your Salesforce development team.{" "}
+          From first audit to full ownership — a structured transition that de-risks transferring Salesforce engineering delivery.{" "}
           <Link href="/services" className="text-bolt-outline hover:text-bolt-glow">
             See our services
           </Link>{" "}

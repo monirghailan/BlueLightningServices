@@ -27,7 +27,7 @@ export default function ServicesPage() {
       <div className="gradient-mesh px-6 py-16 text-center">
         <h1 className="text-4xl font-bold sm:text-5xl">Services</h1>
         <p className="mx-auto mt-4 max-w-2xl text-lg text-muted">
-          Everything your in-house Salesforce team does — delivered by one agentic engineering partner.{" "}
+          Full Salesforce engineering capacity — owned and delivered by one agentic partner.{" "}
           <Link href="/pricing" className="text-bolt-outline hover:text-bolt-glow">
             View pricing
           </Link>{" "}

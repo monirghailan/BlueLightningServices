@@ -1,6 +1,7 @@
+// Positioning: function ownership (not "replace your team"). See plan lexicon in repo docs.
 export const site = {
   name: "Blue Lightning Services",
-  tagline: "Your Salesforce team. Rebuilt with AI.",
+  tagline: "Your Salesforce engineering function. Owned end to end.",
   email: "admin@bluelightningservices.com",
   url: "https://bluelightningservices.com",
 } as const;
@@ -13,10 +14,10 @@ export const icp = {
 } as const;
 
 export const hero = {
-  headline: "Your entire Salesforce development team — without the headcount.",
+  headline: "Full Salesforce engineering ownership — without the headcount.",
   tagline: site.tagline,
   subhead:
-    "Decades of Salesforce mastery. One partner that builds, ships, and maintains your org.",
+    "Decades of Salesforce mastery. One partner that owns build, ship, and operate for your org.",
   ctaPrimary: "Get started",
   ctaSecondary: "See pricing",
 } as const;
@@ -89,7 +90,7 @@ export const services = [
 
 export const differentiators = [
   {
-    title: "Team replacement, not staff augmentation",
+    title: "Function ownership, not staff augmentation",
     description:
       "Fixed-scope managed engineering — not hourly bodies bolted onto your backlog.",
   },
@@ -119,7 +120,7 @@ export const planIncludes = [
 
 export const faqs = [
   {
-    question: "Are you replacing our admin too?",
+    question: "Do you take over admin work too?",
     answer:
       "We take on the full engineering function. Admins can transition to business-side roles, or we absorb operational work as part of the partnership.",
   },
@@ -146,7 +147,7 @@ export const faqs = [
   {
     question: "How is this different from staff augmentation?",
     answer:
-      "We replace your Salesforce development function with fixed-scope managed engineering — not hourly contractors added to your backlog. We own delivery cadence, releases, and outcomes.",
+      "We own your Salesforce engineering function with fixed-scope managed engineering — not hourly contractors added to your backlog. We own delivery cadence, releases, and outcomes.",
   },
   {
     question: "Do you work with existing Salesforce partners or SI firms?",

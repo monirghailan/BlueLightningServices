@@ -28,11 +28,11 @@ export const metadata: Metadata = {
     template: `%s | ${site.name}`,
   },
   description:
-    "Replace your in-house Salesforce development team with an agentic engineering partner. Decades of Salesforce mastery. From £3,499/mo.",
+    "Own your Salesforce engineering function with an agentic engineering partner. Decades of Salesforce mastery. From £3,499/mo.",
   openGraph: {
     title: `${site.name} — ${site.tagline}`,
     description:
-      "Your entire Salesforce development team — without the headcount. Agentic AI delivery with senior expert review.",
+      "Full Salesforce engineering ownership — without the headcount. Agentic AI delivery with senior expert review.",
     url: site.url,
     siteName: site.name,
     type: "website",
@@ -41,7 +41,7 @@ export const metadata: Metadata = {
     card: "summary_large_image",
     title: `${site.name} — ${site.tagline}`,
     description:
-      "Replace your in-house Salesforce development team with an agentic engineering partner.",
+      "Own your Salesforce engineering function with an agentic engineering partner.",
   },
   icons: { icon: "/icon" },
   ...(process.env.GOOGLE_SITE_VERIFICATION && {

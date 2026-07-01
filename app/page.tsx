@@ -14,7 +14,7 @@ export const metadata = buildPageMetadata({
   path: "/",
   title: "Home",
   description:
-    "Replace your in-house Salesforce development team with an agentic engineering partner. Decades of Salesforce mastery. From £3,499/mo.",
+    "Own your Salesforce engineering function with an agentic engineering partner. Decades of Salesforce mastery. From £3,499/mo.",
 });
 
 export default function HomePage() {

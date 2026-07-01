@@ -15,10 +15,10 @@ export function CTASection() {
         className="mx-auto max-w-3xl text-center"
       >
         <h2 className="text-3xl font-bold sm:text-4xl">
-          Ready to consolidate your Salesforce team?
+          Ready for full Salesforce engineering ownership?
         </h2>
         <p className="mt-4 text-lg text-muted">
-          Book a free team audit. We&apos;ll map your org, backlog, and spend — and show you exactly how we take over.
+          Book a free team audit. We&apos;ll map your org, backlog, and spend — and show you exactly how we assume ownership of delivery.
         </p>
         <div className="mt-8 flex flex-col items-center justify-center gap-4 sm:flex-row">
           <Button href="/contact" size="lg">

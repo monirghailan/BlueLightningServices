@@ -62,7 +62,7 @@ export function ProblemSolution() {
             <h2 className="text-balance font-bold leading-snug lg:text-[1.65rem]">
               One agentic partner
               <br />
-              replaces your entire dev function
+              owns your engineering function
             </h2>
             <ul className="mt-1.5 space-y-0.5 text-center leading-snug text-muted sm:mt-4 sm:space-y-2 lg:text-base">
               <li>• Fixed capacity from {monthlyPrice ?? "—"} — not hourly T&M</li>

@@ -71,6 +71,8 @@ Tone: direct, expert, confident but not salesy. One pain point per message — n
 
 Structure: one sharp pain → one consequence → one way BLS helps → single CTA (${site.url} or a relevant page path).
 
+Lead with function ownership and backlog/release outcomes; avoid "replace your team" language.
+
 Never name existing clients, client industries tied to one customer, internal ticket keys, sandbox URLs, or Salesforce record IDs.
 
 Sign off with a real sender name only when the user provides one; otherwise use "Blue Lightning Services team".`;

@@ -2,7 +2,7 @@
 
 Modern marketing site for [bluelightningservices.com](https://bluelightningservices.com).
 
-**Tagline:** Your Salesforce team. Rebuilt with AI.
+**Tagline:** Your Salesforce engineering function. Owned end to end.
 
 ## Stack
 

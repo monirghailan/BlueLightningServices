@@ -30,7 +30,7 @@ export function PricingSection({ compact = false }: { compact?: boolean }) {
             </h2>
             {!compact && (
               <p className="mx-auto mt-4 max-w-2xl text-muted">
-                Replace your in-house Salesforce development team with fixed monthly capacity — not hourly consulting.
+                Own your Salesforce engineering function with fixed monthly capacity — not hourly consulting.
               </p>
             )}
             <div className="mt-8 flex justify-center">

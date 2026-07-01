@@ -3,12 +3,12 @@ import { pageUrl } from "@/lib/seo";
 
 const marketingPages = [
   { path: "/", description: hero.headline },
-  { path: "/how-it-works", description: "Audit, transition, deliver, and operate — how we replace your Salesforce team." },
+  { path: "/how-it-works", description: "Audit, transition, deliver, and operate — how we assume Salesforce engineering ownership." },
   { path: "/services", description: "LWC, Apex, Flow, integrations, Agentforce, architecture, and managed releases." },
-  { path: "/why-us", description: "Team replacement with agentic AI delivery and senior expert review." },
+  { path: "/why-us", description: "Function ownership with agentic AI delivery and senior expert review." },
   { path: "/pricing", description: "Transparent monthly pricing for full Salesforce engineering capacity." },
   { path: "/contact", description: "Book a free team audit or send a message." },
-  { path: "/insights", description: "Salesforce engineering insights on managed services and team replacement." },
+  { path: "/insights", description: "Salesforce engineering insights on managed services and engineering ownership." },
   { path: "/privacy", description: "Privacy policy and data handling." },
   { path: "/portal", description: `${portalLanding.headline} Features: ${portalLanding.features.map((f) => f.title).join(", ")}.` },
 ] as const;

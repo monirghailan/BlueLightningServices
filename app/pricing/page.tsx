@@ -35,7 +35,7 @@ export default function PricingPage() {
       <div className="gradient-mesh px-6 py-16 text-center">
         <h1 className="text-4xl font-bold sm:text-5xl">Pricing</h1>
         <p className="mx-auto mt-4 max-w-2xl text-lg text-muted">
-          One transparent plan. Replace your in-house Salesforce development team — without the headcount cost.{" "}
+          One transparent plan. Own your Salesforce engineering function — without the headcount cost.{" "}
           <Link href="/services" className="text-bolt-outline hover:text-bolt-glow">
             See what&apos;s included
           </Link>

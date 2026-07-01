@@ -7,7 +7,7 @@ export const metadata = buildPageMetadata({
   path: "/why-us",
   title: "Why Us",
   description:
-    "Decades of Salesforce mastery plus agentic AI delivery. Team replacement, not staff augmentation.",
+    "Decades of Salesforce mastery plus agentic AI delivery. Function ownership, not staff augmentation.",
 });
 
 export default function WhyUsPage() {
