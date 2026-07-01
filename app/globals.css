@@ -90,6 +90,54 @@ html.snap-scroll {
   justify-content: flex-start;
 }
 
+/* Portal landing: panels exceed one viewport — never clip or lock height */
+.snap-section:not(.snap-section--last):has(> .portal-snap-hero),
+.snap-section:not(.snap-section--last):has(> .portal-snap-panel-top),
+.snap-section:not(.snap-section--last):has(> .portal-snap-panel-center) {
+  max-height: none;
+  overflow: visible;
+}
+
+.snap-section:not(.snap-section--last) > .portal-snap-hero,
+.snap-section:not(.snap-section--last) > .portal-snap-panel-top {
+  flex: none;
+  min-height: auto;
+  max-height: none;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  box-sizing: border-box;
+  padding-top: clamp(0.75rem, 2.5vh, 1.75rem);
+  padding-bottom: clamp(0.75rem, 2.5vh, 1.75rem);
+}
+
+.snap-section:not(.snap-section--last) > .portal-snap-panel-center {
+  max-height: none;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  box-sizing: border-box;
+}
+
+.snap-section:not(.snap-section--last) > .portal-snap-hero {
+  justify-content: center;
+}
+
+.snap-section:not(.snap-section--last) > .portal-snap-panel-top {
+  justify-content: flex-start;
+}
+
+/* Desktop: center value panels in the snap viewport (override tall flex-start) */
+@media (min-width: 1024px) {
+  .snap-section.snap-section--tall:not(.snap-section--last) > .portal-snap-panel-center {
+    flex: 1;
+    min-height: 0;
+    justify-content: center;
+    padding-top: 0;
+    padding-bottom: 0;
+  }
+}
+
 .snap-section:not(.snap-section--last) > section > div {
   width: 100%;
 }
@@ -171,6 +219,12 @@ html.snap-scroll {
   .snap-section:not(.snap-section--last) {
     max-height: none;
     overflow: visible;
+  }
+
+  .snap-section:not(.snap-section--last):has(> .portal-snap-hero),
+  .snap-section:not(.snap-section--last):has(> .portal-snap-panel-top),
+  .snap-section:not(.snap-section--last):has(> .portal-snap-panel-center) {
+    min-height: auto;
   }
 
   .snap-section:not(.snap-section--last) > section {
@@ -352,6 +406,29 @@ body {
     max-height: none;
     overflow: visible;
     min-height: calc(100svh - var(--header-offset));
+  }
+
+  /* Portal landing: stacked hero + demos — grow naturally, no viewport lock */
+  .snap-section:not(.snap-section--last):has(> .portal-snap-hero),
+  .snap-section:not(.snap-section--last):has(> .portal-snap-panel-top),
+  .snap-section:not(.snap-section--last):has(> .portal-snap-panel-center) {
+    min-height: auto;
+  }
+
+  .snap-section:not(.snap-section--last) > .portal-snap-hero,
+  .snap-section:not(.snap-section--last) > .portal-snap-panel-top {
+    min-height: auto;
+    justify-content: flex-start;
+    padding-top: clamp(0.75rem, 2.5dvh, 1.25rem);
+    padding-bottom: clamp(1.5rem, 3.5dvh, 3.5rem);
+  }
+
+  .snap-section:not(.snap-section--last) > .portal-snap-panel-center {
+    flex: none;
+    min-height: auto;
+    justify-content: flex-start;
+    padding-top: clamp(0.75rem, 2.5dvh, 1.25rem);
+    padding-bottom: clamp(1.5rem, 3.5dvh, 3.5rem);
   }
 
   .snap-section__last-screen {
