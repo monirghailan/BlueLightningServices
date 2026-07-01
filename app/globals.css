@@ -67,27 +67,30 @@ html.snap-scroll {
   min-height: calc(100svh - var(--header-offset));
 }
 
-.snap-section:not(.snap-section--last):not(.snap-section--tall) {
-  max-height: calc(100dvh - var(--header-offset));
-  max-height: calc(100svh - var(--header-offset));
-  overflow: hidden;
-}
+/* Desktop only: lock non-tall snap panels to one viewport (mobile grows naturally) */
+@media (min-width: 1024px) {
+  .snap-section:not(.snap-section--last):not(.snap-section--tall) {
+    max-height: calc(100dvh - var(--header-offset));
+    max-height: calc(100svh - var(--header-offset));
+    overflow: hidden;
+  }
 
-.snap-section:not(.snap-section--last):not(.snap-section--tall) > section {
-  flex: 1;
-  min-height: 0;
-  width: 100%;
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  padding-top: 0;
-  padding-bottom: 0;
-}
+  .snap-section:not(.snap-section--last):not(.snap-section--tall) > section {
+    flex: 1;
+    min-height: 0;
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    padding-top: 0;
+    padding-bottom: 0;
+  }
 
-.snap-section.snap-section--tall:not(.snap-section--last) > section {
-  flex: none;
-  min-height: auto;
-  justify-content: flex-start;
+  .snap-section.snap-section--tall:not(.snap-section--last) > section {
+    flex: none;
+    min-height: auto;
+    justify-content: flex-start;
+  }
 }
 
 /* Portal landing: panels exceed one viewport — never clip or lock height */
